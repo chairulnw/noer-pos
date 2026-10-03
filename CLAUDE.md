@@ -86,6 +86,10 @@ pnpm prisma:seed
 pnpm prisma:studio
 ```
 
+## Next.js
+
+Versi ini punya perubahan besar dari yang umum dikenal. Sebelum menulis kode Next.js, baca panduan yang relevan di `node_modules/next/dist/docs/` dan perhatikan notifikasi deprecation.
+
 ## Jika ragu
 
 - Scope: tanya, jangan tambah fitur "sekalian".
