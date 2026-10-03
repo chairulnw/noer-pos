@@ -22,6 +22,21 @@ function isRateLimited(key: string) {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  callbacks: {
+    ...authConfig.callbacks,
+    // sesi JWT dicek ke DB agar akun nonaktif / role berubah langsung berlaku
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        return token;
+      }
+      const row = await prisma.user.findUnique({ where: { id: token.id as string }, select: { active: true, role: true } });
+      if (!row?.active) return null;
+      token.role = row.role;
+      return token;
+    },
+  },
   providers: [
     Credentials({
       credentials: { username: {}, password: {} },

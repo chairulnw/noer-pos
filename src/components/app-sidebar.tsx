@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth";
 import type { Role } from "@/lib/permissions";
@@ -32,10 +33,10 @@ export function AppSidebar({ user, logo }: { user: { name?: string | null; role:
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-[13px] font-semibold text-accent-foreground">
           {initials(name)}
         </div>
-        <div className="min-w-0 flex-1">
+        <Link href="/akun" title="Akun saya" className="min-w-0 flex-1 rounded-lg py-1 hover:bg-muted">
           <div className="truncate text-sm font-medium">{name}</div>
           <div className="text-[12.5px] text-muted-foreground">{ROLE_LABEL[user.role]}</div>
-        </div>
+        </Link>
         <form
           action={async () => {
             "use server";
