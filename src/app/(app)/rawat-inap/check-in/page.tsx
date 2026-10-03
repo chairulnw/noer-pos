@@ -19,7 +19,7 @@ export default async function CheckInPage({ searchParams }: { searchParams: Prom
     const results = q.trim() ? (await searchPatients(q)).patients : [];
     return (
       <div className="space-y-5">
-        <h1 className="text-[22px] font-semibold">Check-in: pilih pasien</h1>
+        <h1 className="text-[22px] font-semibold leading-11">Check-in: pilih pasien</h1>
         <form className="flex gap-2">
           <Input name="q" defaultValue={q} autoFocus placeholder="Nama owner/hewan, no. WA, no. RM, microchip" aria-label="Cari pasien" />
           <Button type="submit" variant="outline">Cari</Button>
@@ -45,7 +45,7 @@ export default async function CheckInPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold">Check-in rawat inap / hotel</h1>
+      <h1 className="text-[22px] font-semibold leading-11">Check-in rawat inap / hotel</h1>
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-2.5 p-4">
           <span className="text-lg font-semibold">{patient.name}</span>

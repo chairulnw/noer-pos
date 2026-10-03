@@ -28,7 +28,7 @@ export function ItemForm({ item }: { item: ItemView | null }) {
   }
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
       <Section title="Identitas">
         <Field label="Jenis" name="type" errors={err("type")}>
           {item ? (

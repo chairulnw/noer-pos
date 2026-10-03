@@ -26,7 +26,7 @@ export default async function AdmissionPage({ params }: { params: Promise<{ id: 
           <div className="space-y-1">
             <Link href="/rawat-inap" className="text-[13px] font-medium text-primary">← Rawat Inap & Hotel</Link>
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-[22px] font-semibold">{patient.name}</h1>
+              <h1 className="text-[22px] font-semibold leading-11">{patient.name}</h1>
               <span className="text-sm text-muted-foreground tabular-nums">{patient.rmNo}</span>
               <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
             </div>

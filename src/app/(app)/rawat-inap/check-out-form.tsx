@@ -19,7 +19,7 @@ export function CheckOutForm({ admissionId, checkInIso, defaultCheckOut, rateNam
   const days = valid ? billedDays(new Date(checkInIso), out) : null;
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl max-w-xl space-y-5">
       <section className="space-y-4 rounded-[10px] border bg-card p-5">
         <div className="space-y-1.5">
           <label htmlFor="checkOut" className="text-sm font-medium">Waktu keluar</label>

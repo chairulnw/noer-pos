@@ -21,7 +21,7 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
           <Link href="/pasien" className="text-[13px] font-medium text-primary">
             ← Pasien & Owner
           </Link>
-          <h1 className="text-[22px] font-semibold">{owner.name}</h1>
+          <h1 className="text-[22px] font-semibold leading-11">{owner.name}</h1>
           <p className="text-sm text-muted-foreground">WA {formatWhatsapp(owner.whatsapp)}</p>
           <p className="text-sm text-muted-foreground">{owner.address}</p>
           {owner.notes && <p className="text-sm">{owner.notes}</p>}

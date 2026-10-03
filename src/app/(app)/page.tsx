@@ -9,13 +9,13 @@ const DOT = { danger: "bg-destructive", warning: "bg-warning", info: "bg-info" }
 
 function Stat({ label, value, hint, href }: { label: string; value: string; hint?: string; href?: string }) {
   const body = (
-    <div className="rounded-[10px] border bg-card p-4">
+    <div className="h-full rounded-[10px] border bg-card p-4">
       <div className="text-[13px] text-muted-foreground">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
       {hint && <div className="mt-0.5 text-[13px] text-muted-foreground">{hint}</div>}
     </div>
   );
-  return href ? <Link href={href} className="block">{body}</Link> : body;
+  return href ? <Link href={href} className="block h-full">{body}</Link> : body;
 }
 
 function AlertRow({ tone, title, detail, href, action }: { tone: keyof typeof DOT; title: string; detail: string; href: string; action: string }) {
@@ -40,7 +40,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h1 className="text-[22px] font-semibold">Beranda</h1>
+        <h1 className="text-[22px] font-semibold leading-11">Beranda</h1>
         <p className="text-sm text-muted-foreground">Halo, {user.name}.</p>
       </div>
 

@@ -17,7 +17,7 @@ export default async function OpnamePage({ searchParams }: { searchParams: Promi
     <div className="space-y-5">
       <div className="space-y-1">
         <Link href="/inventaris" className="text-[13px] font-medium text-primary">← Inventaris</Link>
-        <h1 className="text-[22px] font-semibold">Stok Opname</h1>
+        <h1 className="text-[22px] font-semibold leading-11">Stok Opname</h1>
       </div>
 
       <form action={createOpnameAction} className="flex flex-wrap items-end gap-3 rounded-[10px] border bg-card p-5">

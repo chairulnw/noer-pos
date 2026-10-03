@@ -11,8 +11,8 @@ export default async function RetailPage() {
   const drafts = await listRetailDrafts();
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold">Retail Walk-in</h1>
+    <div className="max-w-4xl space-y-5">
+      <h1 className="text-[22px] font-semibold leading-11">Retail Walk-in</h1>
       <form action={createRetailAction} className="flex flex-wrap items-end gap-3 rounded-[10px] border bg-card p-5">
         <div className="min-w-60 flex-1 space-y-1.5">
           <label htmlFor="customerName" className="text-sm font-medium">Nama pelanggan (opsional)</label>

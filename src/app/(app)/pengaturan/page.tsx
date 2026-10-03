@@ -8,7 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold">Pengaturan</h1>
+      <h1 className="text-[22px] font-semibold leading-11">Pengaturan</h1>
       <SettingsForm settings={settings} />
     </div>
   );

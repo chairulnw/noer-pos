@@ -18,7 +18,7 @@ export default async function AdmissionsPage() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-semibold">Rawat Inap & Hotel</h1>
+          <h1 className="text-[22px] font-semibold leading-11">Rawat Inap & Hotel</h1>
           <p className="text-sm text-muted-foreground">{admissions.length} hewan menginap saat ini</p>
         </div>
         <Button asChild>

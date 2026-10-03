@@ -20,7 +20,7 @@ export default async function DuePage({ searchParams }: { searchParams: Promise<
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-semibold">Jatuh Tempo</h1>
+          <h1 className="text-[22px] font-semibold leading-11">Jatuh Tempo</h1>
           <p className="text-sm text-muted-foreground">Vaksin yang jatuh tempo dalam {days} hari ke depan, termasuk yang sudah lewat.</p>
         </div>
         <div className="flex gap-1.5">

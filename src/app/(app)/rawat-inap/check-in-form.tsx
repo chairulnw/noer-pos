@@ -27,7 +27,7 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
   const rateOptions = rates.filter((r) => r.type === type);
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
       <input type="hidden" name="patientId" value={patientId} />
       <Section title={`Check-in ${patientName}`}>
         <Field label="Jenis" name="type" errors={err("type")}>

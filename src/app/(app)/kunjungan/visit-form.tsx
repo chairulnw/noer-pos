@@ -24,7 +24,7 @@ export function VisitForm({
   const err = (key: string) => state.errors?.[key];
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
       <Section title="Kunjungan walk-in">
         <Field label="Dokter" name="doctorId" errors={err("doctorId")}>
           <select id="doctorId" name="doctorId" defaultValue={defaultDoctorId ?? ""} className={selectClass} required>

@@ -23,7 +23,7 @@ export default async function VisitsPage() {
       <AutoRefresh seconds={10} />
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-semibold">{isDoctor ? "Pasien Hari Ini" : "Kunjungan"}</h1>
+          <h1 className="text-[22px] font-semibold leading-11">{isDoctor ? "Pasien Hari Ini" : "Kunjungan"}</h1>
           <p className="text-sm text-muted-foreground">{formatDate(todayJakarta())}</p>
         </div>
         <Button asChild>

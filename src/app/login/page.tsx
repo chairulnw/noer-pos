@@ -36,7 +36,7 @@ export default async function LoginPage({
         <Image src={logo} alt="NOER Petshop & Vet Clinic" width={143} height={64} unoptimized className="h-16 w-auto" />
         <form action={login} className="flex w-full flex-col gap-5 rounded-xl border bg-card p-8">
           <div className="space-y-1">
-            <h1 className="text-[22px] font-semibold">Masuk</h1>
+            <h1 className="text-[22px] font-semibold leading-11">Masuk</h1>
             <p className="text-sm text-muted-foreground">Gunakan akun yang diberikan Admin klinik.</p>
           </div>
           <div className="space-y-1.5">

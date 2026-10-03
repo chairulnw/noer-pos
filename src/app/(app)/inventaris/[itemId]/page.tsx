@@ -25,7 +25,7 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <Link href="/inventaris" className="text-[13px] font-medium text-primary">← Inventaris</Link>
-          <h1 className="text-[22px] font-semibold">{item.name}</h1>
+          <h1 className="text-[22px] font-semibold leading-11">{item.name}</h1>
           <p className="text-sm text-muted-foreground">Kartu stok · satuan dasar {item.baseUnit}</p>
         </div>
         <Button asChild>

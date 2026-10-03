@@ -45,7 +45,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       <header className="space-y-1">
         <Link href="/invoice" className="text-[13px] font-medium text-primary">← Invoice</Link>
         <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className="text-[22px] font-semibold tabular-nums">{invoice.invoiceNo}</h1>
+          <h1 className="text-[22px] font-semibold leading-11 tabular-nums">{invoice.invoiceNo}</h1>
           <StatusChip tone={INVOICE_STATUS[invoice.status].tone}>{INVOICE_STATUS[invoice.status].label}</StatusChip>
           {(invoice.status === "FINAL" || paid > 0) && invoice.status !== "VOID" && <StatusChip tone={PAYMENT[status].tone}>{PAYMENT[status].label}</StatusChip>}
         </div>

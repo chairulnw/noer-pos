@@ -37,7 +37,7 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
     <section aria-label="Profil pasien" className="flex min-w-0 flex-col gap-4">
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-4 p-5">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[22px] font-semibold text-accent-foreground">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[22px] font-semibold leading-11 text-accent-foreground">
             {patient.name[0]?.toUpperCase()}
           </div>
           <div className="flex min-w-60 flex-1 flex-col gap-1">

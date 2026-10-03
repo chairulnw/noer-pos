@@ -31,7 +31,7 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
       <header className="space-y-1">
         <Link href="/inventaris/opname" className="text-[13px] font-medium text-primary">← Stok Opname</Link>
         <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className="text-[22px] font-semibold">Opname {formatDate(opname.opnameDate)}</h1>
+          <h1 className="text-[22px] font-semibold leading-11">Opname {formatDate(opname.opnameDate)}</h1>
           <StatusChip tone={final ? "info" : "neutral"}>{final ? "Final" : "Draft"}</StatusChip>
         </div>
         <p className="text-sm text-muted-foreground">{opname.user.name}{opname.note && ` · ${opname.note}`}</p>

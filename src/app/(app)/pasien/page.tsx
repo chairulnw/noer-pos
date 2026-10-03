@@ -27,7 +27,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center gap-3">
-        <h1 className="mr-3 text-[22px] font-semibold">Pasien & Owner</h1>
+        <h1 className="mr-3 text-[22px] font-semibold leading-11">Pasien & Owner</h1>
         <form className="flex h-11 flex-1 basis-80 items-center gap-2.5 rounded-lg border border-input bg-card px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
           <Search className="size-[18px] text-muted-foreground" />
           <input

@@ -25,7 +25,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-[22px] font-semibold">Audit Log</h1>
+        <h1 className="text-[22px] font-semibold leading-11">Audit Log</h1>
         <p className="text-sm text-muted-foreground">{total.toLocaleString("id-ID")} catatan perubahan sensitif. Hanya baca, tidak bisa diubah atau dihapus.</p>
       </header>
 

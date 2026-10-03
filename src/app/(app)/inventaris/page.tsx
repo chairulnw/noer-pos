@@ -22,7 +22,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[22px] font-semibold">Inventaris</h1>
+        <h1 className="text-[22px] font-semibold leading-11">Inventaris</h1>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/inventaris/opname">Stok opname</Link>
