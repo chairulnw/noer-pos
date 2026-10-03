@@ -25,3 +25,7 @@ export const logSchema = z
   .transform((log) => ({ ...log, temp: log.temp === null ? null : Math.round(log.temp * 10) / 10 }));
 
 export type LogInput = z.infer<typeof logSchema>;
+
+export const checkOutSchema = z.object({
+  checkOut: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Waktu keluar tidak valid"),
+});

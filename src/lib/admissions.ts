@@ -2,9 +2,9 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import { todayJakarta } from "@/lib/date";
-import { jakartaLocalToDate } from "@/lib/admission-calc";
+import { billedDays, jakartaLocalToDate } from "@/lib/admission-calc";
 import { RATE_CATEGORY, type CheckInInput, type LogInput } from "@/lib/admission-schema";
-import { nextInvoiceNoFor } from "@/lib/invoices";
+import { nextInvoiceNoFor, recomputeInvoice, taxFromSettings } from "@/lib/invoices";
 
 export async function createAdmission(userId: string, input: CheckInInput) {
   const checkIn = jakartaLocalToDate(input.checkIn);
@@ -151,3 +151,53 @@ export async function latestRawatInapLogs(patientId: string) {
   if (!admission) return null;
   return { admission, logs: await listAdmissionLogs(admission.id, 5) };
 }
+
+export async function checkOutAdmission(userId: string, admissionId: string, checkOutLocal: string) {
+  const checkOut = jakartaLocalToDate(checkOutLocal);
+  if (Number.isNaN(checkOut.getTime()) || checkOut.getTime() > Date.now() + 3_600_000) return { error: "Waktu keluar tidak boleh di masa depan." };
+
+  const tax = await taxFromSettings();
+  return prisma.$transaction(async (tx) => {
+    const admission = await tx.admission.findUnique({
+      where: { id: admissionId },
+      select: {
+        status: true, checkIn: true, patient: { select: { ownerId: true } },
+        rateItem: { select: { id: true, name: true, sellPrice: true, buyPrice: true } },
+      },
+    });
+    if (!admission) return { error: "Admission tidak ditemukan." };
+    if (admission.status !== "AKTIF") return { error: "Pasien ini sudah check-out." };
+    if (checkOut < admission.checkIn) return { error: "Waktu keluar tidak boleh sebelum waktu masuk." };
+
+    const days = billedDays(admission.checkIn, checkOut);
+    const { count } = await tx.admission.updateMany({
+      where: { id: admissionId, status: "AKTIF" },
+      data: { status: "SELESAI", checkOut, billedDays: days },
+    });
+    if (count === 0) return { error: "Pasien ini sudah check-out." };
+
+    let invoice = await tx.invoice.findFirst({ where: { admissionId, status: { not: "VOID" } }, select: { id: true, status: true } });
+    if (invoice && invoice.status !== "DRAFT") throw new CheckOutBlocked("Invoice rawat inap sudah final. Void invoice tersebut terlebih dahulu, lalu ulangi check-out.");
+    invoice ??= await tx.invoice.create({
+      data: { invoiceNo: await nextInvoiceNoFor(tx), admissionId, ownerId: admission.patient.ownerId, createdById: userId },
+      select: { id: true, status: true },
+    });
+
+    const last = await tx.invoiceItem.aggregate({ where: { invoiceId: invoice.id }, _max: { position: true } });
+    const { rateItem } = admission;
+    await tx.invoiceItem.create({
+      data: {
+        invoiceId: invoice.id, itemId: rateItem.id, nameSnapshot: rateItem.name, qty: days,
+        unitPriceSnapshot: rateItem.sellPrice, unitCostSnapshot: rateItem.buyPrice, position: (last._max.position ?? -1) + 1, lineTotal: 0,
+      },
+    });
+    await recomputeInvoice(tx, invoice.id, tax);
+    await logAudit(tx, { userId, action: "admission.check_out", entity: "admission", entityId: admissionId, after: { billedDays: days, invoiceId: invoice.id, rate: rateItem.name } });
+    return { invoiceId: invoice.id, days };
+  }).catch((error) => {
+    if (error instanceof CheckOutBlocked) return { error: error.message };
+    throw error;
+  });
+}
+
+class CheckOutBlocked extends Error {}

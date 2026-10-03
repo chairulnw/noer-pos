@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { checkInSchema, logSchema } from "@/lib/admission-schema";
-import { addAdmissionLog, createAdmission } from "@/lib/admissions";
+import { checkInSchema, checkOutSchema, logSchema } from "@/lib/admission-schema";
+import { addAdmissionLog, checkOutAdmission, createAdmission } from "@/lib/admissions";
 import { requireCapability } from "@/lib/require-role";
 
 export type AdmissionFormState = { message?: string; nonce?: number; errors?: Record<string, string[] | undefined> };
@@ -53,4 +53,17 @@ export async function addLogAction(admissionId: string, _prev: AdmissionFormStat
 
   revalidatePath(`/rawat-inap/${admissionId}`);
   return { nonce: Date.now() };
+}
+
+export async function checkOutAction(admissionId: string, _prev: AdmissionFormState, formData: FormData): Promise<AdmissionFormState> {
+  const user = await requireCapability("manage_admission");
+  const parsed = checkOutSchema.safeParse({ checkOut: text(formData, "checkOut") });
+  if (!parsed.success) return { message: parsed.error.issues[0]?.message ?? "Waktu keluar tidak valid." };
+
+  const result = await checkOutAdmission(user.id, admissionId, parsed.data.checkOut);
+  if ("error" in result) return { message: result.error };
+
+  revalidatePath("/rawat-inap");
+  revalidatePath("/invoice");
+  redirect(`/invoice/${result.invoiceId}`);
 }
