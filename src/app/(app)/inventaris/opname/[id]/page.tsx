@@ -27,7 +27,7 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
   }));
 
   return (
-    <div className="max-w-5xl space-y-5">
+    <div className="space-y-5">
       <header className="space-y-1">
         <Link href="/inventaris/opname" className="text-[13px] font-medium text-primary">← Stok Opname</Link>
         <div className="flex flex-wrap items-center gap-2.5">

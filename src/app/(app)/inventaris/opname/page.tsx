@@ -14,7 +14,7 @@ export default async function OpnamePage({ searchParams }: { searchParams: Promi
   const hasDraft = opnames.some((o) => o.status === "DRAFT");
 
   return (
-    <div className="max-w-4xl space-y-5">
+    <div className="space-y-5">
       <div className="space-y-1">
         <Link href="/inventaris" className="text-[13px] font-medium text-primary">← Inventaris</Link>
         <h1 className="text-[22px] font-semibold">Stok Opname</h1>

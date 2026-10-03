@@ -18,7 +18,7 @@ export function RoomForm({ room }: { room: Room | null }) {
   const err = (key: string) => state.errors?.[key];
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-3xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title="Kandang / ruangan">
         <Field label="Nama" name="name" errors={err("name")}>
           <Input id="name" name="name" defaultValue={room?.name} placeholder="mis. K-01" required />

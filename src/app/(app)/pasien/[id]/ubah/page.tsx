@@ -21,7 +21,7 @@ export default async function EditPatientPage({ params }: { params: Promise<{ id
         ownerName={patient.owner.name}
         patient={{ ...patient, birthDate: patient.birthDate?.toISOString().slice(0, 10) ?? "" }}
       />
-      <form action={deletePatientAction.bind(null, patient.id)} className="max-w-3xl pt-4">
+      <form action={deletePatientAction.bind(null, patient.id)} className="pt-4">
         <ConfirmButton variant="destructive" message={`Hapus ${patient.name} dari daftar pasien?`}>
           Hapus pasien
         </ConfirmButton>

@@ -15,7 +15,7 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
   if (!owner) notFound();
 
   return (
-    <div className="max-w-3xl space-y-5">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <Link href="/pasien" className="text-[13px] font-medium text-primary">

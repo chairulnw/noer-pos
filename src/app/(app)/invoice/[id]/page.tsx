@@ -41,7 +41,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   const [catalog, settings] = editable || canPay ? await Promise.all([editable ? listSellableItems() : [], getSettings()]) : [[], null];
 
   return (
-    <div className="max-w-6xl space-y-5">
+    <div className="space-y-5">
       <header className="space-y-1">
         <Link href="/invoice" className="text-[13px] font-medium text-primary">← Invoice</Link>
         <div className="flex flex-wrap items-center gap-2.5">

@@ -51,7 +51,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
   const [diagnoses, vaccines, catalog] = final || !canEdit ? [[], [], []] : await Promise.all([listDiagnoses(), listVaccines(), listCatalog()]);
 
   return (
-    <div className="max-w-5xl space-y-4">
+    <div className="space-y-4">
       <header className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 px-5">
           <div className="space-y-1">

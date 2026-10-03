@@ -35,7 +35,7 @@ export function PatientForm({ ownerId, ownerName, patient }: { ownerId: string; 
   const err = (key: string) => state.errors?.[key];
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-3xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title={`Hewan milik ${ownerName}`}>
         <Field label="Nama hewan" name="name" errors={err("name")}>
           <Input id="name" name="name" defaultValue={patient?.name} required autoFocus />

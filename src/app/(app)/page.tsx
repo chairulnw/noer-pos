@@ -38,7 +38,7 @@ export default async function HomePage() {
   const total = alerts ? alerts.low.length + alerts.expiring.length : 0;
 
   return (
-    <div className="max-w-4xl space-y-5">
+    <div className="space-y-5">
       <div className="space-y-1">
         <h1 className="text-[22px] font-semibold">Beranda</h1>
         <p className="text-sm text-muted-foreground">Halo, {user.name}.</p>

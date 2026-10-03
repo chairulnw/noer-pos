@@ -16,7 +16,7 @@ export default async function NewVisitPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-5">
       <h1 className="text-[22px] font-semibold">Kunjungan baru</h1>
-      <div className="max-w-3xl overflow-hidden rounded-[10px] border bg-card">
+      <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-2.5 p-4">
           <span className="text-lg font-semibold">{patient.name}</span>
           <span className="text-sm text-muted-foreground tabular-nums">{patient.rmNo}</span>

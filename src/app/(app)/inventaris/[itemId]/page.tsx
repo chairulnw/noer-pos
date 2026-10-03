@@ -21,7 +21,7 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
   const { item } = card;
 
   return (
-    <div className="max-w-5xl space-y-5">
+    <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <Link href="/inventaris" className="text-[13px] font-medium text-primary">← Inventaris</Link>

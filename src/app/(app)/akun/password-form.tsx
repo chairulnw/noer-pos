@@ -10,7 +10,7 @@ export function PasswordForm() {
   const [state, formAction, pending] = useActionState<PasswordState, FormData>(changePasswordAction, {});
   const err = (key: string) => state.errors?.[key];
   return (
-    <form key={state.ok ? "done" : "form"} action={formAction} className="max-w-3xl space-y-5">
+    <form key={state.ok ? "done" : "form"} action={formAction} className="space-y-5">
       <Section title="Ganti password">
         <Field label="Password saat ini" name="current" errors={err("current")} full>
           <Input id="current" name="current" type="password" autoComplete="current-password" required />
