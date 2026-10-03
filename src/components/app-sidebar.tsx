@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth";
 import type { Role } from "@/lib/permissions";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { SidebarShell } from "@/components/sidebar-shell";
 import { SidebarSearch } from "@/components/sidebar-search";
 
 const ROLE_LABEL: Record<Role, string> = {
@@ -25,19 +26,16 @@ export function AppSidebar({ user, logo }: { user: { name?: string | null; role:
   const name = user.name ?? "";
 
   return (
-    <aside className="flex flex-col border-b border-sidebar-border bg-sidebar px-3 py-5 md:sticky md:top-0 md:h-screen md:w-[72px] md:shrink-0 md:border-r md:border-b-0 lg:w-60">
-      <div className="px-2.5 pb-4 md:max-lg:hidden">
-        <Image src={logo} alt="NOER Petshop & Vet Clinic" width={80} height={36} unoptimized priority style={{ width: "auto" }} className="h-9" />
-      </div>
+    <SidebarShell logo={<Image src={logo} alt="NOER Petshop & Vet Clinic" width={80} height={36} unoptimized priority style={{ width: "auto" }} className="h-9" />}>
       <SidebarSearch />
       <div className="min-h-0 md:flex-1 md:overflow-y-auto">
         <SidebarNav role={user.role} />
       </div>
-      <div className="mt-3 flex items-center gap-2.5 border-t border-sidebar-border px-2 pt-4 md:max-lg:flex-col">
+      <div className="mt-3 flex items-center gap-2.5 border-t border-sidebar-border px-2 pt-4 md:group-data-[collapsed=true]/side:flex-col">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-[13px] font-semibold text-accent-foreground">
           {initials(name)}
         </div>
-        <Link href="/akun" title="Akun saya" className="min-w-0 flex-1 rounded-lg py-1 hover:bg-muted md:max-lg:hidden">
+        <Link href="/akun" title="Akun saya" className="min-w-0 flex-1 rounded-lg py-1 hover:bg-muted md:group-data-[collapsed=true]/side:hidden">
           <div className="truncate text-sm font-medium">{name}</div>
           <div className="text-[12.5px] text-muted-foreground">{ROLE_LABEL[user.role]}</div>
         </Link>
@@ -56,6 +54,6 @@ export function AppSidebar({ user, logo }: { user: { name?: string | null; role:
           </button>
         </form>
       </div>
-    </aside>
+    </SidebarShell>
   );
 }

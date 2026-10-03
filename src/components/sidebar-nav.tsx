@@ -49,7 +49,7 @@ export function SidebarNav({ role }: { role: Role }) {
     <nav aria-label="Menu utama" className="flex flex-col gap-3">
       {groups.map((group, gi) => (
         <div key={group.title ?? gi} className="flex flex-col gap-0.5">
-          {group.title && <div className="px-3 pb-1 text-[12px] font-semibold tracking-wide text-muted-foreground uppercase md:max-lg:hidden">{group.title}</div>}
+          {group.title && <div className="px-3 pb-1 text-[12px] font-semibold tracking-wide text-muted-foreground uppercase md:group-data-[collapsed=true]/side:hidden">{group.title}</div>}
           {group.items.map(({ href, label, icon: Icon, roleLabel }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             const text = roleLabel?.[role] ?? label;
@@ -60,12 +60,12 @@ export function SidebarNav({ role }: { role: Role }) {
                 title={text}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 items-center gap-3 rounded-lg px-3 text-[14.5px] font-medium text-sidebar-foreground hover:bg-muted md:max-lg:justify-center",
+                  "flex min-h-11 items-center gap-3 rounded-lg px-3 text-[14.5px] font-medium text-sidebar-foreground hover:bg-muted md:group-data-[collapsed=true]/side:justify-center",
                   active && "bg-sidebar-accent font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent",
                 )}
               >
                 <Icon className={cn("size-[18px] shrink-0", active ? "text-current" : "text-[#8A929B]")} />
-                <span className="md:max-lg:sr-only">{text}</span>
+                <span className="md:group-data-[collapsed=true]/side:sr-only">{text}</span>
               </Link>
             );
           })}
