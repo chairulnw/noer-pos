@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { Database, LayoutDashboard, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 const NAV: { href: string; label: string; icon: LucideIcon; capability?: Capability }[] = [
   { href: "/", label: "Beranda", icon: LayoutDashboard },
+  { href: "/master-data", label: "Master Data", icon: Database, capability: "manage_service_price" },
   { href: "/pengaturan", label: "Pengaturan", icon: SlidersHorizontal, capability: "manage_users_settings" },
 ];
 
