@@ -20,7 +20,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
   const href = (s?: string) => `/invoice?${new URLSearchParams({ ...(q && { q }), ...(s && { status: s }) })}`;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h1 className="text-[22px] font-semibold leading-11">Invoice</h1>
       <div className="flex flex-wrap items-center gap-3">
         <form className="flex flex-1 basis-80 gap-2">

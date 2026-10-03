@@ -14,7 +14,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   const err = (key: string) => state.errors?.[key];
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title="Data klinik">
         <Field label="Nama klinik" name="clinicName" errors={err("clinicName")} full>
           <Input id="clinicName" name="clinicName" defaultValue={settings.clinicName} required />

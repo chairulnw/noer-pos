@@ -32,7 +32,7 @@ export function CreateUserForm() {
   const [state, formAction, pending] = useActionState<UserFormState, FormData>(createUserAction, {});
   const err = (key: string) => state.errors?.[key];
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title="Pengguna baru">
         <Field label="Nama" name="name" errors={err("name")}><Input id="name" name="name" required /></Field>
         <Field label="Username" name="username" errors={err("username")} hint="Dipakai untuk login. Huruf kecil, tanpa spasi.">
@@ -53,8 +53,8 @@ export function EditUserForm({ user, isSelf }: { user: User; isSelf: boolean }) 
   const [resetState, resetAction, resetPending] = useActionState<UserFormState, FormData>(resetPasswordAction.bind(null, user.id), {});
   const err = (key: string) => state.errors?.[key];
   return (
-    <div className="max-w-4xl space-y-5">
-      <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
+    <div className="space-y-5">
+      <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
         <Section title={`@${user.username}`}>
           <Field label="Nama" name="name" errors={err("name")}><Input id="name" name="name" defaultValue={user.name} required /></Field>
           <Field label="Role" name="role" errors={err("role")} hint={isSelf ? "Role akun sendiri tidak bisa diubah." : undefined}>
@@ -65,7 +65,7 @@ export function EditUserForm({ user, isSelf }: { user: User; isSelf: boolean }) 
         <Footer pending={pending} state={state} cancel />
       </form>
 
-      <form onSubmit={keepValuesOnError(resetAction)} className="max-w-4xl space-y-5">
+      <form onSubmit={keepValuesOnError(resetAction)} className="space-y-5">
         <Section title="Reset password">
           <Field label="Password baru" name="reset-password" errors={resetState.errors?.password}>
             <Input id="reset-password" name="password" type="password" autoComplete="new-password" required />

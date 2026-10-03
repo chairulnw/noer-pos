@@ -51,7 +51,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
   const [diagnoses, vaccines, catalog] = final || !canEdit ? [[], [], []] : await Promise.all([listDiagnoses(), listVaccines(), listCatalog()]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         back={{ href: "/kunjungan", label: "Kunjungan hari ini" }}
         title={<>{patient.name} <span className="text-sm font-normal text-muted-foreground tabular-nums">{patient.rmNo}</span></>}

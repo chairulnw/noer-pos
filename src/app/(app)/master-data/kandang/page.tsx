@@ -10,7 +10,7 @@ export default async function RoomsPage() {
   const rooms = await listRooms();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex justify-end">
         <Button asChild>
           <Link href="/master-data/kandang/baru">+ Kandang baru</Link>

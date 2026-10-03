@@ -15,7 +15,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const payments = await listPayments(q?.trim() || undefined);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h1 className="text-[22px] font-semibold leading-11">Riwayat Pembayaran</h1>
       <form className="flex gap-2">
         <Input name="q" data-search defaultValue={q} placeholder="Cari no. invoice, pasien, atau pelanggan" aria-label="Cari pembayaran" />

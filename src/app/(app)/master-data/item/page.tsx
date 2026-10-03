@@ -19,7 +19,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
   const showCost = can(user.role, "manage_product_cost");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <form className="flex flex-1 basis-80 gap-2">
           <Input name="q" defaultValue={q} placeholder="Cari nama, SKU, atau barcode" aria-label="Cari item" />

@@ -21,7 +21,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
   const rows = await listStockSummary(q?.trim() || undefined);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[22px] font-semibold leading-11">Inventaris</h1>
         <div className="flex gap-2">

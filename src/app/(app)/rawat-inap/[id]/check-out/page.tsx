@@ -26,7 +26,7 @@ export default async function CheckOutPage({ params }: { params: Promise<{ id: s
   return (
     <div className="space-y-5">
       <h1 className="text-[22px] font-semibold leading-11">Check-out</h1>
-      <div className="max-w-4xl overflow-hidden rounded-[10px] border bg-card">
+      <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="space-y-1 p-4">
           <div className="flex flex-wrap items-center gap-2.5">
             <Link href={`/pasien?id=${patient.id}`} className="text-lg font-semibold">{patient.name}</Link>

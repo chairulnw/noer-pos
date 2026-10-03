@@ -17,7 +17,7 @@ export function CashForm({ suggestedOpening }: { suggestedOpening: number }) {
   const ready = counted.trim() !== "" && opening.trim() !== "";
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title="Tutup kas hari ini">
         <Field label="Modal awal (Rp)" name="openingCash" errors={err("openingCash")} hint="Uang di laci saat mulai hari ini. Terisi dari hitung fisik penutupan terakhir.">
           <MoneyInput id="openingCash" name="openingCash" className={inputClass} value={opening} onValueChange={(v) => { setOpening(v); }} required />

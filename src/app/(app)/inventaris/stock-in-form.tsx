@@ -22,7 +22,7 @@ export function StockInForm({ products, defaultItemId }: { products: Product[]; 
   const base = product && Number(qty) > 0 ? Math.round(Number(qty.replace(",", ".")) * (product.purchaseUnit ? product.factor : 1) * 1000) / 1000 : null;
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title="Stok masuk">
         <Field label="Produk" name="itemId" errors={err("itemId")} full>
           <select id="itemId" name="itemId" value={itemId} onChange={(e) => setItemId(e.target.value)} className={selectClass} required>

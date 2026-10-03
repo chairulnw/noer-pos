@@ -54,7 +54,7 @@ export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote,
   const v = initial.vitals;
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-4">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-4">
       <section className="space-y-3.5 rounded-[10px] border bg-card p-5">
         <h2 className="text-base font-semibold">Vital signs</h2>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3.5">

@@ -19,7 +19,7 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
   const err = (key: string) => state.errors?.[key];
 
   return (
-    <form onSubmit={keepValuesOnError(formAction)} className="max-w-4xl space-y-5">
+    <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <Section title="Data owner">
         <Field label="Nama" name="name" errors={err("name")}>
           <Input id="name" name="name" defaultValue={owner?.name} required autoFocus />

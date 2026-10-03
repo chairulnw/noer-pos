@@ -11,7 +11,7 @@ export default async function UsersPage() {
   const users = await listUsers();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[22px] font-semibold leading-11">Pengguna</h1>
         <Button asChild><Link href="/pengguna/baru">+ Pengguna baru</Link></Button>
