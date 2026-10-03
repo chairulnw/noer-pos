@@ -18,7 +18,8 @@ export type Capability =
   | "correct_deposit"
   | "manage_stock"
   | "view_revenue_reports"
-  | "view_audit_log";
+  | "view_audit_log"
+  | "close_cash";
 
 const MATRIX: Record<Capability, Role[]> = {
   manage_users_settings: ["ADMIN"],
@@ -39,6 +40,7 @@ const MATRIX: Record<Capability, Role[]> = {
   manage_stock: ["ADMIN"],
   view_revenue_reports: ["ADMIN"],
   view_audit_log: ["ADMIN"],
+  close_cash: ["ADMIN", "KASIR"],
 };
 
 export function can(role: Role, capability: Capability): boolean {

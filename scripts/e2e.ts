@@ -7,6 +7,7 @@ import { billedDays, dateToJakartaLocal } from "../src/lib/admission-calc";
 import { getStockAlerts, receiveStock } from "../src/lib/inventory";
 import * as Opname from "../src/lib/opname";
 import { addInvoiceItem, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
+import { closeCash } from "../src/lib/cash";
 import { getSettings, saveSettings } from "../src/lib/settings";
 import { resolveRange, sumRows } from "../src/lib/report";
 import { getSalesByDay } from "../src/lib/reports";
@@ -20,6 +21,7 @@ const stock = async (itemId: string) =>
 const ok = (label: string) => console.log(`  ok  ${label}`);
 
 async function wipe() {
+  await prisma.cashClosing.deleteMany();
   await prisma.stockMovement.deleteMany(); await prisma.payment.deleteMany(); await prisma.opnameItem.deleteMany(); await prisma.stockOpname.deleteMany(); await prisma.invoiceItem.deleteMany(); await prisma.invoice.deleteMany();
   await prisma.admissionLog.deleteMany(); await prisma.admission.deleteMany(); await prisma.room.deleteMany({ where: { name: "K-E2E" } });
   await prisma.stockBatch.deleteMany(); await prisma.prescriptionItem.deleteMany(); await prisma.recordAddendum.deleteMany(); await prisma.attachment.deleteMany();
@@ -90,6 +92,11 @@ async function main() {
   if ("error" in todayRange) throw new Error(todayRange.error);
   assert.deepEqual(sumRows(await getSalesByDay(todayRange)), { invoices: 1, sales: 360_000, cost: 30 * 1_200 + 150_000 });
   ok("laporan: penjualan tanpa PPN Rp 360.000, HPP dari snapshot");
+
+  assert.ok("id" in (await closeCash(kasir.id, { openingCash: 100_000, countedCash: 499_600, note: "" })));
+  const closing = await prisma.cashClosing.findFirstOrThrow();
+  assert.deepEqual([closing.cashSales, closing.difference], [399_600, 0]);
+  ok("tutup kas: modal 100.000 + tunai 399.600 = fisik 499.600, selisih 0");
 
   assert.ok("error" in (await payInvoice(kasir.id, invoice.id, { method: "TUNAI", cashReceived: 9_999_999, reference: "" })));
   const due = await R.listDueVaccinations(400);

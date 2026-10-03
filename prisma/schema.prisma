@@ -111,6 +111,7 @@ model User {
   invoicesVoided   Invoice[]        @relation("InvoiceVoidedBy")
   paymentsReceived Payment[]
   auditLogs        AuditLog[]
+  cashClosings     CashClosing[]
 
   @@map("user")
 }
@@ -508,6 +509,23 @@ model Payment {
   receivedBy User    @relation(fields: [receivedById], references: [id])
 
   @@map("payment")
+}
+
+model CashClosing {
+  id          String   @id @default(uuid()) @db.Uuid
+  closingDate DateTime @unique @map("closing_date") @db.Date
+  openingCash Int      @map("opening_cash")
+  cashSales   Int      @map("cash_sales")
+  countedCash Int      @map("counted_cash")
+  difference  Int
+  note        String?
+  closedById  String   @map("closed_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  closedBy User @relation(fields: [closedById], references: [id])
+
+  @@map("cash_closing")
 }
 
 // ---------- Sistem ----------

@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 2, dimulai atas permintaan user. Urutan: 2.2, 2.4, 2.5. Task 2.1 (import) dan 2.3 (export) ditunda sampai user minta |
-| Task berikutnya | 2.5 |
+| Task berikutnya | Tidak ada. 2.1 (import) dan 2.3 (export) ditunda sampai user minta |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -65,7 +65,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **2.2** Laporan lengkap
 - [ ] **2.3** Export PDF dan Excel
 - [x] **2.4** Dashboard lanjut
-- [ ] **2.5** Tutup kas harian (jika klien setuju)
+- [x] **2.5** Tutup kas harian (jika klien setuju)
 
 ---
 
@@ -214,6 +214,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1C.5 | Selesai | `pnpm e2e` diperluas: selain alur kunjungan -> rekam medis -> invoice -> bayar -> void, kini mencakup check-in rawat inap (check-in ganda ditolak), DP pada invoice DRAFT, monitoring, check-out 3 hari, obat tambahan, pelunasan = total - DP, invoice FINAL, opname (alasan wajib) dan audit. Semua lulus. Story Must PRD 7.1-7.6 ditelusuri ke log task; semuanya sudah dibangun dan diuji. Gate 1C lulus, **Fase 1 selesai** |
 | 2026-10-04 | 2.2 | Selesai | `/laporan` (Admin saja, view_revenue_reports; menu "Laporan"): tab Omzet & Laba (harian/bulanan, preset hari ini/7 hari/bulan ini/bulan lalu atau rentang bebas maks 366 hari), Produk & Layanan (10 teratas menurut penjualan dengan HPP dan laba kotor), Kunjungan (per hari, per dokter, check-in rawat inap/hotel), Stok & Jatuh Tempo (stok menipis, expired, vaksin 30 hari; kondisi saat ini). Definisi: hanya invoice FINAL; penjualan = grand total − PPN; HPP = qty × harga beli snapshot; laba kotor = penjualan − HPP; diskon tingkat invoice tidak dialokasikan ke per item. Hari dihitung WIB (kolom waktu Prisma `timestamp` tanpa zona, konversi `AT TIME ZONE 'UTC'` lalu Jakarta; tes batas tengah malam). Diuji: angka manual cocok, VOID/DRAFT/bulan lain diabaikan, Kasir/Dokter ditolak. Laba bersih (pengeluaran operasional) di luar scope (PRD Q3) |
 | 2026-10-04 | 2.4 | Selesai | Beranda: grafik batang Omzet harian (hanya Admin) dan Kunjungan harian (semua peran) dengan pilihan 7/30/90 hari. Tanpa library grafik (batang dari elemen HTML, aksesibel via aria-label dan tooltip). Kartu "Omzet hari ini" disamakan dengan laporan: tanpa PPN (sebelumnya total termasuk PPN). Diuji: total 30 hari cocok hitungan manual (Rp 1.300.000, 33 kunjungan), Dokter/Kasir tidak menerima omzet. 202 test |
+| 2026-10-04 | 2.5 | Selesai | `/tutup-kas` (Kasir dan Admin, kapabilitas baru close_cash; Dokter ditolak): modal awal (terisi dari hitung fisik penutupan terakhir), hitung fisik, catatan. Tunai sistem = jumlah pembayaran TUNAI tidak void pada hari WIB itu; selisih = fisik − (modal + tunai sistem); catatan wajib bila selisih ≠ 0. Satu penutupan per tanggal (unik), tidak bisa diubah, konfirmasi dua langkah di halaman, tercatat audit `cash.close`. Tabel `cash_closing` (migrasi, CHECK nominal ≥ 0). Keputusan default: **Kasir tidak menerima angka tunai sistem** (aturan 3), hanya modal, fisik, selisih (catatan: dari selisih Kasir bisa menghitung mundur tunai sistem, ini kompromi agar bisa hitung ulang); Admin melihat tunai sistem dan peringatan bila ada transaksi tunai setelah penutupan. Pembayaran void tidak dihitung sebagai kas (pengembalian dana di luar sistem, BR-13). Hanya hari ini yang bisa ditutup. Diuji: batas tengah malam WIB, void, non-tunai, hari lain, penutupan ganda, tampilan Kasir, browser. Ditambah ke `pnpm e2e` |
 
 ## Perintah Proyek
 
