@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1A.13 |
+| Task berikutnya | 1B.1 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -28,10 +28,10 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1A.10** Inventaris dasar: stok masuk manual, batch, kartu stok, FEFO, blokir expired
 - [x] **1A.11** Kasir: invoice auto/manual/retail, diskon, PPN, pembayaran penuh, kembalian, finalisasi
 - [x] **1A.12** Void invoice (Admin) + restock
-- [ ] **1A.13** Struk thermal 80mm (+58mm via setting)
+- [x] **1A.13** Struk thermal 80mm (+58mm via setting)
 
 **Gate 1A:** satu pasien bisa dilayani dari pendaftaran sampai struk, stok berkurang benar.
-- [ ] Gate 1A lulus (uji manual alur utama)
+- [x] Gate 1A lulus (`pnpm e2e`: pendaftaran, kunjungan, rekam medis, invoice, bayar, stok, void, audit)
 
 ## Fase 1, Milestone 1B: Layanan Lanjutan & Dokumen
 
@@ -144,6 +144,10 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1A.12 | Void (Admin, alasan min. 3 karakter): invoice DRAFT atau FINAL; nomor invoice tetap; seluruh pembayaran ditandai `voided` dan tetap tampil di riwayat; kunjungan SELESAI kembali ke MENUNGGU_BAYAR; teraudit dengan daftar item yang di-restock | BR-13. Dashboard omzet (1C.1) harus mengabaikan invoice VOID dan pembayaran void |
 | 2026-10-03 | 1A.12 | Restock dipilih per item produk; stok kembali ke **batch asal** lewat gerakan `VOID_RETURN` (bisa ke batch yang kini expired, tetap tidak bisa dijual). Item yang tidak dicentang tetap terpotong (mis. rusak). DRAFT tidak punya stok terpotong sehingga tanpa pilihan restock | Void dua kali ditolak sehingga stok tidak bisa kembali ganda |
 | 2026-10-03 | 1A.12 | Tombol "Buat invoice baru dari kunjungan" pada invoice kunjungan yang void membuat draft baru dari tindakan/resep rekam medis (harga master saat ini). Retail memakai "Mulai invoice retail" baru | Jalur koreksi yang diminta BR-14 |
+| 2026-10-03 | 1A.13 | Struk di `/invoice/[id]/struk` (invoice FINAL): kop dari Pengaturan (nama, alamat, telepon, NPWP), item dengan diskon, subtotal/diskon/PPN/total, pembayaran + kembalian, sisa bila ada, footer. Lebar `@page` 80 atau 58 mm mengikuti Pengaturan; tombol Cetak memanggil `window.print()` dan hanya struk yang tercetak | FR-POS-10, FR-POS-11, SPEC bagian 2 |
+| 2026-10-03 | 1A.13 | Penanda **SALINAN**: kolom baru `invoice.receipt_prints` bertambah tiap tombol Cetak ditekan; cetak pertama = asli, berikutnya = salinan | Tidak ada cara lain mengetahui cetak ulang. Tidak tahu apakah printer benar-benar mencetak |
+| 2026-10-03 | 1A.13 | Logo klinik tidak dicetak di struk | Gambar di printer thermal sering kabur; belum diminta. Tambahkan bila klien mau |
+| 2026-10-03 | proses | `pnpm e2e` (`scripts/e2e.ts`) menjalankan alur utama dan memverifikasi stok, status, audit; **menghapus data transaksi** di DB dev | Dasar Gate 1A dan uji e2e 1C.5. Menolak jalan bila NODE_ENV=production |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -176,6 +180,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.10 | Selesai | `/inventaris`, `/inventaris/masuk`, `/inventaris/[itemId]` (kartu stok). Logika FEFO, konversi, expired, status stok diuji (144 test). Data layer diuji lewat skrip: lintas batch, HPP tertimbang 1.250, expired dilewati, stok kurang ditolak tanpa mengubah stok, dua pengambilan bersamaan tidak negatif, CHECK stok negatif. Browser: stok masuk 2 box = 200 tablet tampil di kartu stok. Lanjut ke 1A.11 |
 | 2026-10-03 | 1A.11 | Selesai | `/invoice` (editor draft: cari/scan, qty, diskon item, diskon invoice, hapus; panel bayar tunai/QRIS/transfer/kartu, kembalian, QRIS), `/retail`, `/pembayaran`. 155 test (rumus uang, status bayar, skema). Skrip: edit, audit diskon, stok kurang membatalkan semua, bayar tunai kurang ditolak, bayar bersamaan hanya sekali, kunci setelah final, HPP tertimbang, kunjungan SELESAI. Browser: retail dari awal sampai Lunas dan stok berkurang. Role: dokter ditolak, kasir tanpa HPP di halaman. Lanjut ke 1A.12 |
 | 2026-10-03 | 1A.12 | Selesai | Panel Void di halaman invoice (Admin saja): alasan wajib, pilihan restock per produk, bukan refund; pembayaran ditandai Void di invoice dan Riwayat Pembayaran. Skrip: restock ke batch asal, void ganda ditolak, edit/bayar invoice void ditolak, invoice pengganti, void draft, audit. Browser: alasan kosong ditolak, void berhasil. Kasir tidak melihat tombol. Lanjut ke 1A.13 |
+| 2026-10-03 | 1A.13 | Selesai | Cetak struk 80/58 mm + tombol dari halaman invoice dan Riwayat Pembayaran. Dicek di browser: layout 80 mm, 58 mm, mode SALINAN. **Belum diuji dengan printer thermal sungguhan** dan dialog print browser tidak diuji (diperlukan perangkat klien). **Gate 1A lulus** lewat `pnpm e2e`. Lanjut ke Milestone 1B (1B.1) |
 
 ## Perintah Proyek
 
@@ -188,4 +193,5 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | DB (Docker) | `docker compose up -d` / `docker compose down` |
 | Migrasi | `pnpm prisma:migrate` |
 | Seed | `pnpm prisma:seed` |
+| Uji alur utama (hapus data transaksi DB dev) | `pnpm e2e` |
 | Prisma Studio | `pnpm prisma:studio` |

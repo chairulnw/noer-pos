@@ -1,0 +1,1 @@
+ALTER TABLE "invoice" ADD COLUMN "receipt_prints" INTEGER NOT NULL DEFAULT 0;

@@ -10,7 +10,8 @@
     "test": "vitest run",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

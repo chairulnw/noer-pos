@@ -59,6 +59,13 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
         </div>
         {invoice.status === "VOID" && invoice.voidReason && <p className="text-sm text-destructive">Void: {invoice.voidReason}</p>}
+        {invoice.status === "FINAL" && (
+          <div className="pt-1">
+            <Button variant="outline" asChild>
+              <Link href={`/invoice/${invoice.id}/struk`}>Cetak struk</Link>
+            </Button>
+          </div>
+        )}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {canReplace && (
           <form action={replacementAction.bind(null, invoice.id)} className="pt-1">

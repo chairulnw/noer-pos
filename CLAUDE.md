@@ -82,6 +82,9 @@ pnpm prisma:migrate
 # seed
 pnpm prisma:seed
 
+# uji alur utama (menghapus data transaksi di DB dev)
+pnpm e2e
+
 # prisma studio
 pnpm prisma:studio
 ```

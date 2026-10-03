@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { prisma } from "@/lib/db";
 import { addInvoiceItem, createReplacementInvoice, createRetailInvoice, payInvoice, removeInvoiceItem, setInvoiceDiscount, updateInvoiceItem, voidInvoice } from "@/lib/invoice-ops";
 import { discountSchema, lineSchema, paySchema, voidSchema, type Discount, type PayInput, type VoidInput } from "@/lib/invoice-schema";
 import { requireCapability } from "@/lib/require-role";
@@ -83,4 +84,11 @@ export async function replacementAction(invoiceId: string) {
   if ("error" in result) redirect(`/invoice/${invoiceId}?error=${encodeURIComponent(result.error)}`);
   revalidatePath("/invoice");
   redirect(`/invoice/${result.id}`);
+}
+
+export async function markReceiptPrintedAction(invoiceId: string) {
+  await requireCapability("manage_invoice_payment");
+  if (!id.safeParse(invoiceId).success) return;
+  await prisma.invoice.updateMany({ where: { id: invoiceId, status: "FINAL" }, data: { receiptPrints: { increment: 1 } } });
+  revalidatePath(`/invoice/${invoiceId}/struk`);
 }
