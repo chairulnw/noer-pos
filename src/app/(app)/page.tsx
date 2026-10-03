@@ -1,10 +1,22 @@
 import Link from "next/link";
+import { getDashboardSummary } from "@/lib/dashboard";
 import { getStockAlerts } from "@/lib/inventory";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatRupiah } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { requireUser } from "@/lib/require-role";
 
 const DOT = { danger: "bg-destructive", warning: "bg-warning", info: "bg-info" };
+
+function Stat({ label, value, hint, href }: { label: string; value: string; hint?: string; href?: string }) {
+  const body = (
+    <div className="rounded-[10px] border bg-card p-4">
+      <div className="text-[13px] text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
+      {hint && <div className="mt-0.5 text-[13px] text-muted-foreground">{hint}</div>}
+    </div>
+  );
+  return href ? <Link href={href} className="block">{body}</Link> : body;
+}
 
 function AlertRow({ tone, title, detail, href, action }: { tone: keyof typeof DOT; title: string; detail: string; href: string; action: string }) {
   return (
@@ -21,6 +33,7 @@ function AlertRow({ tone, title, detail, href, action }: { tone: keyof typeof DO
 
 export default async function HomePage() {
   const user = await requireUser();
+  const summary = await getDashboardSummary(can(user.role, "view_revenue_reports"));
   const alerts = can(user.role, "manage_stock") ? await getStockAlerts() : null;
   const total = alerts ? alerts.low.length + alerts.expiring.length : 0;
 
@@ -29,6 +42,13 @@ export default async function HomePage() {
       <div className="space-y-1">
         <h1 className="text-[22px] font-semibold">Beranda</h1>
         <p className="text-sm text-muted-foreground">Halo, {user.name}.</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {summary.revenue && <Stat label="Omzet hari ini" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final`} />}
+        <Stat label="Kunjungan hari ini" value={String(summary.visits)} href={can(user.role, "create_visit") ? "/kunjungan" : undefined} />
+        <Stat label="Rawat inap aktif" value={String(summary.rawatInap)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
+        <Stat label="Hotel aktif" value={String(summary.hotel)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
       </div>
 
       {alerts && (
