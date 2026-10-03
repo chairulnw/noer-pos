@@ -64,10 +64,15 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
         </div>
         {invoice.status === "VOID" && invoice.voidReason && <p className="text-sm text-destructive">Void: {invoice.voidReason}</p>}
-        {invoice.status === "FINAL" && (
-          <div className="pt-1">
+        {invoice.status !== "VOID" && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {invoice.status === "FINAL" && (
+              <Button variant="outline" asChild>
+                <Link href={`/invoice/${invoice.id}/struk`}>Cetak struk</Link>
+              </Button>
+            )}
             <Button variant="outline" asChild>
-              <Link href={`/invoice/${invoice.id}/struk`}>Cetak struk</Link>
+              <a href={`/api/invoice/${invoice.id}/pdf`}>Unduh e-invoice (PDF)</a>
             </Button>
           </div>
         )}

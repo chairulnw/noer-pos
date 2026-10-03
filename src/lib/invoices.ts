@@ -121,13 +121,13 @@ export const getInvoice = (id: string) =>
       payments: { select: { id: true, kind: true, method: true, amount: true, cashReceived: true, reference: true, paidAt: true, voided: true, receivedBy: { select: { name: true } } }, orderBy: { paidAt: "asc" } },
       owner: { select: { name: true, whatsapp: true } },
       createdBy: { select: { name: true } },
-      admission: { select: { id: true, type: true, room: { select: { name: true } }, patient: { select: { id: true, name: true, rmNo: true, allergyNote: true, aggressive: true } } } },
+      admission: { select: { id: true, type: true, room: { select: { name: true } }, patient: { select: { id: true, name: true, rmNo: true, species: true, allergyNote: true, aggressive: true } } } },
       visit: {
         select: {
           id: true,
           createdAt: true,
           doctor: { select: { name: true } },
-          patient: { select: { id: true, name: true, rmNo: true, allergyNote: true, aggressive: true } },
+          patient: { select: { id: true, name: true, rmNo: true, species: true, allergyNote: true, aggressive: true } },
         },
       },
     },
