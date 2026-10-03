@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1A.10 |
+| Task berikutnya | 1A.11 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -25,7 +25,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1A.7** Kunjungan walk-in + halaman "Pasien Hari Ini"
 - [x] **1A.8** Rekam medis: SOAP, vital, diagnosa, lampiran, vaksinasi, finalisasi, addendum, halaman jatuh tempo
 - [x] **1A.9** Resep & tindakan → draft invoice otomatis
-- [ ] **1A.10** Inventaris dasar: stok masuk manual, batch, kartu stok, FEFO, blokir expired
+- [x] **1A.10** Inventaris dasar: stok masuk manual, batch, kartu stok, FEFO, blokir expired
 - [ ] **1A.11** Kasir: invoice auto/manual/retail, diskon, PPN, pembayaran penuh, kembalian, finalisasi
 - [ ] **1A.12** Void invoice (Admin) + restock
 - [ ] **1A.13** Struk thermal 80mm (+58mm via setting)
@@ -125,6 +125,11 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1A.9 | Dokter tidak menerima harga di pemilih item (hanya nama, jenis, satuan); invoice yang dikirim ke UI tidak membawa `unit_cost_snapshot` | SPEC bagian 5 (dokter tidak melihat harga), BR-7 |
 | 2026-10-03 | 1A.9 | Peringatan alergi saat memilih obat berupa pencocokan kata nama obat (min. 5 huruf) dengan catatan alergi; hanya informasi, tidak memblokir | Keputusan user (sistem hanya menunjukkan). Pencocokan teks bebas bisa meleset untuk nama dagang |
 | 2026-10-03 | 1A.9 | Halaman `/invoice` (daftar + filter) dan `/invoice/[id]` baru versi baca saja; edit item, diskon, dan pembayaran di 1A.11 | AC 1A.9: item dokter muncul di invoice |
+| 2026-10-03 | 1A.10 | `stock_movement.qty` bertanda: masuk positif, keluar negatif, void positif, penyesuaian bertanda | ERD tidak menentukan; tanda memudahkan kartu stok dan saldo |
+| 2026-10-03 | 1A.10 | Batch kedaluwarsa jika tanggal expired **sebelum** hari ini (hari-H masih bisa dijual); stok masuk untuk batch yang sudah expired ditolak | Tanggal expired pada kemasan berarti berlaku sampai hari itu |
+| 2026-10-03 | 1A.10 | Stok masuk: harga beli diisi **per satuan beli**; HPP batch = harga / faktor konversi (dibulatkan). Batch dengan no. batch dan expired sama digabung dan HPP-nya dirata-rata tertimbang. `items.buy_price` master tidak diubah otomatis | FR-INV-2, BR-8. Perubahan harga master hanya lewat Master Data (teraudit) |
+| 2026-10-03 | 1A.10 | Pengurangan stok (`deductForInvoiceItem`) memakai FEFO, batch tanpa expired terakhir lalu FIFO, update kondisional `qty_on_hand >= qty` agar dua transaksi bersamaan tidak membuat stok negatif; mengembalikan HPP rata-rata alokasi untuk snapshot invoice. Dipanggil oleh finalisasi invoice di 1A.11 | BR-4, BR-5, BR-6 |
+| 2026-10-03 | 1A.10 | Halaman Inventaris hanya Admin (kapabilitas manage_stock): daftar produk dengan status Habis/Menipis/Hampir expired/Aman, kartu stok per produk (batch + riwayat), form stok masuk. Notifikasi di dashboard di 1B.7 | SPEC bagian 5 |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -154,6 +159,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.7 | Selesai | `/kunjungan` (daftar hari ini, auto-refresh 10 dtk, batalkan) dan `/kunjungan/baru?patient=` (pilih dokter, keluhan; tag dan catatan alergi tampil di atas form). `visit_date` memakai hari Jakarta. Diuji lewat skrip (dokter tidak valid, pasien tidak ada, filter per dokter, batalkan sekali) dan HTTP per role. Tanpa nomor antrean. Lanjut ke 1A.8 |
 | 2026-10-03 | 1A.8 | Selesai | `/rekam-medis/[visitId]`: vital signs, SOAP, diagnosa (autocomplete master), vaksinasi (jatuh tempo otomatis dari interval), lampiran, finalisasi (kunjungan jadi MENUNGGU_BAYAR), addendum. `/jatuh-tempo`. Riwayat kunjungan dan vaksinasi di profil pasien (Admin/Dokter). 113 test lulus. Diuji lewat skrip: final terkunci (simpan, vaksin, finalisasi ulang ditolak), addendum, lampiran palsu ditolak, audit; akses per role dan lampiran 401/403; simpan draft di browser. Finalisasi lewat tombol tidak diuji di browser karena dialog konfirmasi. Belum: tindakan & resep (1A.9). Lanjut ke 1A.9 |
 | 2026-10-03 | 1A.9 | Selesai | Bagian Tindakan & resep di form rekam medis (cari, qty, aturan pakai, peringatan alergi). Finalisasi membuat draft invoice dengan snapshot harga/HPP, total (PPN dari Pengaturan), nomor berurutan; finalisasi ganda bersamaan tetap satu invoice. 128 test lulus (rumus uang, nomor, alergi). Diuji lewat skrip dan browser (picker, peringatan, simpan). Lanjut ke 1A.10 |
+| 2026-10-03 | 1A.10 | Selesai | `/inventaris`, `/inventaris/masuk`, `/inventaris/[itemId]` (kartu stok). Logika FEFO, konversi, expired, status stok diuji (144 test). Data layer diuji lewat skrip: lintas batch, HPP tertimbang 1.250, expired dilewati, stok kurang ditolak tanpa mengubah stok, dua pengambilan bersamaan tidak negatif, CHECK stok negatif. Browser: stok masuk 2 box = 200 tablet tampil di kartu stok. Lanjut ke 1A.11 |
 
 ## Perintah Proyek
 
