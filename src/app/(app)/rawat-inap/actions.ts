@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkInSchema, checkOutSchema, logSchema } from "@/lib/admission-schema";
 import { addAdmissionLog, checkOutAdmission, createAdmission } from "@/lib/admissions";
+import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 
 export type AdmissionFormState = { message?: string; nonce?: number; errors?: Record<string, string[] | undefined> };
@@ -65,5 +66,5 @@ export async function checkOutAction(admissionId: string, _prev: AdmissionFormSt
 
   revalidatePath("/rawat-inap");
   revalidatePath("/invoice");
-  redirect(`/invoice/${result.invoiceId}`);
+  redirect(can(user.role, "manage_invoice_payment") ? `/invoice/${result.invoiceId}` : "/rawat-inap");
 }

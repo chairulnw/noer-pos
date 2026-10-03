@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const checkInSchema = z.object({
-  patientId: z.uuid({ error: "Pasien tidak valid" }),
+  patientId: z.guid({ error: "Pasien tidak valid" }),
   type: z.enum(["RAWAT_INAP", "HOTEL"], { error: "Pilih jenis" }),
-  roomId: z.uuid({ error: "Pilih kandang" }),
-  rateItemId: z.uuid({ error: "Pilih tarif harian" }),
+  roomId: z.guid({ error: "Pilih kandang" }),
+  rateItemId: z.guid({ error: "Pilih tarif harian" }),
   checkIn: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Waktu masuk tidak valid"),
-  visitId: z.union([z.uuid(), z.literal("")]),
+  visitId: z.union([z.guid(), z.literal("")]),
   notes: z.string().trim().max(300, "Maksimal 300 karakter"),
 });
 

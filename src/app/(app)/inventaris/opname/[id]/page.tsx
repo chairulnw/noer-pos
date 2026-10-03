@@ -10,7 +10,7 @@ import { OpnameEditor } from "../opname-editor";
 export default async function OpnameSessionPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("manage_stock");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const opname = await getOpname(id);
   if (!opname) notFound();
   const final = opname.status === "FINAL";

@@ -16,7 +16,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
   const { q = "", id } = await searchParams;
   const [{ patients, ownersWithoutPets }, selected] = await Promise.all([
     searchPatients(q),
-    id && z.uuid().safeParse(id).success ? getPatient(id) : null,
+    id && z.guid().safeParse(id).success ? getPatient(id) : null,
   ]);
   const history = selected && can(user.role, "view_medical_record") ? await getPatientHistory(selected.id) : null;
   const admissions = selected ? await listPatientAdmissions(selected.id) : [];

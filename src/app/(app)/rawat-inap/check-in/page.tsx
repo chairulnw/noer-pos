@@ -13,7 +13,7 @@ import { CheckInForm } from "../check-in-form";
 export default async function CheckInPage({ searchParams }: { searchParams: Promise<{ patient?: string; q?: string }> }) {
   await requireCapability("manage_admission");
   const { patient: patientId, q = "" } = await searchParams;
-  const patient = patientId && z.uuid().safeParse(patientId).success ? await getPatient(patientId) : null;
+  const patient = patientId && z.guid().safeParse(patientId).success ? await getPatient(patientId) : null;
 
   if (!patient) {
     const results = q.trim() ? (await searchPatients(q)).patients : [];

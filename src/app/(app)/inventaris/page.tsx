@@ -32,7 +32,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           </Button>
         </div>
       </header>
-      <form className="flex max-w-xl gap-2">
+      <form className="flex gap-2">
         <Input name="q" defaultValue={q} placeholder="Cari nama, SKU, atau barcode" aria-label="Cari produk" />
         <Button type="submit" variant="outline">Cari</Button>
       </form>

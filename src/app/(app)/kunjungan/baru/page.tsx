@@ -9,7 +9,7 @@ import { VisitForm } from "../visit-form";
 export default async function NewVisitPage({ searchParams }: { searchParams: Promise<{ patient?: string }> }) {
   const user = await requireCapability("create_visit");
   const { patient: patientId } = await searchParams;
-  if (!patientId || !z.uuid().safeParse(patientId).success) notFound();
+  if (!patientId || !z.guid().safeParse(patientId).success) notFound();
   const [patient, doctors] = await Promise.all([getPatient(patientId), listDoctors()]);
   if (!patient) notFound();
 

@@ -10,7 +10,7 @@ import { requireCapability } from "@/lib/require-role";
 export default async function OwnerPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("manage_patients");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const owner = await getOwner(id);
   if (!owner) notFound();
 

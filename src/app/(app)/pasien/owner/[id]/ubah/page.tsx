@@ -16,7 +16,7 @@ export default async function EditOwnerPage({
   await requireCapability("manage_patients");
   const { id } = await params;
   const { error } = await searchParams;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const owner = await getOwner(id);
   if (!owner) notFound();
 

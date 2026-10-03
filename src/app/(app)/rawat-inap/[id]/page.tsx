@@ -12,7 +12,7 @@ import { LogForm } from "../log-form";
 export default async function AdmissionPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("monitor_admission");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const admission = await getAdmission(id);
   if (!admission) notFound();
   const logs = await listAdmissionLogs(id);

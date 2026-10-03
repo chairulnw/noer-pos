@@ -11,7 +11,7 @@ const PREFIX = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Bayar" };
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("manage_invoice_payment");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const [invoice, settings] = await Promise.all([getInvoice(id), getSettings()]);
   if (!invoice || invoice.status !== "FINAL") notFound();
 

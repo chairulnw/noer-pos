@@ -9,7 +9,7 @@ import { PatientForm } from "../../patient-form";
 export default async function EditPatientPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("manage_patients");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const patient = await getPatient(id);
   if (!patient) notFound();
 

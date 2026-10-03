@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { todayJakarta } from "@/lib/date";
 
 export const visitSchema = z.object({
-  doctorId: z.uuid({ error: "Pilih dokter" }),
+  doctorId: z.guid({ error: "Pilih dokter" }),
   complaint: z.string().trim().min(1, "Keluhan wajib diisi").max(500, "Maksimal 500 karakter"),
 });
 

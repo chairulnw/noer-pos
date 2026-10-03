@@ -21,7 +21,7 @@ export async function createOpnameAction(formData: FormData) {
 async function run(opnameId: string, rows: OpnameRowInput[], finalize: boolean): Promise<OpnameResult> {
   const user = await requireCapability("manage_stock");
   const parsed = opnameRowsSchema.safeParse(rows);
-  if (!parsed.success || !z.uuid().safeParse(opnameId).success) return { error: parsed.success ? "Data tidak valid." : (parsed.error.issues[0]?.message ?? "Data tidak valid.") };
+  if (!parsed.success || !z.guid().safeParse(opnameId).success) return { error: parsed.success ? "Data tidak valid." : (parsed.error.issues[0]?.message ?? "Data tidak valid.") };
 
   const result = finalize ? await finalizeOpname(user.id, opnameId, parsed.data) : await saveOpname(opnameId, parsed.data);
   revalidatePath(`/inventaris/opname/${opnameId}`);

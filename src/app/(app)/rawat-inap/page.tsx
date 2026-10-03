@@ -11,6 +11,7 @@ import { requireCapability } from "@/lib/require-role";
 export default async function AdmissionsPage() {
   const user = await requireCapability("manage_admission");
   const canMonitor = can(user.role, "monitor_admission");
+  const canInvoice = can(user.role, "manage_invoice_payment");
   const admissions = await listActiveAdmissions();
   const now = new Date();
 
@@ -60,7 +61,7 @@ export default async function AdmissionsPage() {
                 <td className="px-4 py-3 text-right">
                   <Link href={`/rawat-inap/${a.id}/check-out`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Check-out</Link>
                   {canMonitor && <Link href={`/rawat-inap/${a.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">{a.type === "RAWAT_INAP" ? "Monitoring" : "Detail"}</Link>}
-                  {a.invoices[0] && <Link href={`/invoice/${a.invoices[0].id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Invoice</Link>}
+                  {canInvoice && a.invoices[0] && <Link href={`/invoice/${a.invoices[0].id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Invoice</Link>}
                 </td>
               </tr>
             ))}

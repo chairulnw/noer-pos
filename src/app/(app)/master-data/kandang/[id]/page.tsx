@@ -7,7 +7,7 @@ import { RoomForm } from "../room-form";
 export default async function EditRoomPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("manage_rooms");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
 
   const room = await getRoom(id);
   if (!room) notFound();

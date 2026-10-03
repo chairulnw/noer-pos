@@ -10,7 +10,7 @@ import { requireCapability } from "@/lib/require-role";
 
 export type ActionResult = { error?: string; ok?: boolean; change?: number };
 
-const id = z.uuid();
+const id = z.guid();
 const refresh = (invoiceId: string) => revalidatePath(`/invoice/${invoiceId}`);
 const invalid = (error: z.ZodError): ActionResult => ({ error: error.issues[0]?.message ?? "Isian tidak valid." });
 

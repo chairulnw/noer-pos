@@ -29,7 +29,7 @@ export const isRecordEmpty = (r: RecordInput) =>
 export const addendumSchema = z.object({ note: text(2000).min(1, "Catatan wajib diisi") });
 
 export const vaccinationSchema = z.object({
-  itemId: z.uuid({ error: "Pilih vaksin" }),
+  itemId: z.guid({ error: "Pilih vaksin" }),
   batchNo: text(50),
   givenAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Tanggal tidak valid"),
   nextDue: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Tanggal tidak valid"),
@@ -62,7 +62,7 @@ export function detectAttachment(head: Uint8Array, size: number) {
 export const recordItemsSchema = z
   .array(
     z.object({
-      itemId: z.uuid({ error: "Item tidak valid" }),
+      itemId: z.guid({ error: "Item tidak valid" }),
       qty: number().gt(0, "Jumlah harus lebih dari 0").max(99999, "Terlalu besar"),
       instruction: text(200),
     }),

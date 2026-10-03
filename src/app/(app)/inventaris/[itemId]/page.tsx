@@ -14,7 +14,7 @@ const TYPE = { IN: "Masuk", OUT: "Keluar", VOID_RETURN: "Kembali (void)", ADJUST
 export default async function StockCardPage({ params }: { params: Promise<{ itemId: string }> }) {
   await requireCapability("manage_stock");
   const { itemId } = await params;
-  if (!z.uuid().safeParse(itemId).success) notFound();
+  if (!z.guid().safeParse(itemId).success) notFound();
   const card = await getStockCard(itemId);
   if (!card) notFound();
   const today = todayJakarta();

@@ -36,7 +36,7 @@ function Card({ title, aside, children }: { title: string; aside?: React.ReactNo
 export default async function RecordPage({ params }: { params: Promise<{ visitId: string }> }) {
   const user = await requireCapability("view_medical_record");
   const { visitId } = await params;
-  if (!z.uuid().safeParse(visitId).success) notFound();
+  if (!z.guid().safeParse(visitId).success) notFound();
   if (!(await ensureRecord(visitId))) notFound();
 
   const data = await getRecordView(visitId);

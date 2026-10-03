@@ -17,7 +17,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-4">
       <h1 className="text-[22px] font-semibold leading-11">Riwayat Pembayaran</h1>
-      <form className="flex max-w-xl gap-2">
+      <form className="flex gap-2">
         <Input name="q" defaultValue={q} placeholder="Cari no. invoice, pasien, atau pelanggan" aria-label="Cari pembayaran" />
         <Button type="submit" variant="outline">Cari</Button>
       </form>

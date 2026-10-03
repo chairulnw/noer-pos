@@ -25,7 +25,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   const user = await requireCapability("manage_invoice_payment");
   const { id } = await params;
   const { error } = await searchParams;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
   const invoice = await getInvoice(id);
   if (!invoice) notFound();
 

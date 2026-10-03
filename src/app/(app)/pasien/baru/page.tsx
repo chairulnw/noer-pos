@@ -7,7 +7,7 @@ import { PatientForm } from "../patient-form";
 export default async function NewPatientPage({ searchParams }: { searchParams: Promise<{ owner?: string }> }) {
   await requireCapability("manage_patients");
   const { owner: ownerId } = await searchParams;
-  if (!ownerId || !z.uuid().safeParse(ownerId).success) notFound();
+  if (!ownerId || !z.guid().safeParse(ownerId).success) notFound();
   const owner = await getOwner(ownerId);
   if (!owner) notFound();
 

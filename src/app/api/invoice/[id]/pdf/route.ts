@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!can(session.user.role, "manage_invoice_payment")) return new Response(null, { status: 403 });
 
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) return new Response(null, { status: 404 });
+  if (!z.guid().safeParse(id).success) return new Response(null, { status: 404 });
   const [invoice, settings] = await Promise.all([getInvoice(id), getSettings()]);
   if (!invoice || invoice.status === "VOID") return new Response(null, { status: 404 });
 

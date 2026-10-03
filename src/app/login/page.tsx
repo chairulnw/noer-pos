@@ -33,7 +33,7 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="flex w-full max-w-100 flex-col items-center gap-6">
-        <Image src={logo} alt="NOER Petshop & Vet Clinic" width={143} height={64} unoptimized className="h-16 w-auto" />
+        <Image src={logo} alt="NOER Petshop & Vet Clinic" width={143} height={64} unoptimized priority style={{ width: "auto" }} className="h-16" />
         <form action={login} className="flex w-full flex-col gap-5 rounded-xl border bg-card p-8">
           <div className="space-y-1">
             <h1 className="text-[22px] font-semibold leading-11">Masuk</h1>

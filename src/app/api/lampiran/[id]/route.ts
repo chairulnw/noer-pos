@@ -9,7 +9,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!can(session.user.role, "view_medical_record")) return new Response(null, { status: 403 });
 
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) return new Response(null, { status: 404 });
+  if (!z.guid().safeParse(id).success) return new Response(null, { status: 404 });
   const file = await getAttachmentFile(id).catch(() => null);
   if (!file) return new Response(null, { status: 404 });
 

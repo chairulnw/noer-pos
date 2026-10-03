@@ -7,7 +7,7 @@ import { ItemForm } from "../item-form";
 export default async function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireCapability("manage_service_price");
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success) notFound();
+  if (!z.guid().safeParse(id).success) notFound();
 
   const item = await getItem(id, user.role);
   if (!item) notFound();
