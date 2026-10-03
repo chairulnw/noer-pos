@@ -56,3 +56,13 @@ export const weightedCost = (oldQty: number, oldCost: number, inQty: number, inC
   Math.round((oldQty * oldCost + inQty * inCost) / (oldQty + inQty));
 
 export const opnameDiff = (system: number, counted: number) => (milli(counted) - milli(system)) / 1000;
+
+export type BatchAlert = "EXPIRED" | "HAMPIR_EXPIRED" | null;
+
+export function batchExpiryAlert(expiry: Date | null, qty: number, today: Date, warnDays: number): BatchAlert {
+  if (expiry === null || milli(qty) <= 0) return null;
+  if (isExpired(expiry, today)) return "EXPIRED";
+  return expiry <= new Date(today.getTime() + warnDays * 86_400_000) ? "HAMPIR_EXPIRED" : null;
+}
+
+export const isLowStock = (usable: number, threshold: number | null) => threshold !== null && usable <= threshold;

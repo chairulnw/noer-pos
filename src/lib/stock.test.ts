@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { costPerBaseUnit, fefoAllocate, isExpired, opnameDiff, stockStatus, toBaseQty, weightedCost, type StockBatchInfo } from "./stock";
+import { batchExpiryAlert, costPerBaseUnit, fefoAllocate, isExpired, isLowStock, opnameDiff, stockStatus, toBaseQty, weightedCost, type StockBatchInfo } from "./stock";
 
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
 const today = day("2026-10-03");
@@ -132,5 +132,30 @@ describe("opnameDiff", () => {
     expect(opnameDiff(100, 100)).toBe(0);
     expect(opnameDiff(0.3, 0.1)).toBe(-0.2);
     expect(opnameDiff(2, 2.5)).toBe(0.5);
+  });
+});
+
+describe("batchExpiryAlert", () => {
+  it("expired, hampir expired, aman, dan batch kosong atau tanpa expired", () => {
+    expect(batchExpiryAlert(day("2026-10-02"), 5, today, 90)).toBe("EXPIRED");
+    expect(batchExpiryAlert(day("2026-10-03"), 5, today, 90)).toBe("HAMPIR_EXPIRED");
+    expect(batchExpiryAlert(day("2027-01-01"), 5, today, 90)).toBe("HAMPIR_EXPIRED");
+    expect(batchExpiryAlert(day("2027-01-02"), 5, today, 90)).toBeNull();
+    expect(batchExpiryAlert(day("2026-10-02"), 0, today, 90)).toBeNull();
+    expect(batchExpiryAlert(null, 5, today, 90)).toBeNull();
+  });
+
+  it("jendela peringatan mengikuti Pengaturan", () => {
+    expect(batchExpiryAlert(day("2026-11-20"), 5, today, 30)).toBeNull();
+    expect(batchExpiryAlert(day("2026-11-20"), 5, today, 60)).toBe("HAMPIR_EXPIRED");
+  });
+});
+
+describe("isLowStock", () => {
+  it("hanya produk yang punya batas yang dipantau; sama dengan batas dihitung menipis", () => {
+    expect(isLowStock(10, 10)).toBe(true);
+    expect(isLowStock(11, 10)).toBe(false);
+    expect(isLowStock(0, 5)).toBe(true);
+    expect(isLowStock(0, null)).toBe(false);
   });
 });

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import { todayJakarta } from "@/lib/date";
 import { getSettings } from "@/lib/settings";
-import { costPerBaseUnit, fefoAllocate, isExpired, stockStatus, toBaseQty, weightedCost } from "@/lib/stock";
+import { batchExpiryAlert, costPerBaseUnit, fefoAllocate, isExpired, isLowStock, stockStatus, toBaseQty, weightedCost } from "@/lib/stock";
 import type { StockInInput } from "@/lib/stock-schema";
 
 type Tx = Prisma.TransactionClient;
@@ -144,3 +144,34 @@ export async function deductForInvoiceItem(tx: Tx, params: { userId: string; inv
 }
 
 export type StockSummaryRow = Awaited<ReturnType<typeof listStockSummary>>[number];
+
+export async function getStockAlerts() {
+  const [items, settings] = await Promise.all([
+    prisma.item.findMany({
+      where: { type: "PRODUCT", active: true, deletedAt: null },
+      select: { id: true, name: true, baseUnit: true, lowStockThreshold: true, stockBatches: { select: { batchNo: true, expiryDate: true, qtyOnHand: true } } },
+      orderBy: { name: "asc" },
+    }),
+    getSettings(),
+  ]);
+  const today = todayJakarta();
+
+  const low: { id: string; name: string; unit: string; usable: number; threshold: number }[] = [];
+  const expiring: { id: string; name: string; unit: string; batchNo: string; expiry: Date; qty: number; level: "EXPIRED" | "HAMPIR_EXPIRED" }[] = [];
+
+  for (const item of items) {
+    const batches = item.stockBatches.map((b) => ({ batchNo: b.batchNo, expiry: b.expiryDate, qty: Number(b.qtyOnHand) }));
+    const { usable } = stockStatus(batches, null, today, settings.expiryWarningDays);
+    const threshold = item.lowStockThreshold === null ? null : Number(item.lowStockThreshold);
+    if (threshold !== null && isLowStock(usable, threshold)) low.push({ id: item.id, name: item.name, unit: item.baseUnit, usable, threshold });
+
+    for (const b of batches) {
+      const level = batchExpiryAlert(b.expiry, b.qty, today, settings.expiryWarningDays);
+      if (level) expiring.push({ id: item.id, name: item.name, unit: item.baseUnit, batchNo: b.batchNo, expiry: b.expiry!, qty: b.qty, level });
+    }
+  }
+
+  low.sort((a, b) => a.usable - b.usable);
+  expiring.sort((a, b) => a.expiry.getTime() - b.expiry.getTime());
+  return { low, expiring, warnDays: settings.expiryWarningDays };
+}

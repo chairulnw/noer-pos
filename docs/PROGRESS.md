@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1B.7 |
+| Task berikutnya | 1C.1 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -41,10 +41,10 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1B.4** DP + pelunasan (BR-9)
 - [x] **1B.5** E-invoice PDF
 - [x] **1B.6** Stok opname
-- [ ] **1B.7** Notifikasi stok rendah/hampir expired di dashboard
+- [x] **1B.7** Notifikasi stok rendah/hampir expired di dashboard
 
 **Gate 1B:** tagihan menginap benar, DP dan pelunasan benar, e-invoice terunduh.
-- [ ] Gate 1B lulus
+- [x] Gate 1B lulus
 
 ## Fase 1, Milestone 1C: Penutup
 
@@ -205,6 +205,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1B.4 | Selesai | Tombol Bayar DP (jumlah, metode, uang diterima), ringkasan Total/DP dibayar/Sisa, label DP/Pelunasan di invoice dan struk, koreksi DP Admin. 182 test (settlement, deposit, koreksi, permission). Skrip: DP kedua ditolak, pelunasan = sisa, maks 2 pembayaran, DP 600rb > total 300rb ditolak lalu dikoreksi Admin, DP pada FINAL, void invoice ber-DP menandai DP void. Browser: DP Rp 50.000 lalu pelunasan Rp 150.000 menjadi Final/Lunas. Lanjut ke 1B.5 |
 | 2026-10-03 | 1B.5 | Selesai | Tombol Unduh e-invoice (PDF) di halaman invoice. Test render PDF (termasuk 80 item multi-halaman, 183 test). Diuji: tanpa login 401, Dokter 403, Kasir 200 dengan header unduhan; tampilan PDF diperiksa di viewer browser (item diskon, PPN, DP, sisa). Lanjut ke 1B.6 |
 | 2026-10-03 | 1B.6 | Selesai | `/inventaris/opname` (daftar + mulai/lanjutkan) dan `/inventaris/opname/[id]` (tabel hitung fisik, selisih langsung, alasan, simpan draft, finalkan dengan konfirmasi; tampilan final baca saja). 184 test. Skrip: sesi ganda melanjutkan yang lama, alasan wajib, penjualan di sela hitungan tidak dihitung ganda, penguncian setelah final, rollback saat stok tidak cukup, audit. Browser: 100 -> 96 dengan alasan, gerakan ADJUST -4. Lanjut ke 1B.7 |
+| 2026-10-03 | 1B.7 | Selesai | Kartu "Notifikasi stok" di Beranda untuk Admin (kapabilitas manage_stock): produk habis/menipis (ambang per item) dan batch expired/hampir expired (hari peringatan dari Pengaturan). 187 test. Kasir/dokter tidak melihat kartu. Gate 1B terbukti lewat uji 1B.3-1B.5 (tagihan menginap, DP/pelunasan, PDF). Lanjut ke 1C.1 |
 
 ## Perintah Proyek
 
