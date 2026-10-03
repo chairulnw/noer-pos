@@ -5,10 +5,10 @@ async function main() {
   const passwordHash = await bcrypt.hash("password123", 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@klinik.test" },
+    where: { username: "admin" },
     update: {},
     create: {
-      email: "admin@klinik.test",
+      username: "admin",
       passwordHash,
       name: "Admin Klinik",
       role: "ADMIN",
@@ -16,10 +16,10 @@ async function main() {
   });
 
   const dokter = await prisma.user.upsert({
-    where: { email: "dokter@klinik.test" },
+    where: { username: "dokter" },
     update: {},
     create: {
-      email: "dokter@klinik.test",
+      username: "dokter",
       passwordHash,
       name: "Drh. Contoh",
       role: "DOKTER",
@@ -27,10 +27,10 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: "kasir@klinik.test" },
+    where: { username: "kasir" },
     update: {},
     create: {
-      email: "kasir@klinik.test",
+      username: "kasir",
       passwordHash,
       name: "Kasir Contoh",
       role: "KASIR",
@@ -95,7 +95,7 @@ async function main() {
     },
   });
 
-  console.log("Seed selesai:", { admin: admin.email, dokter: dokter.email, item: konsultasi.name });
+  console.log("Seed selesai:", { admin: admin.username, dokter: dokter.username, item: konsultasi.name });
 }
 
 main()

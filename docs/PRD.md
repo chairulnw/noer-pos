@@ -94,7 +94,7 @@ Klinik hewan butuh satu sistem yang menyatukan **rekam medis pasien (PMS)** dan 
 | Modul | Isi |
 |---|---|
 | Login & role | 3 role: Owner/Admin, Dokter, Kasir |
-| Owner & pasien | CRUD, nomor RM otomatis, pencarian cepat, banner alergi/agresif, foto opsional |
+| Owner & pasien | CRUD, nomor RM otomatis, pencarian cepat, tag & catatan alergi/agresif, foto opsional |
 | Kunjungan | Tanpa antrean. Kasir input walk-in, langsung dilayani. Dokter melihat daftar "pasien hari ini" |
 | Rekam medis | SOAP, vital signs, diagnosa, tindakan, resep, lampiran lab/rontgen. Final + addendum |
 | Vaksinasi | Catat vaksin, batch, tanggal berikutnya. Daftar "jatuh tempo" hanya tampilan |
@@ -136,7 +136,7 @@ Prioritas: **M** = Must, **S** = Should, **C** = Could.
 | US-1 | Kasir | Mendaftarkan owner dan hewan baru | Owner wajib: nama, WhatsApp, alamat. Hewan wajib terhubung ke owner. Nomor RM `RM-YYYY-NNNNN` otomatis. Nomor WA duplikat memunculkan peringatan | M |
 | US-2 | Kasir | Mencari pasien dengan cepat | Cari berdasarkan nama owner/hewan, no. WA, no. RM, microchip | M |
 | US-3 | Kasir | Membuat kunjungan walk-in | Pilih pasien dan dokter, isi keluhan. Kunjungan langsung masuk daftar "pasien hari ini" milik dokter. Tanpa nomor antrean | M |
-| US-4 | Dokter/Kasir | Melihat peringatan alergi atau hewan agresif | Banner merah mencolok di profil, daftar hari ini, rekam medis, dan form resep | M |
+| US-4 | Dokter/Kasir | Melihat peringatan alergi atau hewan agresif | Tag kecil di daftar, invoice, dan header rekam medis. Baris catatan klinis di profil dan header rekam medis. Peringatan merah saat obat yang dialergikan dipilih di form resep. Hanya informasi, tidak memblokir: keputusan ada di dokter | M |
 
 ### 7.2 Rekam Medis (Fase 1)
 | ID | Sebagai | Saya ingin | Acceptance Criteria | P |
@@ -167,6 +167,7 @@ Prioritas: **M** = Must, **S** = Should, **C** = Could.
 | US-20 | Kasir | Menerima DP lalu pelunasan | Maksimal 2 pembayaran per invoice: DP (sebagian), lalu pelunasan sisa. Tanpa cicilan. Sisa tagihan terlihat jelas | M |
 | US-21 | Kasir | Mencetak struk thermal | Memuat data klinik, item, diskon, PPN, total, DP, sisa, metode bayar. Cetak ulang bertanda "SALINAN" | M |
 | US-22 | Kasir | Mengunduh e-invoice PDF | PDF bernomor invoice, siap dikirim manual oleh staf | M |
+| US-37 | Kasir | Melihat riwayat pembayaran | Daftar pembayaran per transaksi dengan pencarian dan cetak ulang struk "SALINAN". Tanpa total harian/omzet untuk Kasir | S |
 | US-23 | Admin | Membatalkan (void) invoice salah input | Hanya Admin, alasan wajib. Pilih restock per item. Tercatat di audit log. Bukan refund | M |
 
 ### 7.5 Inventaris (Fase 1)

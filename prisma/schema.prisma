@@ -1,5 +1,3 @@
-// Skema database. Lihat docs/SPEC.md bagian 8 untuk ERD dan bagian 7 untuk aturan bisnis.
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -94,7 +92,7 @@ enum PaymentMethod {
 
 model User {
   id           String  @id @default(uuid()) @db.Uuid
-  email        String  @unique
+  username     String  @unique
   passwordHash String  @map("password_hash")
   name         String
   role         Role
@@ -413,8 +411,7 @@ model Admission {
   logs     AdmissionLog[]
   invoice  Invoice?
 
-  // Catatan: satu kandang hanya untuk satu admission AKTIF (BR-17) ditegakkan
-  // lewat unique index parsial di migrasi SQL (lihat migration *_admission_room_active_unique).
+  // BR-17: unique index parsial (room_id WHERE status = AKTIF) ada di migrasi SQL
   @@index([roomId, status])
   @@map("admission")
 }
@@ -512,7 +509,7 @@ model AuditLog {
   userId   String @map("user_id") @db.Uuid
   action   String
   entity   String
-  entityId String @map("entity_id") @db.Uuid
+  entityId String @map("entity_id")
   before   Json?
   after    Json?
 

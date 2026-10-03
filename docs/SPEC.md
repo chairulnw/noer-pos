@@ -15,7 +15,7 @@
 | Layanan | Konsultasi, vaksin, operasi/tindakan, rawat inap, grooming, pet hotel, pet shop |
 | Bahasa & mata uang | UI Bahasa Indonesia, IDR |
 | Hardware | Printer thermal (58/80mm), PC/tablet kasir |
-| Desain | Profesional, bersih, tidak berlebihan. Warna teal/biru |
+| Desain | Profesional, bersih, tidak berlebihan. Warna utama ungu `#533872` (dari logo NOER), font IBM Plex Sans. Acuan visual: artifact "NOER Vet Clinic — Referensi Desain" |
 
 ## 2. Keputusan Teknis (Final)
 
@@ -25,7 +25,7 @@
 | Framework | Next.js (App Router) + TypeScript |
 | Database | PostgreSQL |
 | ORM | Prisma |
-| Auth | Auth.js (Credentials: email + password), session cookie |
+| Auth | Auth.js (Credentials: username + password), session cookie |
 | UI | Tailwind CSS + shadcn/ui |
 | Validasi | Zod (client dan server) |
 | Test | Vitest untuk logika bisnis |
@@ -86,8 +86,8 @@ Kolom F = fase. Semua F1 kecuali disebut.
 ### 6.1 Auth & User
 | ID | Kebutuhan | F |
 |---|---|:-:|
-| FR-AUTH-1 | Login email + password, logout, session timeout 12 jam, rate limit login | 1 |
-| FR-AUTH-2 | Admin CRUD user (nama, email, role, aktif/nonaktif). Tanpa hard delete | 1 |
+| FR-AUTH-1 | Login username + password, logout, session timeout 12 jam, rate limit login | 1 |
+| FR-AUTH-2 | Admin CRUD user (nama, username, role, aktif/nonaktif). Tanpa hard delete | 1 |
 | FR-AUTH-3 | Ganti password sendiri | 1 |
 
 ### 6.2 Owner & Pasien
@@ -97,7 +97,7 @@ Kolom F = fase. Semua F1 kecuali disebut.
 | FR-PAT-2 | CRUD **Pasien**: nama, spesies, ras, jenis kelamin, tgl lahir (atau perkiraan umur), warna, microchip, status steril, berat terakhir. Foto opsional | 1 |
 | FR-PAT-3 | 1 owner banyak pasien. Pasien wajib terhubung ke 1 owner | 1 |
 | FR-PAT-4 | Nomor RM otomatis: `RM-YYYY-NNNNN` (urut, reset per tahun) | 1 |
-| FR-PAT-5 | **Alert alergi / agresif**: banner merah di profil, daftar hari ini, form rekam medis, form resep | 1 |
+| FR-PAT-5 | **Alert alergi / agresif**: tag kecil di daftar, invoice, dan header rekam medis; baris catatan klinis di profil dan header rekam medis; peringatan merah saat obat yang dialergikan dipilih di form resep. Peringatan hanya informasi: sistem tidak memblokir dan tidak meminta konfirmasi tambahan, keputusan ada di dokter | 1 |
 | FR-PAT-6 | Pencarian cepat: nama owner, nama hewan, no. WA, no. RM, microchip | 1 |
 | FR-PAT-7 | Profil pasien: riwayat kunjungan, vaksinasi, rawat inap, berat | 1 |
 | FR-PAT-8 | Soft delete + peringatan duplikat (no. WA sama) | 1 |
@@ -167,6 +167,7 @@ Kolom F = fase. Semua F1 kecuali disebut.
 | FR-POS-10 | **Struk thermal**: nama klinik, alamat, no. invoice, tanggal, kasir, item, diskon, PPN, total, DP, sisa, metode bayar, kembalian. Header/footer dari Settings | 1 |
 | FR-POS-11 | Cetak ulang struk (ditandai "SALINAN") | 1 |
 | FR-POS-12 | **E-invoice PDF** (BR-16): tombol unduh di halaman invoice. Dikirim manual oleh staf | 1 (1B) |
+| FR-POS-14 | **Riwayat Pembayaran** (Admin, Kasir): daftar pembayaran per transaksi (tanggal, no. invoice, pasien/pelanggan, metode, nominal), pencarian, cetak ulang struk "SALINAN". Tanpa total harian/omzet untuk Kasir (BR-7) | 1 |
 | FR-POS-13 | Tutup kas harian: modal awal, hitung fisik, selisih terhadap total tunai sistem | 2 |
 
 ### 6.9 Dashboard, Laporan, Sistem
@@ -234,7 +235,7 @@ erDiagram
   ADMISSION ||--o| INVOICE : bills
 
   USER { uuid id PK
-    string email UK
+    string username UK "huruf kecil"
     string password_hash
     enum role "ADMIN|DOKTER|KASIR"
     bool active }
@@ -514,7 +515,7 @@ flowchart LR
 | 1A.3 | Auth + role guard (server-side) + layout per role | Matriks bagian 5 lolos tes |
 | 1A.4 | Settings klinik + util audit log | Perubahan harga/stok/settings tercatat |
 | 1A.5 | Master item (layanan & produk), kategori, konversi satuan, master kandang | Kasir tidak menerima `buy_price` di response |
-| 1A.6 | Owner & pasien: CRUD, pencarian, nomor RM, alert alergi/agresif | Banner tampil di semua halaman terkait |
+| 1A.6 | Owner & pasien: CRUD, pencarian, nomor RM, alert alergi/agresif | Tag dan catatan alergi/agresif tampil di halaman terkait (FR-PAT-5) |
 | 1A.7 | Kunjungan walk-in + halaman "Pasien Hari Ini" | Tanpa nomor antrean, status berpindah sesuai FR-VIS-2 |
 | 1A.8 | Rekam medis: SOAP, vital, diagnosa, lampiran, vaksinasi, finalisasi, addendum, halaman jatuh tempo | Final mengunci, addendum berfungsi |
 | 1A.9 | Resep & tindakan → draft invoice otomatis | Item dokter muncul di invoice |
@@ -574,7 +575,7 @@ Aturan kerja:
    menerima harga beli atau omzet di response API.
 6. Operasi invoice + stok + pembayaran harus atomik dalam satu transaksi (BR-12).
 7. Tulis unit test untuk logika bisnis yang tercantum di bagian 10 (Test).
-8. UI Bahasa Indonesia, tablet-friendly, tampilan profesional (teal/biru, bersih).
+8. UI Bahasa Indonesia, tablet-friendly, tampilan profesional (ungu #533872, bersih).
 9. Setelah tiap task: jalankan lint + test, lalu ringkas apa yang dikerjakan, cara
    menjalankan, cara verifikasi manual, dan apa yang belum selesai.
 10. Jangan mengerjakan Fase 2 sebelum seluruh Fase 1 selesai.

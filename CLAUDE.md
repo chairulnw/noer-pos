@@ -55,6 +55,7 @@ Fase 2 (import data lama, laporan, export, dashboard lanjut, tutup kas) **tidak 
 | Validasi | Zod di client dan server. Satu skema dipakai bersama |
 | Test | Vitest. Logika bisnis wajib ada test (daftar di SPEC bagian 10) |
 | Commit | Conventional Commits, mis. `feat(pos): add DP payment rules`. Satu task = satu atau beberapa commit kecil |
+| Komentar | Seminim mungkin: hanya alasan yang tidak jelas dari kode, satu baris. Jangan menjelaskan apa yang dilakukan kode |
 | Format | Lint + formatter dari setup 1A.1 harus lulus sebelum commit |
 | Migrasi | Semua perubahan skema lewat migrasi Prisma. Jangan edit DB manual |
 | Secret | Jangan commit `.env`. Sediakan `.env.example` |
