@@ -261,6 +261,7 @@ model Attachment {
   id       String @id @default(uuid()) @db.Uuid
   recordId String @map("record_id") @db.Uuid
   filePath String @map("file_path")
+  fileName String @map("file_name")
   mime     String
   size     Int
 

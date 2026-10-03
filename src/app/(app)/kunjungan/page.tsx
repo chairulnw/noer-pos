@@ -6,6 +6,7 @@ import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { todayJakarta } from "@/lib/date";
 import { formatDate, formatTime } from "@/lib/format";
+import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 import { VISIT_STATUS } from "@/lib/visit-status";
 import { listTodayVisits } from "@/lib/visits";
@@ -14,6 +15,7 @@ import { cancelVisitAction } from "./actions";
 export default async function VisitsPage() {
   const user = await requireCapability("create_visit");
   const isDoctor = user.role === "DOKTER";
+  const canOpenRecord = can(user.role, "view_medical_record");
   const visits = await listTodayVisits(isDoctor ? user.id : undefined);
 
   return (
@@ -68,7 +70,12 @@ export default async function VisitsPage() {
                 <td className="px-4 py-3">
                   <StatusChip tone={VISIT_STATUS[v.status].tone}>{VISIT_STATUS[v.status].label}</StatusChip>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="flex items-center justify-end gap-1 px-4 py-3 text-right">
+                  {canOpenRecord && v.status !== "BATAL" && (
+                    <Button variant={v.status === "DILAYANI" ? "default" : "outline"} asChild>
+                      <Link href={`/rekam-medis/${v.id}`}>{v.status === "DILAYANI" ? "Periksa" : "Rekam medis"}</Link>
+                    </Button>
+                  )}
                   {v.status === "DILAYANI" && (
                     <form action={cancelVisitAction.bind(null, v.id)}>
                       <ConfirmButton variant="ghost" message={`Batalkan kunjungan ${v.patient.name}?`}>

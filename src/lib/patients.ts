@@ -124,3 +124,27 @@ export async function deleteOwner(id: string) {
   await prisma.owner.updateMany({ where: { id, deletedAt: null }, data: { deletedAt: new Date() } });
   return {};
 }
+
+export async function getPatientHistory(patientId: string) {
+  const [visits, vaccinations] = await Promise.all([
+    prisma.visit.findMany({
+      where: { patientId, status: { not: "BATAL" } },
+      select: {
+        id: true,
+        visitDate: true,
+        complaint: true,
+        doctor: { select: { name: true } },
+        medicalRecord: { select: { diagnosis: true, finalized: true } },
+      },
+      orderBy: [{ visitDate: "desc" }, { createdAt: "desc" }],
+      take: 30,
+    }),
+    prisma.vaccination.findMany({
+      where: { record: { visit: { patientId } } },
+      select: { id: true, givenAt: true, nextDue: true, batchNo: true, item: { select: { name: true } } },
+      orderBy: { givenAt: "desc" },
+      take: 30,
+    }),
+  ]);
+  return { visits, vaccinations };
+}

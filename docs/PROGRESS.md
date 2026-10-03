@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1A.8 |
+| Task berikutnya | 1A.9 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -23,7 +23,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1A.5** Master item (layanan & produk), kategori, konversi satuan, master kandang
 - [x] **1A.6** Owner & pasien: CRUD, pencarian, nomor RM, alert alergi/agresif
 - [x] **1A.7** Kunjungan walk-in + halaman "Pasien Hari Ini"
-- [ ] **1A.8** Rekam medis: SOAP, vital, diagnosa, lampiran, vaksinasi, finalisasi, addendum, halaman jatuh tempo
+- [x] **1A.8** Rekam medis: SOAP, vital, diagnosa, lampiran, vaksinasi, finalisasi, addendum, halaman jatuh tempo
 - [ ] **1A.9** Resep & tindakan → draft invoice otomatis
 - [ ] **1A.10** Inventaris dasar: stok masuk manual, batch, kartu stok, FEFO, blokir expired
 - [ ] **1A.11** Kasir: invoice auto/manual/retail, diskon, PPN, pembayaran penuh, kembalian, finalisasi
@@ -112,6 +112,12 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1A.7 | Status kunjungan berpindah otomatis ke MENUNGGU_BAYAR (saat rekam medis final) dan SELESAI (saat invoice lunas) dikerjakan di 1A.8 dan 1A.11, bukan di 1A.7 | Pemicunya ada di task itu |
 | 2026-10-03 | 1A.7 | Halaman `/kunjungan` satu rute untuk semua role: Dokter hanya melihat kunjungannya sendiri dan judulnya "Pasien Hari Ini"; Kasir/Admin melihat semua. Auto-refresh 10 detik. Kunjungan hanya bisa dibatalkan saat DILAYANI | FR-VIS-3. Hasil kunjungan = status BATAL, tanpa hapus (aturan 7) |
 | 2026-10-03 | 1A.7 | Kunjungan baru dibuat dari profil pasien ("+ Buat kunjungan"), bukan dari halaman Kunjungan | Pasien harus dipilih lewat pencarian yang sudah ada |
+| 2026-10-03 | 1A.8 | Kolom baru `attachment.file_name` (migrasi `attachment_file_name`). File lampiran disimpan di `UPLOAD_DIR` (default `./uploads`, gitignored; perlu volume Docker di 1C.4), dilayani lewat `/api/lampiran/[id]` yang mengecek login dan role (401/403) | FR-MR-7: lampiran tidak publik. Jenis file divalidasi dari isi (PDF/PNG/JPEG), bukan dari nama atau mime kiriman browser |
+| 2026-10-03 | 1A.8 | Lampiran boleh ditambah setelah rekam medis final (hanya tambah, tanpa hapus); catatan, vital, dan vaksinasi terkunci. Penguncian dicek di dalam update DB (`WHERE finalized = false`), bukan hanya di UI | Hasil lab sering datang setelah final. BR-2 |
+| 2026-10-03 | 1A.8 | Finalisasi menolak rekam medis yang seluruh SOAP dan diagnosanya kosong | Menghindari rekam medis kosong terkunci. Tidak ada di SPEC: aturan tambahan |
+| 2026-10-03 | 1A.8 | Halaman Jatuh Tempo hanya untuk Admin dan Dokter (kapabilitas lihat rekam medis), mengikuti desain dan matriks. Hanya dosis vaksin terbaru per pasien dan vaksin yang dihitung; rentang 7/14/30 hari, yang sudah lewat tetap tampil | US-10 menyebut Kasir, tetapi matriks bagian 5 dan desain tidak memberi Kasir akses rekam medis. "Kontrol" (jadwal kontrol) belum punya data terstruktur, hanya vaksin |
+| 2026-10-03 | 1A.8 | Berat dari vital signs memperbarui `last_weight_kg` pasien saat draft disimpan. Diagnosa baru otomatis masuk master diagnosa (tanpa duplikat, tidak peka huruf besar-kecil) | FR-MR-2, FR-MR-3 |
+| 2026-10-03 | 1A.8 | Finalisasi dan addendum masuk audit log; Dokter mana pun boleh membuka dan mengisi rekam medis semua kunjungan | FR-SYS-1. Matriks tidak membatasi per dokter |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -139,6 +145,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.5 | Selesai | Halaman `/master-data/item` (daftar, cari, filter jenis, tambah, ubah) dan `/master-data/kandang`. Validasi zod: kategori sesuai jenis, harga integer, SKU/barcode unik. `toItemView` menyaring `buyPrice` untuk Kasir/Dokter (BR-7), diuji. Tambah/ubah item masuk audit log (nilai sebelum/sesudah). Test: 81 lulus. Diuji di browser: tambah item, SKU duplikat ditolak (isian tetap ada), ubah harga tercatat di audit; kasir diarahkan ke `/forbidden`. Nama kandang duplikat ditolak (diuji lewat skrip). Belum: kandang tidak diaudit (bukan daftar audit FR-SYS-1); menonaktifkan kandang belum memeriksa admission aktif (menunggu 1B.1). Lanjut ke 1A.6 |
 | 2026-10-03 | 1A.6 | Selesai | `/pasien`: pencarian (nama owner/hewan, no. WA, no. RM, microchip; tanpa kata kunci = 50 terbaru) + profil sesuai desain, tag Alergi/Agresif dan baris catatan klinis. Form owner (peringatan WA duplikat), form hewan (tanggal lahir atau perkiraan umur, berat), halaman owner, ubah, hapus lunak. Logika murni diuji (WA, umur, nomor RM, skema; 102 test lulus). Diuji di browser dan skrip: 3 pendaftaran bersamaan menghasilkan RM berurutan, duplikat WA, tombol "Tetap simpan", owner tanpa hewan tetap ditemukan, hapus owner berhewan ditolak. Belum: profil belum punya tab riwayat kunjungan/vaksin/rawat inap (menyusul 1A.7, 1A.8, 1B), tombol "+ Buat kunjungan" (1A.7), foto. Lanjut ke 1A.7 |
 | 2026-10-03 | 1A.7 | Selesai | `/kunjungan` (daftar hari ini, auto-refresh 10 dtk, batalkan) dan `/kunjungan/baru?patient=` (pilih dokter, keluhan; tag dan catatan alergi tampil di atas form). `visit_date` memakai hari Jakarta. Diuji lewat skrip (dokter tidak valid, pasien tidak ada, filter per dokter, batalkan sekali) dan HTTP per role. Tanpa nomor antrean. Lanjut ke 1A.8 |
+| 2026-10-03 | 1A.8 | Selesai | `/rekam-medis/[visitId]`: vital signs, SOAP, diagnosa (autocomplete master), vaksinasi (jatuh tempo otomatis dari interval), lampiran, finalisasi (kunjungan jadi MENUNGGU_BAYAR), addendum. `/jatuh-tempo`. Riwayat kunjungan dan vaksinasi di profil pasien (Admin/Dokter). 113 test lulus. Diuji lewat skrip: final terkunci (simpan, vaksin, finalisasi ulang ditolak), addendum, lampiran palsu ditolak, audit; akses per role dan lampiran 401/403; simpan draft di browser. Finalisasi lewat tombol tidak diuji di browser karena dialog konfirmasi. Belum: tindakan & resep (1A.9). Lanjut ke 1A.9 |
 
 ## Perintah Proyek
 

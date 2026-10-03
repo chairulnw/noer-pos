@@ -4,18 +4,20 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { cn } from "@/lib/utils";
-import { getPatient, searchPatients } from "@/lib/patients";
+import { getPatient, getPatientHistory, searchPatients } from "@/lib/patients";
+import { can } from "@/lib/permissions";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
 import { PatientProfile } from "./patient-profile";
 
 export default async function PatientsPage({ searchParams }: { searchParams: Promise<{ q?: string; id?: string }> }) {
-  await requireCapability("manage_patients");
+  const user = await requireCapability("manage_patients");
   const { q = "", id } = await searchParams;
   const [{ patients, ownersWithoutPets }, selected] = await Promise.all([
     searchPatients(q),
     id && z.uuid().safeParse(id).success ? getPatient(id) : null,
   ]);
+  const history = selected && can(user.role, "view_medical_record") ? await getPatientHistory(selected.id) : null;
   const total = patients.length + ownersWithoutPets.length;
   const href = (patientId: string) => `/pasien?${new URLSearchParams({ ...(q && { q }), id: patientId })}`;
 
@@ -70,7 +72,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
 
         <div className="min-w-0 flex-[999] basis-[520px]">
           {selected ? (
-            <PatientProfile patient={selected} />
+            <PatientProfile patient={selected} history={history} />
           ) : (
             <p className="rounded-[10px] border bg-card p-8 text-center text-sm text-muted-foreground">
               Pilih pasien untuk melihat profil.
