@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { stayDay } from "@/lib/admission-calc";
 import { listActiveAdmissions } from "@/lib/admissions";
 import { formatDate, formatTime } from "@/lib/format";
+import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 
 export default async function AdmissionsPage() {
-  await requireCapability("manage_admission");
+  const user = await requireCapability("manage_admission");
+  const canMonitor = can(user.role, "monitor_admission");
   const admissions = await listActiveAdmissions();
   const now = new Date();
 
@@ -56,6 +58,7 @@ export default async function AdmissionsPage() {
                 <td className="px-4 py-3 text-muted-foreground">{formatDate(a.checkIn)} · {formatTime(a.checkIn)}</td>
                 <td className="px-4 py-3 tabular-nums">Hari ke-{stayDay(a.checkIn, now)}</td>
                 <td className="px-4 py-3 text-right">
+                  {canMonitor && <Link href={`/rawat-inap/${a.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">{a.type === "RAWAT_INAP" ? "Monitoring" : "Detail"}</Link>}
                   {a.invoices[0] && <Link href={`/invoice/${a.invoices[0].id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Invoice</Link>}
                 </td>
               </tr>

@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1B.2 |
+| Task berikutnya | 1B.3 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -36,7 +36,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 ## Fase 1, Milestone 1B: Layanan Lanjutan & Dokumen
 
 - [x] **1B.1** Rawat inap & hotel: check-in, kandang tunggal, layar admission aktif
-- [ ] **1B.2** Monitoring harian rawat inap
+- [x] **1B.2** Monitoring harian rawat inap
 - [ ] **1B.3** Check-out + hitung hari (BR-15) + item tarif ke invoice
 - [ ] **1B.4** DP + pelunasan (BR-9)
 - [ ] **1B.5** E-invoice PDF
@@ -152,6 +152,8 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1B.1 | Validasi check-in: kandang aktif dan sesuai jenis; tarif harian = layanan aktif `billing_unit = PER_DAY` berkategori "rawat inap"/"hotel" sesuai jenis; satu pasien tidak boleh punya dua admission aktif; waktu masuk tidak boleh lebih dari 1 jam di masa depan. Kandang terisi dijaga unique index parsial DB (BR-17) dan diuji dengan check-in bersamaan | FR-ADM-1, FR-ADM-2. Dua aturan terakhir (pasien ganda, batas waktu) tidak ada di SPEC: mencegah tagihan ganda |
 | 2026-10-03 | 1B.1 | Lama inap ditampilkan "Hari ke-N" = selisih tanggal kalender (zona Jakarta) + 1; tarif harian hanya terlihat oleh yang boleh melihat harga (formulir check-in tidak menampilkan harga) | BR-15, SPEC bagian 5. Menu Rawat Inap & Hotel tersedia untuk semua role mengikuti SPEC (desain kasir tidak memuatnya) |
 | 2026-10-03 | 1B.1 | Layanan tarif harian harus dibuat Admin di Master Data (kategori rawat inap/hotel, centang "Tarif per hari") dan kandang di Master Data > Kandang sebelum check-in; seed belum memuatnya | Data tarif dan kandang menunggu klien |
+| 2026-10-03 | 1B.2 | Monitoring harian hanya untuk admission **rawat inap yang masih AKTIF** (hotel tidak memerlukannya, SPEC FR-ADM-3); waktu tidak boleh sebelum check-in atau di masa depan; minimal salah satu dari suhu, makan/minum, catatan; log hanya bisa ditambah (tanpa ubah/hapus) | Catatan klinis yang tidak boleh diedit diam-diam; koreksi lewat log baru. Aturan append-only tidak tertulis di SPEC |
+| 2026-10-03 | 1B.2 | Halaman `/rawat-inap/[id]` dan bagian monitoring di profil pasien hanya untuk Admin dan Dokter (kapabilitas `monitor_admission`); Kasir tidak melihat tautan Monitoring | SPEC bagian 5 |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -186,6 +188,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.12 | Selesai | Panel Void di halaman invoice (Admin saja): alasan wajib, pilihan restock per produk, bukan refund; pembayaran ditandai Void di invoice dan Riwayat Pembayaran. Skrip: restock ke batch asal, void ganda ditolak, edit/bayar invoice void ditolak, invoice pengganti, void draft, audit. Browser: alasan kosong ditolak, void berhasil. Kasir tidak melihat tombol. Lanjut ke 1A.13 |
 | 2026-10-03 | 1A.13 | Selesai | Cetak struk 80/58 mm + tombol dari halaman invoice dan Riwayat Pembayaran. Dicek di browser: layout 80 mm, 58 mm, mode SALINAN. **Belum diuji dengan printer thermal sungguhan** dan dialog print browser tidak diuji (diperlukan perangkat klien). **Gate 1A lulus** lewat `pnpm e2e`. Lanjut ke Milestone 1B (1B.1) |
 | 2026-10-03 | 1B.1 | Selesai | `/rawat-inap` (admission aktif: kandang, pasien + tag alergi, jenis, masuk, Hari ke-N, link invoice), `/rawat-inap/check-in` (cari pasien, jenis, kandang kosong, tarif, waktu, kunjungan hari ini), bagian Rawat inap & hotel di profil pasien. 162 test (hari kalender). Skrip: semua validasi, dua check-in bersamaan ke kandang sama (satu ditolak, tanpa invoice yatim). Browser: daftar, form (opsi berganti per jenis), check-in. Lanjut ke 1B.2 |
+| 2026-10-03 | 1B.2 | Selesai | `/rawat-inap/[id]` (tambah monitoring: waktu, suhu, makan/minum, catatan; riwayat terbaru dulu) dan 5 log terakhir di profil pasien. 169 test (skema log, check-in). Skrip: sebelum check-in, masa depan, hotel, setelah check-out, id tak ada ditolak. Browser: tambah log, form ter-reset, tampil di profil. Kasir ditolak (/forbidden). Lanjut ke 1B.3 |
 
 ## Perintah Proyek
 

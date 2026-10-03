@@ -2,15 +2,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
 import { todayJakarta } from "@/lib/date";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatTime } from "@/lib/format";
 import { StatusChip } from "@/components/status-chip";
 import type { getPatient, getPatientHistory } from "@/lib/patients";
-import type { listPatientAdmissions } from "@/lib/admissions";
+import type { latestRawatInapLogs, listPatientAdmissions } from "@/lib/admissions";
 import { formatAge, formatWhatsapp } from "@/lib/patient-schema";
 
 type Patient = NonNullable<Awaited<ReturnType<typeof getPatient>>>;
 type History = Awaited<ReturnType<typeof getPatientHistory>>;
 type Admissions = Awaited<ReturnType<typeof listPatientAdmissions>>;
+type Monitoring = Awaited<ReturnType<typeof latestRawatInapLogs>>;
 
 const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
 
@@ -23,7 +24,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function PatientProfile({ patient, history, admissions }: { patient: Patient; history: History | null; admissions: Admissions }) {
+export function PatientProfile({ patient, history, admissions, monitoring }: { patient: Patient; history: History | null; admissions: Admissions; monitoring: Monitoring }) {
   const details = [
     patient.species,
     patient.breed,
@@ -88,6 +89,24 @@ export function PatientProfile({ patient, history, admissions }: { patient: Pati
                 </div>
               </div>
               <StatusChip tone={a.status === "AKTIF" ? "warning" : "neutral"}>{a.status === "AKTIF" ? "Menginap" : "Selesai"}</StatusChip>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {monitoring && monitoring.logs.length > 0 && (
+        <div className="overflow-hidden rounded-[10px] border bg-card">
+          <div className="flex items-center justify-between border-b px-5 py-3">
+            <h3 className="text-base font-semibold">Monitoring rawat inap · {monitoring.admission.room.name}</h3>
+            <Link href={`/rawat-inap/${monitoring.admission.id}`} className="text-sm font-medium text-primary">Semua</Link>
+          </div>
+          {monitoring.logs.map((log) => (
+            <div key={log.id} className="grid grid-cols-[130px_minmax(0,1fr)] gap-4 border-b px-5 py-3 text-[14.5px] last:border-0">
+              <span className="text-muted-foreground tabular-nums">{formatDate(log.loggedAt)} · {formatTime(log.loggedAt)}</span>
+              <span>
+                {log.tempC !== null && <span className="font-medium tabular-nums">{Number(log.tempC).toLocaleString("id-ID")} °C </span>}
+                {[log.intake, log.note].filter(Boolean).join(" · ")}
+              </span>
             </div>
           ))}
         </div>

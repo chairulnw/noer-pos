@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import { todayJakarta } from "@/lib/date";
 import { jakartaLocalToDate } from "@/lib/admission-calc";
-import { RATE_CATEGORY, type CheckInInput } from "@/lib/admission-schema";
+import { RATE_CATEGORY, type CheckInInput, type LogInput } from "@/lib/admission-schema";
 import { nextInvoiceNoFor } from "@/lib/invoices";
 
 export async function createAdmission(userId: string, input: CheckInInput) {
@@ -101,3 +101,53 @@ export const listPatientAdmissions = (patientId: string) =>
     orderBy: { checkIn: "desc" },
     take: 20,
   });
+
+export const getAdmission = (id: string) =>
+  prisma.admission.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      type: true,
+      status: true,
+      checkIn: true,
+      checkOut: true,
+      notes: true,
+      patient: { select: { id: true, name: true, rmNo: true, species: true, allergyNote: true, aggressive: true, behaviorNote: true } },
+      room: { select: { name: true } },
+      rateItem: { select: { name: true } },
+      invoices: { where: { status: { not: "VOID" } }, select: { id: true, invoiceNo: true }, take: 1 },
+    },
+  });
+
+export const listAdmissionLogs = (admissionId: string, take = 100) =>
+  prisma.admissionLog.findMany({
+    where: { admissionId },
+    select: { id: true, loggedAt: true, tempC: true, intake: true, note: true, user: { select: { name: true } } },
+    orderBy: { loggedAt: "desc" },
+    take,
+  });
+
+export async function addAdmissionLog(userId: string, admissionId: string, input: LogInput) {
+  const loggedAt = jakartaLocalToDate(input.loggedAt);
+  const admission = await prisma.admission.findUnique({ where: { id: admissionId }, select: { type: true, status: true, checkIn: true } });
+  if (!admission) return { error: "Admission tidak ditemukan." };
+  if (admission.type !== "RAWAT_INAP") return { error: "Monitoring harian hanya untuk rawat inap." };
+  if (admission.status !== "AKTIF") return { error: "Pasien sudah check-out. Monitoring tidak bisa ditambah." };
+  if (Number.isNaN(loggedAt.getTime()) || loggedAt.getTime() > Date.now() + 3_600_000) return { error: "Waktu tidak boleh di masa depan." };
+  if (loggedAt < admission.checkIn) return { error: "Waktu monitoring tidak boleh sebelum waktu check-in." };
+
+  await prisma.admissionLog.create({
+    data: { admissionId, userId, loggedAt, tempC: input.temp, intake: input.intake || null, note: input.note || null },
+  });
+  return {};
+}
+
+export async function latestRawatInapLogs(patientId: string) {
+  const admission = await prisma.admission.findFirst({
+    where: { patientId, type: "RAWAT_INAP" },
+    orderBy: { checkIn: "desc" },
+    select: { id: true, status: true, room: { select: { name: true } } },
+  });
+  if (!admission) return null;
+  return { admission, logs: await listAdmissionLogs(admission.id, 5) };
+}
