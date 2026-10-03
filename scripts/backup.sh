@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Backup harian: dump PostgreSQL + folder lampiran, retensi default 14 hari.
+# Backup harian: dump PostgreSQL + lampiran (volume app di produksi, UPLOAD_DIR di dev), retensi 14 hari.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -17,8 +17,13 @@ trap 'rm -rf "$tmp"' ERR
 docker compose exec -T db pg_dump -U "$DB_USER" -Fc "$DB_NAME" > "$tmp/db.dump"
 docker compose exec -T db pg_restore -l < "$tmp/db.dump" > /dev/null
 
-mkdir -p "$UPLOAD_DIR"
-tar -czf "$tmp/uploads.tar.gz" -C "$UPLOAD_DIR" .
+if docker compose ps --services --status running | grep -qx app; then
+  docker compose exec -T app tar -czf - -C /data/uploads . > "$tmp/uploads.tar.gz"
+else
+  mkdir -p "$UPLOAD_DIR"
+  tar -czf "$tmp/uploads.tar.gz" -C "$UPLOAD_DIR" .
+fi
+tar -tzf "$tmp/uploads.tar.gz" > /dev/null
 
 mv "$tmp" "$BACKUP_DIR/$stamp"
 find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d -name '20*' -mtime +"$RETENTION_DAYS" -exec rm -rf {} +

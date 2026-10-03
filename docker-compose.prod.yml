@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pos
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?isi DB_PASSWORD di .env}
+      POSTGRES_DB: pos
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pos -d pos"]
+      interval: 5s
+      retries: 10
+
+  # Jalankan manual: migrasi dan pembuatan Admin pertama (lihat docs/DEPLOY.md)
+  tools:
+    build:
+      context: .
+      target: builder
+    profiles: ["tools"]
+    environment:
+      DATABASE_URL: postgresql://pos:${DB_PASSWORD}@db:5432/pos?schema=public
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_NAME: ${ADMIN_NAME:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://pos:${DB_PASSWORD}@db:5432/pos?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:?isi AUTH_SECRET di .env}
+      AUTH_URL: https://${DOMAIN:?isi DOMAIN di .env}
+      AUTH_TRUST_HOST: "true"
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - app
+
+volumes:
+  db-data:
+  uploads:
+  caddy-data:

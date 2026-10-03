@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1C.4 |
+| Task berikutnya | 1C.5 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -51,7 +51,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1C.1** Dashboard dasar (omzet hanya Admin)
 - [x] **1C.2** Audit log viewer (Admin)
 - [x] **1C.3** Backup harian + prosedur restore
-- [ ] **1C.4** Dokumentasi deploy VPS
+- [x] **1C.4** Dokumentasi deploy VPS
 - [ ] **1C.5** Uji end-to-end alur utama + perbaikan
 
 **Gate 1C:** semua story Must Fase 1 lulus, backup dan restore teruji.
@@ -210,6 +210,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1C.2 | Selesai | `/audit` (Admin saja, kapabilitas view_audit_log; Dokter/Kasir diarahkan ke forbidden): filter pengguna, entitas, rentang tanggal (hari WIB, "sampai" inklusif), 50 baris per halaman, diff sebelum/sesudah dalam JSON, hanya baca. Menu "Audit Log" di sidebar. 189 test. Diuji HTTP per role dan dengan baris uji (dihapus). Lanjut ke 1C.3 |
 | 2026-10-03 | 1C.3 | Selesai | `scripts/backup.sh` (pg_dump format custom + tar folder lampiran, ditulis ke folder sementara lalu di-rename agar tidak ada backup setengah jadi, dump diverifikasi `pg_restore -l`, retensi 14 hari via RETENTION_DAYS) dan `scripts/restore.sh <folder> <db-baru> [folder-uploads]` (menolak DB yang sudah ada, tidak menimpa data berjalan). Teruji: restore ke DB kosong, jumlah baris user/item/settings/audit_log sama, file lampiran kembali, folder backup berumur >14 hari terhapus. Jadwal cron dan prosedur pemulihan penuh ditulis di 1C.4. Lanjut ke 1C.4 |
 | 2026-10-03 | 1C.3a | Selesai | Tambahan agar bisa go-live (FR-AUTH-2 dan FR-AUTH-3 ternyata belum ada): `/pengguna` (Admin: tambah, ubah nama/role, aktif/nonaktif, reset password; tanpa hard delete; tidak bisa menonaktifkan/menurunkan akun sendiri sehingga selalu ada Admin aktif) dan `/akun` (ganti password sendiri, wajib password lama). Semua tercatat audit tanpa hash. Sesi JWT kini dicek ke DB tiap `auth()`: akun nonaktif langsung ditolak walau sesinya masih berlaku, perubahan role langsung berlaku. Password minimal 8 karakter. 192 test. Diuji skrip, HTTP per role, dan browser |
+| 2026-10-03 | 1C.4 | Selesai | `Dockerfile` (multi-stage, output standalone), `docker-compose.prod.yml` (db tanpa port publik, app, Caddy HTTPS otomatis, profil `tools` untuk migrasi dan `scripts/create-admin.ts`), `deploy/Caddyfile`, `.env.production.example`, `docs/DEPLOY.md` (instal, update, cron backup + salin ke server lain, uji restore, pemulihan nyata). Diuji dari nol: DB kosong, migrate deploy, create-admin, login via HTTPS, halaman Admin, PDF dan struk di container, backup lalu restore. `backup.sh` diperbaiki agar mengambil lampiran dari volume container app di produksi. Seed TIDAK dipakai di produksi (password contoh). Keputusan: tanpa CI/CD dan tanpa registry, build di VPS |
 
 ## Perintah Proyek
 
