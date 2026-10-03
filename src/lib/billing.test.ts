@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allergyMatch, formatInvoiceNo, invoiceTotals, lineTotals, nextInvoiceNo, type Discount, type LineInput } from "./billing";
+import { allergyMatch, changeDue, formatInvoiceNo, paymentStatus, invoiceTotals, lineTotals, nextInvoiceNo, type Discount, type LineInput } from "./billing";
 
 const none: Discount = { type: null, value: 0 };
 const line = (qty: number, unitPrice: number, discount: Discount = none): LineInput => ({ qty, unitPrice, discount });
@@ -100,5 +100,23 @@ describe("allergyMatch", () => {
     expect(allergyMatch(note, "Metronidazole 250 mg")).toBe(false);
     expect(allergyMatch(null, "Amoxicillin")).toBe(false);
     expect(allergyMatch(note, "Injeksi Cefotaxime 1 g")).toBe(false);
+  });
+});
+
+describe("status pembayaran (BR-9, diturunkan)", () => {
+  it("belum bayar, sebagian, lunas", () => {
+    expect(paymentStatus(0, 499500)).toBe("BELUM_BAYAR");
+    expect(paymentStatus(200000, 499500)).toBe("SEBAGIAN");
+    expect(paymentStatus(499500, 499500)).toBe("LUNAS");
+  });
+
+  it("invoice bernilai 0 langsung lunas", () => {
+    expect(paymentStatus(0, 0)).toBe("LUNAS");
+  });
+
+  it("kembalian tunai tidak pernah negatif", () => {
+    expect(changeDue(500000, 499500)).toBe(500);
+    expect(changeDue(499500, 499500)).toBe(0);
+    expect(changeDue(100, 499500)).toBe(0);
   });
 });

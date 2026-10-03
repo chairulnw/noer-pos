@@ -478,6 +478,7 @@ model InvoiceItem {
   qty               Decimal       @db.Decimal(12, 3)
   unitPriceSnapshot Int           @map("unit_price_snapshot")
   unitCostSnapshot  Int           @map("unit_cost_snapshot")
+  position          Int           @default(0)
   discountType      DiscountType? @map("discount_type")
   discountValue     Int           @default(0) @map("discount_value")
   lineTotal         Int           @map("line_total")

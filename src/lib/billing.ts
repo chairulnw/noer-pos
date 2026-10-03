@@ -41,3 +41,10 @@ export function allergyMatch(allergyNote: string | null, itemName: string) {
     .split(/[^a-z]+/)
     .some((word) => word.length >= 5 && note.includes(word));
 }
+
+export type PaymentStatus = "BELUM_BAYAR" | "SEBAGIAN" | "LUNAS";
+
+export const paymentStatus = (paid: number, grandTotal: number): PaymentStatus =>
+  paid >= grandTotal ? "LUNAS" : paid > 0 ? "SEBAGIAN" : "BELUM_BAYAR";
+
+export const changeDue = (cashReceived: number, grandTotal: number) => Math.max(0, cashReceived - grandTotal);

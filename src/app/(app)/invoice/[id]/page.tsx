@@ -3,26 +3,40 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { StatusChip } from "@/components/status-chip";
+import { paymentStatus } from "@/lib/billing";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { INVOICE_STATUS } from "@/lib/invoice-status";
-import { getInvoice, lineView } from "@/lib/invoices";
+import { getInvoice, lineView, listSellableItems } from "@/lib/invoices";
+import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
+import { getSettings } from "@/lib/settings";
+import { InvoiceEditor } from "../invoice-editor";
+import { PayPanel } from "../pay-panel";
+
+const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const PAYMENT = { BELUM_BAYAR: { label: "Belum bayar", tone: "warning" }, SEBAGIAN: { label: "DP", tone: "warning" }, LUNAS: { label: "Lunas", tone: "success" } } as const;
 
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
-  await requireCapability("manage_invoice_payment");
+  const user = await requireCapability("manage_invoice_payment");
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
   const invoice = await getInvoice(id);
   if (!invoice) notFound();
+
   const patient = invoice.visit?.patient;
+  const paid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
+  const status = paymentStatus(paid, invoice.grandTotal);
+  const editable = invoice.status === "DRAFT";
+  const [catalog, settings] = editable ? await Promise.all([listSellableItems(), getSettings()]) : [[], null];
 
   return (
-    <div className="max-w-5xl space-y-5">
+    <div className="max-w-6xl space-y-5">
       <header className="space-y-1">
         <Link href="/invoice" className="text-[13px] font-medium text-primary">← Invoice</Link>
         <div className="flex flex-wrap items-center gap-2.5">
           <h1 className="text-[22px] font-semibold tabular-nums">{invoice.invoiceNo}</h1>
           <StatusChip tone={INVOICE_STATUS[invoice.status].tone}>{INVOICE_STATUS[invoice.status].label}</StatusChip>
+          {invoice.status === "FINAL" && <StatusChip tone={PAYMENT[status].tone}>{PAYMENT[status].label}</StatusChip>}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <span>
@@ -31,60 +45,67 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                 <span className="font-medium text-foreground">{patient.name}</span> ({patient.rmNo})
               </>
             ) : (
-              <span className="font-medium text-foreground">{invoice.customerName ?? "Retail"}</span>
+              <span className="font-medium text-foreground">{invoice.customerName ?? "Retail walk-in"}</span>
             )}
             {invoice.owner && ` · ${invoice.owner.name}`} · {formatDate(invoice.createdAt)}
             {invoice.visit && ` · ${invoice.visit.doctor.name}`}
           </span>
           {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
         </div>
+        {invoice.status === "VOID" && invoice.voidReason && <p className="text-sm text-destructive">Void: {invoice.voidReason}</p>}
       </header>
 
-      <section className="space-y-3 rounded-[10px] border bg-card p-5">
-        <div className="overflow-x-auto">
-          <div className="min-w-[560px] text-[14.5px]">
-            <div className="grid grid-cols-[minmax(0,2.4fr)_70px_minmax(0,1fr)_80px_minmax(0,1.1fr)] gap-3 border-b px-1 py-2 text-[13px] text-muted-foreground">
-              <span>Item</span>
-              <span className="text-right">Qty</span>
-              <span className="text-right">Harga</span>
-              <span className="text-right">Diskon</span>
-              <span className="text-right">Subtotal</span>
-            </div>
-            {invoice.items.length === 0 && <p className="px-1 py-6 text-center text-sm text-muted-foreground">Belum ada item.</p>}
-            {invoice.items.map((item) => {
+      <div className="flex flex-wrap items-start gap-5">
+        <div className="min-w-0 flex-[999] basis-[520px] space-y-4">
+          <InvoiceEditor
+            invoiceId={invoice.id}
+            editable={editable}
+            canDiscount={can(user.role, "apply_discount")}
+            catalog={catalog.map((c) => ({ ...c }))}
+            lines={invoice.items.map((item) => {
               const line = lineView(item);
-              return (
-                <div key={item.id} className="grid min-h-14 grid-cols-[minmax(0,2.4fr)_70px_minmax(0,1fr)_80px_minmax(0,1.1fr)] items-center gap-3 border-b px-1 last:border-0">
-                  <span className="font-medium">{item.nameSnapshot}</span>
-                  <span className="text-right tabular-nums">{Number(item.qty)}</span>
-                  <span className="text-right tabular-nums text-muted-foreground">{formatRupiah(item.unitPriceSnapshot)}</span>
-                  <span className="text-right tabular-nums text-muted-foreground">
-                    {item.discountType === "PERCENT" ? `${item.discountValue}%` : line.discount > 0 ? formatRupiah(line.discount) : "—"}
-                  </span>
-                  <span className="text-right font-medium tabular-nums">{formatRupiah(item.lineTotal)}</span>
-                </div>
-              );
+              return {
+                id: item.id,
+                name: item.nameSnapshot,
+                qty: Number(item.qty),
+                unitPrice: item.unitPriceSnapshot,
+                discountType: item.discountType,
+                discountValue: item.discountValue,
+                discountAmount: line.discount,
+                total: item.lineTotal,
+              };
             })}
-          </div>
-        </div>
-      </section>
+          />
 
-      <section className="ml-auto max-w-sm space-y-2 rounded-[10px] border bg-card p-5 text-[14.5px]">
-        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">{formatRupiah(invoice.subtotal)}</span></div>
-        {invoice.discountTotal > 0 && (
-          <div className="flex justify-between"><span className="text-muted-foreground">Diskon invoice</span><span className="tabular-nums">− {formatRupiah(invoice.discountTotal)}</span></div>
-        )}
-        {invoice.taxRate > 0 && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">PPN {invoice.taxRate}%{invoice.taxIncluded && " (termasuk)"}</span>
-            <span className="tabular-nums">{formatRupiah(invoice.taxTotal)}</span>
-          </div>
-        )}
-        <div className="flex items-baseline justify-between border-t pt-3">
-          <span className="font-medium">Total</span>
-          <span className="text-[28px] font-semibold tabular-nums">{formatRupiah(invoice.grandTotal)}</span>
+          {invoice.payments.length > 0 && (
+            <section className="space-y-3 rounded-[10px] border bg-card p-5">
+              <h2 className="text-base font-semibold">Pembayaran</h2>
+              {invoice.payments.map((p) => (
+                <div key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 text-[14.5px] last:border-0 last:pb-0">
+                  <div>
+                    <span className="font-medium">{METHOD[p.method]}</span>
+                    <span className="text-muted-foreground"> · {formatDate(p.paidAt)} · {p.receivedBy.name}</span>
+                    {p.reference && <div className="text-[13px] text-muted-foreground">{p.reference}</div>}
+                    {p.cashReceived !== null && <div className="text-[13px] text-muted-foreground">Diterima {formatRupiah(p.cashReceived)} · kembalian {formatRupiah(p.cashReceived - p.amount)}</div>}
+                  </div>
+                  <span className="font-semibold tabular-nums">{formatRupiah(p.amount)}</span>
+                </div>
+              ))}
+            </section>
+          )}
         </div>
-      </section>
+
+        <div className="min-w-0 flex-1 basis-[340px] md:max-w-sm">
+          <PayPanel
+            invoiceId={invoice.id}
+            editable={editable}
+            canDiscount={can(user.role, "apply_discount")}
+            hasQris={Boolean(settings?.qris)}
+            discount={{ type: invoice.discountType, value: invoice.discountValue }}
+            totals={{ subtotal: invoice.subtotal, discountTotal: invoice.discountTotal, taxTotal: invoice.taxTotal, grandTotal: invoice.grandTotal, taxRate: invoice.taxRate, taxIncluded: invoice.taxIncluded }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

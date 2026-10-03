@@ -3,6 +3,7 @@ import { ClinicalTags } from "@/components/clinical-flags";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { paymentStatus } from "@/lib/billing";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { INVOICE_STATUS } from "@/lib/invoice-status";
 import { listInvoices } from "@/lib/invoices";
@@ -68,7 +69,13 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                 <td className="px-4 py-3 text-muted-foreground">{formatDate(inv.createdAt)}</td>
                 <td className="px-4 py-3 text-right tabular-nums">{formatRupiah(inv.grandTotal)}</td>
                 <td className="px-4 py-3">
-                  <StatusChip tone={INVOICE_STATUS[inv.status].tone}>{INVOICE_STATUS[inv.status].label}</StatusChip>
+                  <div className="flex flex-wrap gap-1.5">
+                    <StatusChip tone={INVOICE_STATUS[inv.status].tone}>{INVOICE_STATUS[inv.status].label}</StatusChip>
+                    {inv.status === "FINAL" && (() => {
+                      const state = paymentStatus(inv.payments.reduce((sum, p) => sum + p.amount, 0), inv.grandTotal);
+                      return <StatusChip tone={state === "LUNAS" ? "success" : "warning"}>{state === "LUNAS" ? "Lunas" : state === "SEBAGIAN" ? "DP" : "Belum bayar"}</StatusChip>;
+                    })()}
+                  </div>
                 </td>
               </tr>
             ))}

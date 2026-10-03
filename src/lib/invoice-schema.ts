@@ -1,0 +1,24 @@
+import { z } from "zod";
+
+const intValue = z.number({ error: "Isi dengan angka" }).int("Harus bilangan bulat").min(0, "Minimal 0").max(1_000_000_000, "Terlalu besar");
+
+export const discountSchema = z
+  .object({ type: z.enum(["PERCENT", "AMOUNT"]).nullable(), value: intValue })
+  .refine((d) => d.type !== "PERCENT" || d.value <= 100, { message: "Persen maksimal 100", path: ["value"] })
+  .transform((d) => (d.type === null || d.value === 0 ? { type: null, value: 0 } : d));
+
+export const lineSchema = z.object({
+  qty: z.number({ error: "Isi dengan angka" }).gt(0, "Jumlah harus lebih dari 0").max(99_999, "Terlalu besar"),
+  discount: discountSchema,
+});
+
+export const paySchema = z
+  .object({
+    method: z.enum(["TUNAI", "QRIS", "TRANSFER", "KARTU"], { error: "Pilih metode pembayaran" }),
+    cashReceived: intValue.nullable(),
+    reference: z.string().trim().max(100, "Maksimal 100 karakter"),
+  })
+  .transform((p) => ({ ...p, cashReceived: p.method === "TUNAI" ? p.cashReceived : null, reference: p.method === "TUNAI" ? "" : p.reference }));
+
+export type Discount = z.infer<typeof discountSchema>;
+export type PayInput = z.infer<typeof paySchema>;

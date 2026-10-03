@@ -11,7 +11,7 @@ export const taxFromSettings = async () => {
   return { rate: settings.taxEnabled ? settings.taxRate : 0, included: settings.taxMode === "INCLUDE" };
 };
 
-async function createInvoiceNo(tx: Tx) {
+export async function nextInvoiceNoFor(tx: Tx) {
   const datePart = todayJakarta().toISOString().slice(0, 10).replaceAll("-", "");
   const last = await tx.invoice.findFirst({
     where: { invoiceNo: { startsWith: `INV-${datePart}-` } },
@@ -58,12 +58,13 @@ export async function createDraftInvoiceFromRecord(tx: Tx, userId: string, recor
 
   const invoice = await tx.invoice.create({
     data: {
-      invoiceNo: await createInvoiceNo(tx),
+      invoiceNo: await nextInvoiceNoFor(tx),
       visitId: visit.id,
       ownerId: visit.patient.ownerId,
       createdById: userId,
       items: {
-        create: record.prescriptionItems.map(({ qty, item }) => ({
+        create: record.prescriptionItems.map(({ qty, item }, position) => ({
+          position,
           itemId: item.id,
           nameSnapshot: item.name,
           qty,
@@ -97,6 +98,7 @@ export const listInvoices = (filter: { q?: string; status?: "DRAFT" | "FINAL" | 
       status: true,
       grandTotal: true,
       customerName: true,
+      payments: { where: { voided: false }, select: { amount: true } },
       createdAt: true,
       owner: { select: { name: true } },
       visit: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
@@ -110,9 +112,10 @@ export const getInvoice = (id: string) =>
     where: { id },
     include: {
       items: {
-        select: { id: true, nameSnapshot: true, qty: true, unitPriceSnapshot: true, discountType: true, discountValue: true, lineTotal: true },
-        orderBy: { id: "asc" },
+        select: { id: true, itemId: true, nameSnapshot: true, qty: true, unitPriceSnapshot: true, discountType: true, discountValue: true, lineTotal: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
       },
+      payments: { where: { voided: false }, select: { id: true, kind: true, method: true, amount: true, cashReceived: true, reference: true, paidAt: true, receivedBy: { select: { name: true } } }, orderBy: { paidAt: "asc" } },
       owner: { select: { name: true, whatsapp: true } },
       createdBy: { select: { name: true } },
       visit: {
@@ -123,4 +126,46 @@ export const getInvoice = (id: string) =>
         },
       },
     },
+  });
+
+export const listSellableItems = () =>
+  prisma.item.findMany({
+    where: { active: true, deletedAt: null },
+    select: { id: true, name: true, type: true, sellPrice: true, baseUnit: true, sku: true, barcode: true },
+    orderBy: [{ type: "asc" }, { name: "asc" }],
+  });
+
+export const listRetailDrafts = () =>
+  prisma.invoice.findMany({
+    where: { visitId: null, admissionId: null, status: "DRAFT" },
+    select: { id: true, invoiceNo: true, customerName: true, grandTotal: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
+export const listPayments = (q?: string) =>
+  prisma.payment.findMany({
+    where: {
+      voided: false,
+      ...(q && {
+        invoice: {
+          OR: [
+            { invoiceNo: { contains: q, mode: "insensitive" } },
+            { customerName: { contains: q, mode: "insensitive" } },
+            { owner: { name: { contains: q, mode: "insensitive" } } },
+            { visit: { patient: { name: { contains: q, mode: "insensitive" } } } },
+          ],
+        },
+      }),
+    },
+    select: {
+      id: true,
+      kind: true,
+      method: true,
+      amount: true,
+      paidAt: true,
+      invoice: { select: { id: true, invoiceNo: true, customerName: true, visit: { select: { patient: { select: { name: true } } } } } },
+    },
+    orderBy: { paidAt: "desc" },
+    take: 100,
   });

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Clock, Database, Package, Receipt, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { Barcode, CalendarDays, Clock, CreditCard, Database, Package, Receipt, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,8 @@ const NAV: { href: string; label: string; icon: LucideIcon; capability?: Capabil
   { href: "/jatuh-tempo", label: "Jatuh Tempo", icon: Clock, capability: "view_medical_record" },
   { href: "/pasien", label: "Pasien & Owner", icon: PawPrint, capability: "manage_patients" },
   { href: "/invoice", label: "Invoice", icon: Receipt, capability: "manage_invoice_payment" },
+  { href: "/retail", label: "Retail Walk-in", icon: Barcode, capability: "manage_invoice_payment" },
+  { href: "/pembayaran", label: "Riwayat Pembayaran", icon: CreditCard, capability: "manage_invoice_payment" },
   { href: "/inventaris", label: "Inventaris", icon: Package, capability: "manage_stock" },
   { href: "/master-data", label: "Master Data", icon: Database, capability: "manage_service_price" },
   { href: "/pengaturan", label: "Pengaturan", icon: SlidersHorizontal, capability: "manage_users_settings" },
