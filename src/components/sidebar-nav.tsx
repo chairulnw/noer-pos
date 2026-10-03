@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Database, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { CalendarDays, Database, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
-const NAV: { href: string; label: string; icon: LucideIcon; capability?: Capability }[] = [
+const NAV: { href: string; label: string; icon: LucideIcon; capability?: Capability; roleLabel?: Partial<Record<Role, string>> }[] = [
   { href: "/", label: "Beranda", icon: LayoutDashboard },
+  { href: "/kunjungan", label: "Kunjungan", icon: CalendarDays, capability: "create_visit", roleLabel: { DOKTER: "Pasien Hari Ini" } },
   { href: "/pasien", label: "Pasien & Owner", icon: PawPrint, capability: "manage_patients" },
   { href: "/master-data", label: "Master Data", icon: Database, capability: "manage_service_price" },
   { href: "/pengaturan", label: "Pengaturan", icon: SlidersHorizontal, capability: "manage_users_settings" },
@@ -19,7 +20,7 @@ export function SidebarNav({ role }: { role: Role }) {
 
   return (
     <nav aria-label="Menu utama" className="flex flex-col gap-0.5">
-      {items.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label, icon: Icon, roleLabel }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
           <Link
@@ -32,7 +33,7 @@ export function SidebarNav({ role }: { role: Role }) {
             )}
           >
             <Icon className={cn("size-[18px]", active ? "text-current" : "text-[#8A929B]")} />
-            {label}
+            {roleLabel?.[role] ?? label}
           </Link>
         );
       })}

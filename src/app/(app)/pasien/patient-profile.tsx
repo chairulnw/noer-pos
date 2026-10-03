@@ -52,9 +52,14 @@ export function PatientProfile({ patient }: { patient: Patient }) {
               · WA {formatWhatsapp(patient.owner.whatsapp)}
             </div>
           </div>
-          <Button variant="outline" asChild>
-            <Link href={`/pasien/${patient.id}/ubah`}>Ubah</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href={`/pasien/${patient.id}/ubah`}>Ubah</Link>
+            </Button>
+            <Button asChild>
+              <Link href={`/kunjungan/baru?patient=${patient.id}`}>+ Buat kunjungan</Link>
+            </Button>
+          </div>
         </div>
         <ClinicalNotes allergyNote={patient.allergyNote} aggressive={patient.aggressive} behaviorNote={patient.behaviorNote} />
       </div>
