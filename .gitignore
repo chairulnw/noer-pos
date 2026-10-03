@@ -45,3 +45,5 @@ next-env.d.ts
 
 # uploaded attachments
 /uploads
+/backups
+/uploads-restored

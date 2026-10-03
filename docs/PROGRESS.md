@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1C.3 |
+| Task berikutnya | 1C.4 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -50,7 +50,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 
 - [x] **1C.1** Dashboard dasar (omzet hanya Admin)
 - [x] **1C.2** Audit log viewer (Admin)
-- [ ] **1C.3** Backup harian + prosedur restore
+- [x] **1C.3** Backup harian + prosedur restore
 - [ ] **1C.4** Dokumentasi deploy VPS
 - [ ] **1C.5** Uji end-to-end alur utama + perbaikan
 
@@ -208,6 +208,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1B.7 | Selesai | Kartu "Notifikasi stok" di Beranda untuk Admin (kapabilitas manage_stock): produk habis/menipis (ambang per item) dan batch expired/hampir expired (hari peringatan dari Pengaturan). 187 test. Kasir/dokter tidak melihat kartu. Gate 1B terbukti lewat uji 1B.3-1B.5 (tagihan menginap, DP/pelunasan, PDF). Lanjut ke 1C.1 |
 | 2026-10-03 | 1C.1 | Selesai | Beranda: kartu Omzet hari ini (hanya kapabilitas view_revenue_reports = Admin; diambil dari invoice FINAL dengan finalized_at hari ini WIB, VOID/DRAFT diabaikan), Kunjungan hari ini (tanpa BATAL), Rawat inap aktif, Hotel aktif. Query di `src/lib/dashboard.ts`; non-Admin tidak menerima angka omzet dari server. Diuji dengan data invoice FINAL/VOID/DRAFT/kemarin. Lanjut ke 1C.2 |
 | 2026-10-03 | 1C.2 | Selesai | `/audit` (Admin saja, kapabilitas view_audit_log; Dokter/Kasir diarahkan ke forbidden): filter pengguna, entitas, rentang tanggal (hari WIB, "sampai" inklusif), 50 baris per halaman, diff sebelum/sesudah dalam JSON, hanya baca. Menu "Audit Log" di sidebar. 189 test. Diuji HTTP per role dan dengan baris uji (dihapus). Lanjut ke 1C.3 |
+| 2026-10-03 | 1C.3 | Selesai | `scripts/backup.sh` (pg_dump format custom + tar folder lampiran, ditulis ke folder sementara lalu di-rename agar tidak ada backup setengah jadi, dump diverifikasi `pg_restore -l`, retensi 14 hari via RETENTION_DAYS) dan `scripts/restore.sh <folder> <db-baru> [folder-uploads]` (menolak DB yang sudah ada, tidak menimpa data berjalan). Teruji: restore ke DB kosong, jumlah baris user/item/settings/audit_log sama, file lampiran kembali, folder backup berumur >14 hari terhapus. Jadwal cron dan prosedur pemulihan penuh ditulis di 1C.4. Lanjut ke 1C.4 |
 
 ## Perintah Proyek
 
