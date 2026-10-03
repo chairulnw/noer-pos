@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1A.6 |
+| Task berikutnya | 1A.7 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -21,7 +21,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1A.3** Auth + role guard (server-side) + layout per role
 - [x] **1A.4** Settings klinik + util audit log
 - [x] **1A.5** Master item (layanan & produk), kategori, konversi satuan, master kandang
-- [ ] **1A.6** Owner & pasien: CRUD, pencarian, nomor RM, alert alergi/agresif
+- [x] **1A.6** Owner & pasien: CRUD, pencarian, nomor RM, alert alergi/agresif
 - [ ] **1A.7** Kunjungan walk-in + halaman "Pasien Hari Ini"
 - [ ] **1A.8** Rekam medis: SOAP, vital, diagnosa, lampiran, vaksinasi, finalisasi, addendum, halaman jatuh tempo
 - [ ] **1A.9** Resep & tindakan → draft invoice otomatis
@@ -104,6 +104,11 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1A.5 | Halaman Master Data hanya untuk Admin. Kasir "lihat harga layanan" (SPEC bagian 5) dipenuhi di pencarian item kasir (1A.11), lewat `toItemView` tanpa `buyPrice` | Desain tidak punya menu Master Data untuk kasir |
 | 2026-10-03 | 1A.5 | Form memakai `keepValuesOnError` (submit lewat `startTransition`) | React 19 mereset isian form setelah server action; tanpa ini semua isian hilang saat ada error validasi |
 | 2026-10-03 | proses | Satu task = satu commit; komentar kode seminim mungkin (baris Komentar di CLAUDE.md) | Instruksi user. 1A.3 dan 1A.4 di-commit bersama karena selesai sebelum aturan ini |
+| 2026-10-03 | 1A.6 | Kolom baru `patient.behavior_note` (migrasi `patient_behavior_note`) | Desain punya baris catatan "Perilaku" bertext, ERD hanya punya flag `aggressive`. Tag Alergi tampil jika `allergy_note` terisi |
+| 2026-10-03 | 1A.6 | Foto pasien (opsional di FR-PAT-2) ditunda | Butuh penyimpanan file + route ber-auth; bukan syarat AC. Kolom `photo_path` sudah ada |
+| 2026-10-03 | 1A.6 | Nomor RM = max nomor tahun ini + 1 dalam transaksi, ulangi hingga 3x jika bentrok unique `rm_no`; nomor pasien yang dihapus tidak dipakai ulang | Tanpa tabel counter. Volume ±20 pasien/hari |
+| 2026-10-03 | 1A.6 | WhatsApp disimpan `62xxx` (10-15 digit), ditampilkan `0812-3456-7781`. Duplikat memunculkan peringatan dengan tombol "Tetap simpan", tidak memblokir | FR-PAT-1, FR-PAT-8 |
+| 2026-10-03 | 1A.6 | Hapus pasien/owner = soft delete dengan konfirmasi; owner yang masih punya hewan tidak bisa dihapus | Aturan keras 7. Dibolehkan semua role karena matriks bagian 5 memberi akses CRUD owner/pasien ke semuanya |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -129,6 +134,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.3 | Selesai | Auth.js Credentials + bcrypt + session JWT 12 jam + rate limit login (in-memory). Matriks peran bagian 5 dikodekan di `src/lib/permissions.ts` dan diuji penuh (53 assertion) di `permissions.test.ts`, independen dari implementasi. `requireUser`/`requireCapability` untuk guard server-side (BR-11). Layout per role: halaman `/` menampilkan menu sesuai capability masing-masing role. Diverifikasi manual lewat curl: login admin/kasir, menu termuat sesuai matriks, logout menghapus sesi, rate limit blokir setelah 5 percobaan gagal (termasuk saat password benar, selama window 15 menit). Lint, test, build lulus. **Belum dikerjakan**: CRUD user (FR-AUTH-2), ganti password sendiri (FR-AUTH-3) — di luar AC task ini. Lanjut ke 1A.4 (Settings klinik + util audit log) di sesi berikutnya |
 | 2026-10-03 | 1A.4 | Selesai | Util `logAudit(tx, …)` (ikut transaksi pemanggil, BR-12). Halaman `/pengaturan` (Admin saja, dicek di page dan server action): data klinik, logo, footer struk, kertas 58/80, QRIS, PPN (aktif, tarif integer, mode), hari peringatan expired. Hanya key yang berubah yang disimpan, masing-masing diaudit dengan nilai sebelum/sesudah. Layout sidebar + tema desain NOER, login disesuaikan desain, logo NOER di `public/logo-noer.png`. Test: 66 lulus (skema, diff, audit value, validasi gambar). Diuji di browser: login admin, simpan, audit log tercatat, kasir ditolak (`/forbidden`) dan tidak melihat menu Pengaturan. Perbaikan di jalan: `proxy.ts` sempat mengalihkan `/logo-noer.png` ke login. Belum: audit harga & stok (menyusul di 1A.5 dan 1A.10 memakai `logAudit`), tombol tampil/sembunyi password di login. Lanjut ke 1A.5 |
 | 2026-10-03 | 1A.5 | Selesai | Halaman `/master-data/item` (daftar, cari, filter jenis, tambah, ubah) dan `/master-data/kandang`. Validasi zod: kategori sesuai jenis, harga integer, SKU/barcode unik. `toItemView` menyaring `buyPrice` untuk Kasir/Dokter (BR-7), diuji. Tambah/ubah item masuk audit log (nilai sebelum/sesudah). Test: 81 lulus. Diuji di browser: tambah item, SKU duplikat ditolak (isian tetap ada), ubah harga tercatat di audit; kasir diarahkan ke `/forbidden`. Nama kandang duplikat ditolak (diuji lewat skrip). Belum: kandang tidak diaudit (bukan daftar audit FR-SYS-1); menonaktifkan kandang belum memeriksa admission aktif (menunggu 1B.1). Lanjut ke 1A.6 |
+| 2026-10-03 | 1A.6 | Selesai | `/pasien`: pencarian (nama owner/hewan, no. WA, no. RM, microchip; tanpa kata kunci = 50 terbaru) + profil sesuai desain, tag Alergi/Agresif dan baris catatan klinis. Form owner (peringatan WA duplikat), form hewan (tanggal lahir atau perkiraan umur, berat), halaman owner, ubah, hapus lunak. Logika murni diuji (WA, umur, nomor RM, skema; 102 test lulus). Diuji di browser dan skrip: 3 pendaftaran bersamaan menghasilkan RM berurutan, duplikat WA, tombol "Tetap simpan", owner tanpa hewan tetap ditemukan, hapus owner berhewan ditolak. Belum: profil belum punya tab riwayat kunjungan/vaksin/rawat inap (menyusul 1A.7, 1A.8, 1B), tombol "+ Buat kunjungan" (1A.7), foto. Lanjut ke 1A.7 |
 
 ## Perintah Proyek
 

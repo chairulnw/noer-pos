@@ -150,6 +150,7 @@ model Patient {
   lastWeightKg Decimal?   @map("last_weight_kg") @db.Decimal(6, 2)
   allergyNote  String?    @map("allergy_note")
   aggressive   Boolean    @default(false)
+  behaviorNote String?    @map("behavior_note")
   photoPath    String?    @map("photo_path")
   deletedAt    DateTime?  @map("deleted_at")
 
