@@ -61,8 +61,8 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-medium">{inv.visit?.patient.name ?? inv.customerName ?? "Retail"}</span>
-                    {inv.visit && <ClinicalTags allergyNote={inv.visit.patient.allergyNote} aggressive={inv.visit.patient.aggressive} />}
+                    <span className="font-medium">{(inv.visit ?? inv.admission)?.patient.name ?? inv.customerName ?? "Retail"}</span>
+                    {(inv.visit ?? inv.admission) && <ClinicalTags allergyNote={(inv.visit ?? inv.admission)!.patient.allergyNote} aggressive={(inv.visit ?? inv.admission)!.patient.aggressive} />}
                   </div>
                   {inv.owner && <div className="text-[13px] text-muted-foreground">{inv.owner.name}</div>}
                 </td>

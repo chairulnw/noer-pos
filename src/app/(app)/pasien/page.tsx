@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { cn } from "@/lib/utils";
 import { getPatient, getPatientHistory, searchPatients } from "@/lib/patients";
+import { listPatientAdmissions } from "@/lib/admissions";
 import { can } from "@/lib/permissions";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
@@ -18,6 +19,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
     id && z.uuid().safeParse(id).success ? getPatient(id) : null,
   ]);
   const history = selected && can(user.role, "view_medical_record") ? await getPatientHistory(selected.id) : null;
+  const admissions = selected ? await listPatientAdmissions(selected.id) : [];
   const total = patients.length + ownersWithoutPets.length;
   const href = (patientId: string) => `/pasien?${new URLSearchParams({ ...(q && { q }), id: patientId })}`;
 
@@ -72,7 +74,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
 
         <div className="min-w-0 flex-[999] basis-[520px]">
           {selected ? (
-            <PatientProfile patient={selected} history={history} />
+            <PatientProfile patient={selected} history={history} admissions={admissions} />
           ) : (
             <p className="rounded-[10px] border bg-card p-8 text-center text-sm text-muted-foreground">
               Pilih pasien untuk melihat profil.

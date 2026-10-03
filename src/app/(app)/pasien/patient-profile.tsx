@@ -5,10 +5,12 @@ import { todayJakarta } from "@/lib/date";
 import { formatDate } from "@/lib/format";
 import { StatusChip } from "@/components/status-chip";
 import type { getPatient, getPatientHistory } from "@/lib/patients";
+import type { listPatientAdmissions } from "@/lib/admissions";
 import { formatAge, formatWhatsapp } from "@/lib/patient-schema";
 
 type Patient = NonNullable<Awaited<ReturnType<typeof getPatient>>>;
 type History = Awaited<ReturnType<typeof getPatientHistory>>;
+type Admissions = Awaited<ReturnType<typeof listPatientAdmissions>>;
 
 const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
 
@@ -21,7 +23,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function PatientProfile({ patient, history }: { patient: Patient; history: History | null }) {
+export function PatientProfile({ patient, history, admissions }: { patient: Patient; history: History | null; admissions: Admissions }) {
   const details = [
     patient.species,
     patient.breed,
@@ -58,6 +60,9 @@ export function PatientProfile({ patient, history }: { patient: Patient; history
             <Button variant="outline" asChild>
               <Link href={`/pasien/${patient.id}/ubah`}>Ubah</Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link href={`/rawat-inap/check-in?patient=${patient.id}`}>Check-in</Link>
+            </Button>
             <Button asChild>
               <Link href={`/kunjungan/baru?patient=${patient.id}`}>+ Buat kunjungan</Link>
             </Button>
@@ -70,6 +75,23 @@ export function PatientProfile({ patient, history }: { patient: Patient; history
         <Stat label="Berat terakhir" value={patient.lastWeightKg === null ? "—" : `${patient.lastWeightKg.toLocaleString("id-ID")} kg`} />
         <Stat label="Terdaftar" value={formatDate(patient.createdAt)} />
       </div>
+
+      {admissions.length > 0 && (
+        <div className="overflow-hidden rounded-[10px] border bg-card">
+          <h3 className="border-b px-5 py-3 text-base font-semibold">Rawat inap & hotel</h3>
+          {admissions.map((a) => (
+            <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3.5 last:border-0">
+              <div>
+                <div className="text-[14.5px] font-medium">{a.type === "HOTEL" ? "Hotel" : "Rawat inap"} · {a.room.name}</div>
+                <div className="text-[13.5px] text-muted-foreground">
+                  {formatDate(a.checkIn)}{a.checkOut && ` – ${formatDate(a.checkOut)}`}{a.billedDays !== null && ` · ${a.billedDays} hari`}
+                </div>
+              </div>
+              <StatusChip tone={a.status === "AKTIF" ? "warning" : "neutral"}>{a.status === "AKTIF" ? "Menginap" : "Selesai"}</StatusChip>
+            </div>
+          ))}
+        </div>
+      )}
 
       {history && (
         <>

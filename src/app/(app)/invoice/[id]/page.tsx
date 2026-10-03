@@ -27,7 +27,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   const invoice = await getInvoice(id);
   if (!invoice) notFound();
 
-  const patient = invoice.visit?.patient;
+  const patient = (invoice.visit ?? invoice.admission)?.patient;
   const paid = invoice.payments.filter((p) => !p.voided).reduce((sum, p) => sum + p.amount, 0);
   const status = paymentStatus(paid, invoice.grandTotal);
   const editable = invoice.status === "DRAFT";
@@ -54,7 +54,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
               <span className="font-medium text-foreground">{invoice.customerName ?? "Retail walk-in"}</span>
             )}
             {invoice.owner && ` · ${invoice.owner.name}`} · {formatDate(invoice.createdAt)}
-            {invoice.visit && ` · ${invoice.visit.doctor.name}`}
+            {invoice.visit && ` · ${invoice.visit.doctor.name}`}{invoice.admission && ` · ${invoice.admission.type === "HOTEL" ? "Hotel" : "Rawat inap"} ${invoice.admission.room.name}`}
           </span>
           {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
         </div>

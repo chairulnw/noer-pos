@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Barcode, CalendarDays, Clock, CreditCard, Database, Package, Receipt, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { BedDouble, Barcode, CalendarDays, Clock, CreditCard, Database, Package, Receipt, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 const NAV: { href: string; label: string; icon: LucideIcon; capability?: Capability; roleLabel?: Partial<Record<Role, string>> }[] = [
   { href: "/", label: "Beranda", icon: LayoutDashboard },
   { href: "/kunjungan", label: "Kunjungan", icon: CalendarDays, capability: "create_visit", roleLabel: { DOKTER: "Pasien Hari Ini" } },
+  { href: "/rawat-inap", label: "Rawat Inap & Hotel", icon: BedDouble, capability: "manage_admission" },
   { href: "/jatuh-tempo", label: "Jatuh Tempo", icon: Clock, capability: "view_medical_record" },
   { href: "/pasien", label: "Pasien & Owner", icon: PawPrint, capability: "manage_patients" },
   { href: "/invoice", label: "Invoice", icon: Receipt, capability: "manage_invoice_payment" },
