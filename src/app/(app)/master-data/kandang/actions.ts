@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { roomSchema, saveRoom } from "@/lib/rooms";
 import { requireCapability } from "@/lib/require-role";
+import { flash } from "@/components/flash";
 
 export type RoomFormState = {
   message?: string;
@@ -27,5 +28,6 @@ export async function saveRoomAction(id: string | null, _prev: RoomFormState, fo
   if (result.error) return { message: result.error };
 
   revalidatePath("/master-data/kandang");
+  await flash("Kandang tersimpan");
   redirect("/master-data/kandang");
 }

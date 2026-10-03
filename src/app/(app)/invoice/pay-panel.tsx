@@ -1,5 +1,7 @@
 "use client";
 
+import { MoneyInput } from "@/components/money-input";
+import { toast } from "@/components/toaster";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { changeDue } from "@/lib/billing";
@@ -51,11 +53,14 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
   const cash = Number(received ?? total) || 0;
   const quick = [...new Set([total, roundUp(total, 10_000), roundUp(total, 50_000), roundUp(total, 100_000)])].filter((v) => v > 0).slice(0, 4);
 
-  const run = (fn: () => Promise<{ error?: string }>) =>
+  const run = (fn: () => Promise<{ error?: string }>, done?: string) =>
     startTransition(async () => {
       const result = await fn();
       setError(result.error);
+      if (!result.error && done) toast(done);
     });
+  const canSubmit = !pending && !overpaid && !(total > 0 && method === "TUNAI" && cash < total);
+  const pay = () => run(() => payAction(invoiceId, { method, cashReceived: total > 0 && method === "TUNAI" ? cash : null, reference }), "Pembayaran tersimpan");
 
   return (
     <section aria-label="Pembayaran" className="space-y-4 rounded-[10px] border bg-card p-5">
@@ -83,7 +88,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
               <option value="AMOUNT">Nominal (Rp)</option>
             </select>
             {dType && <input type="number" min="0" step="1" aria-label="Nilai diskon invoice" value={dValue} onChange={(e) => setDValue(e.target.value)} className="h-10 w-32 rounded-lg border border-input bg-card px-2 text-sm" />}
-            <Button type="button" variant="outline" disabled={pending} onClick={() => run(async () => { const r = await setDiscountAction(invoiceId, { type: dType || null, value: Number(dValue) || 0 }); if (!r.error) setDiscOpen(false); return r; })}>
+            <Button type="button" variant="outline" disabled={pending} onClick={() => run(async () => { const r = await setDiscountAction(invoiceId, { type: dType || null, value: Number(dValue) || 0 }); if (!r.error) setDiscOpen(false); return r; }, "Diskon tersimpan")}>
               Terapkan
             </Button>
           </div>
@@ -133,7 +138,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
               <label htmlFor="received" className="text-sm font-medium">Uang diterima</label>
               <div className="flex h-12 items-center gap-2 rounded-lg border border-input px-3">
                 <span className="text-[15px] text-muted-foreground">Rp</span>
-                <input id="received" type="number" min="0" step="1" value={received ?? String(total)} onChange={(e) => setReceived(e.target.value)} className="min-w-0 flex-1 bg-transparent text-lg font-medium tabular-nums outline-none" />
+                <MoneyInput id="received" onKeyDown={(e) => e.key === "Enter" && canSubmit && pay()} value={received ?? String(total)} onValueChange={setReceived} className="min-w-0 flex-1 bg-transparent text-lg font-medium tabular-nums outline-none" />
               </div>
               <div className="grid grid-cols-4 gap-1.5">
                 {quick.map((v) => (
@@ -168,8 +173,8 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
             type="button"
             size="lg"
             className="w-full"
-            disabled={pending || overpaid || (total > 0 && method === "TUNAI" && cash < total)}
-            onClick={() => run(() => payAction(invoiceId, { method, cashReceived: total > 0 && method === "TUNAI" ? cash : null, reference }))}
+            disabled={!canSubmit}
+            onClick={pay}
           >
             {pending ? "Memproses…" : total > 0 ? `Bayar ${formatRupiah(total)}` : "Selesaikan invoice"}
           </Button>
@@ -184,12 +189,12 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
                   <label htmlFor="dp-amount" className="text-sm font-medium">Jumlah DP ({METHODS.find((m) => m.id === method)?.label})</label>
                   <div className="flex h-11 items-center gap-2 rounded-lg border border-input bg-card px-3">
                     <span className="text-sm text-muted-foreground">Rp</span>
-                    <input id="dp-amount" type="number" min="1" step="1" value={dpAmount} onChange={(e) => setDpAmount(e.target.value)} className="min-w-0 flex-1 bg-transparent font-medium tabular-nums outline-none" />
+                    <MoneyInput id="dp-amount" value={dpAmount} onValueChange={setDpAmount} className="min-w-0 flex-1 bg-transparent font-medium tabular-nums outline-none" />
                   </div>
                   {method === "TUNAI" && (
                     <div className="flex h-11 items-center gap-2 rounded-lg border border-input bg-card px-3">
                       <span className="text-sm text-muted-foreground">Diterima Rp</span>
-                      <input aria-label="Uang diterima untuk DP" type="number" min="0" step="1" value={dpCash ?? dpAmount} onChange={(e) => setDpCash(e.target.value)} className="min-w-0 flex-1 bg-transparent tabular-nums outline-none" />
+                      <MoneyInput aria-label="Uang diterima untuk DP" value={dpCash ?? dpAmount} onValueChange={setDpCash} className="min-w-0 flex-1 bg-transparent tabular-nums outline-none" />
                     </div>
                   )}
                   <Button
@@ -201,7 +206,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
                         const r = await depositAction(invoiceId, { amount: Number(dpAmount), method, cashReceived: method === "TUNAI" ? Number(dpCash ?? dpAmount) : null, reference });
                         if (!r.error) { setDpOpen(false); setDpAmount(""); setDpCash(null); }
                         return r;
-                      })
+                      }, "DP tersimpan")
                     }
                   >
                     Terima DP

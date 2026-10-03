@@ -7,6 +7,7 @@ import { saveItem } from "@/lib/items";
 import { capabilityFor, itemSchema } from "@/lib/item-schema";
 import { can } from "@/lib/permissions";
 import { requireUser } from "@/lib/require-role";
+import { flash } from "@/components/flash";
 
 export type FormState = {
   message?: string;
@@ -50,5 +51,6 @@ export async function saveItemAction(id: string | null, _prev: FormState, formDa
   if (result.error) return { message: result.error };
 
   revalidatePath("/master-data/item");
+  await flash("Item tersimpan");
   redirect("/master-data/item");
 }

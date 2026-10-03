@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/require-role";
 import { passwordChangeSchema } from "@/lib/user-schema";
 import { changeOwnPassword } from "@/lib/users";
+import { flash } from "@/components/flash";
 
 export type PasswordState = {
   ok?: boolean;
@@ -20,5 +21,6 @@ export async function changePasswordAction(_prev: PasswordState, formData: FormD
 
   const result = await changeOwnPassword(user.id, parsed.data.current, parsed.data.next);
   if (result.error) return { message: result.error, errors: { current: [result.error] } };
+  await flash("Password diganti");
   return { ok: true, message: "Password diganti." };
 }

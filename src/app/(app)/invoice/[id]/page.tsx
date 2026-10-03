@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ClinicalTags } from "@/components/clinical-flags";
+import { PageHeader } from "@/components/page-header";
+import { MoreMenu, menuItemClass } from "@/components/more-menu";
 import { StatusChip } from "@/components/status-chip";
 import { paymentStatus } from "@/lib/billing";
 import { formatDate, formatRupiah } from "@/lib/format";
@@ -42,47 +44,62 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
   return (
     <div className="space-y-5">
-      <header className="space-y-1">
-        <Link href="/invoice" className="text-[13px] font-medium text-primary">← Invoice</Link>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className="text-[22px] font-semibold leading-11 tabular-nums">{invoice.invoiceNo}</h1>
-          <StatusChip tone={INVOICE_STATUS[invoice.status].tone}>{INVOICE_STATUS[invoice.status].label}</StatusChip>
-          {(invoice.status === "FINAL" || paid > 0) && invoice.status !== "VOID" && <StatusChip tone={PAYMENT[status].tone}>{PAYMENT[status].label}</StatusChip>}
-        </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>
-            {patient ? (
-              <>
-                <span className="font-medium text-foreground">{patient.name}</span> ({patient.rmNo})
-              </>
-            ) : (
-              <span className="font-medium text-foreground">{invoice.customerName ?? "Retail walk-in"}</span>
+      <PageHeader
+        back={{ href: "/invoice", label: "Invoice" }}
+        title={<span className="tabular-nums">{invoice.invoiceNo}</span>}
+        status={
+          <>
+            <StatusChip tone={INVOICE_STATUS[invoice.status].tone}>{INVOICE_STATUS[invoice.status].label}</StatusChip>
+            {(invoice.status === "FINAL" || paid > 0) && invoice.status !== "VOID" && <StatusChip tone={PAYMENT[status].tone}>{PAYMENT[status].label}</StatusChip>}
+          </>
+        }
+        meta={
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              <span>
+                {patient ? (
+                  <>
+                    <span className="font-medium text-foreground">{patient.name}</span> ({patient.rmNo})
+                  </>
+                ) : (
+                  <span className="font-medium text-foreground">{invoice.customerName ?? "Retail walk-in"}</span>
+                )}
+                {invoice.owner && ` · ${invoice.owner.name}`} · {formatDate(invoice.createdAt)}
+                {invoice.visit && ` · ${invoice.visit.doctor.name}`}{invoice.admission && ` · ${invoice.admission.type === "HOTEL" ? "Hotel" : "Rawat inap"} ${invoice.admission.room.name}`}
+              </span>
+              {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
+            </div>
+            {invoice.status === "VOID" && invoice.voidReason && <p className="text-destructive">Void: {invoice.voidReason}</p>}
+            {error && <p role="alert" className="text-destructive">{error}</p>}
+          </>
+        }
+        actions={
+          <>
+            {canReplace && (
+              <form action={replacementAction.bind(null, invoice.id)}>
+                <Button type="submit" variant="outline">Buat invoice baru dari kunjungan</Button>
+              </form>
             )}
-            {invoice.owner && ` · ${invoice.owner.name}`} · {formatDate(invoice.createdAt)}
-            {invoice.visit && ` · ${invoice.visit.doctor.name}`}{invoice.admission && ` · ${invoice.admission.type === "HOTEL" ? "Hotel" : "Rawat inap"} ${invoice.admission.room.name}`}
-          </span>
-          {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
-        </div>
-        {invoice.status === "VOID" && invoice.voidReason && <p className="text-sm text-destructive">Void: {invoice.voidReason}</p>}
-        {invoice.status !== "VOID" && (
-          <div className="flex flex-wrap gap-2 pt-1">
             {invoice.status === "FINAL" && (
-              <Button variant="outline" asChild>
+              <Button asChild>
                 <Link href={`/invoice/${invoice.id}/struk`}>Cetak struk</Link>
               </Button>
             )}
-            <Button variant="outline" asChild>
-              <a href={`/api/invoice/${invoice.id}/pdf`}>Unduh e-invoice (PDF)</a>
-            </Button>
-          </div>
-        )}
-        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        {canReplace && (
-          <form action={replacementAction.bind(null, invoice.id)} className="pt-1">
-            <Button type="submit" variant="outline">Buat invoice baru dari kunjungan</Button>
-          </form>
-        )}
-      </header>
+            {invoice.status !== "VOID" && (
+              <MoreMenu>
+                <a role="menuitem" href={`/api/invoice/${invoice.id}/pdf`} className={menuItemClass}>Unduh e-invoice (PDF)</a>
+                {canVoid && (
+                  <VoidPanel
+                    invoiceId={invoice.id}
+                    invoiceNo={invoice.invoiceNo}
+                    products={invoice.status === "FINAL" ? invoice.items.filter((i) => i.item.type === "PRODUCT").map((i) => ({ id: i.id, name: i.nameSnapshot, qty: Number(i.qty) })) : []}
+                  />
+                )}
+              </MoreMenu>
+            )}
+          </>
+        }
+      />
 
       <div className="flex flex-wrap items-start gap-5">
         <div className="min-w-0 flex-[999] basis-[520px] space-y-4">
@@ -105,14 +122,6 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
               };
             })}
           />
-
-          {canVoid && (
-            <VoidPanel
-              invoiceId={invoice.id}
-              invoiceNo={invoice.invoiceNo}
-              products={invoice.status === "FINAL" ? invoice.items.filter((i) => i.item.type === "PRODUCT").map((i) => ({ id: i.id, name: i.nameSnapshot, qty: Number(i.qty) })) : []}
-            />
-          )}
 
           {invoice.payments.length > 0 && (
             <section className="space-y-3 rounded-[10px] border bg-card p-5">

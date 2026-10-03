@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/page-header";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
 
       <section className="overflow-hidden rounded-[10px] border bg-card">
         <h2 className="border-b px-4 py-3 text-base font-semibold">Hewan ({owner.patients.length})</h2>
-        {owner.patients.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Belum ada hewan terdaftar.</p>}
+        {owner.patients.length === 0 && <EmptyState action={<Button asChild><Link href={`/pasien/baru?owner=${owner.id}`}>+ Hewan baru</Link></Button>}>Belum ada hewan terdaftar.</EmptyState>}
         {owner.patients.map((p) => (
           <Link key={p.id} href={`/pasien?id=${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
             <div className="flex flex-wrap items-center gap-1.5">

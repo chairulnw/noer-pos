@@ -122,6 +122,8 @@ export function InvoiceEditor({ invoiceId, lines, catalog, editable, canDiscount
                 if (pick) add(pick);
               }}
               aria-label="Tambah item"
+              data-search
+              autoFocus
               placeholder="Tambah layanan / produk, atau scan barcode"
               className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
             />
@@ -143,7 +145,7 @@ export function InvoiceEditor({ invoiceId, lines, catalog, editable, canDiscount
       )}
 
       <div className="overflow-x-auto">
-        <div className="min-w-[640px]">
+        <div className="min-w-[560px]">
           <div className="grid grid-cols-[minmax(0,2.4fr)_124px_minmax(0,1fr)_80px_minmax(0,1.1fr)_44px] gap-3 border-b px-1 py-2 text-[13px] text-muted-foreground">
             <span>Item</span>
             <span className="text-center">Qty</span>

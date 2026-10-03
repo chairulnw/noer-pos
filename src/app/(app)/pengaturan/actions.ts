@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireCapability } from "@/lib/require-role";
 import { getSettings, saveSettings } from "@/lib/settings";
 import { IMAGE_LIMITS, imageToDataUrl, settingsSchema } from "@/lib/settings-schema";
+import { flash } from "@/components/flash";
 
 export type SettingsState = {
   ok?: boolean;
@@ -49,5 +50,6 @@ export async function updateSettings(_prev: SettingsState, formData: FormData): 
 
   const changes = await saveSettings(user.id, parsed.data);
   revalidatePath("/", "layout");
+  if (changes.length) await flash("Pengaturan disimpan");
   return { ok: true, message: changes.length ? "Pengaturan disimpan." : "Tidak ada perubahan." };
 }

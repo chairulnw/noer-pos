@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ConfirmButton } from "@/components/confirm-button";
+import { toast } from "@/components/toaster";
 import { Button } from "@/components/ui/button";
 import { opnameDiff } from "@/lib/stock";
 import { finalizeOpnameAction, saveOpnameAction, type OpnameResult } from "./actions";
@@ -11,7 +13,6 @@ const fmt = (n: number) => n.toLocaleString("id-ID");
 
 export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial: OpnameRow[] }) {
   const [rows, setRows] = useState(initial);
-  const [confirming, setConfirming] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean }>();
   const [pending, startTransition] = useTransition();
 
@@ -23,13 +24,13 @@ export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial:
     startTransition(async () => {
       const result = await fn();
       setMessage(result.error ? { text: result.error, ok: false } : { text: success, ok: true });
-      if (!result.error) setConfirming(false);
+      if (!result.error) toast(success);
     });
 
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[820px] text-[14.5px]">
+        <table className="w-full min-w-[700px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Produk / batch</th>
@@ -87,28 +88,20 @@ export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial:
 
       {message && <p role="status" className={`text-sm ${message.ok ? "text-success" : "text-destructive"}`}>{message.text}</p>}
 
-      {confirming ? (
-        <div className="space-y-3 rounded-[10px] border border-[#E9CFA6] bg-card p-5">
-          <p className="text-sm">
-            Finalkan opname? <strong>{withDiff.length}</strong> batch akan disesuaikan dan opname tidak bisa diubah lagi.
-          </p>
-          <div className="flex gap-2">
-            <Button type="button" disabled={pending} onClick={() => run(() => finalizeOpnameAction(opnameId, payload), "Opname difinalkan.")}>
-              {pending ? "Memproses…" : "Ya, finalkan"}
-            </Button>
-            <Button type="button" variant="outline" onClick={() => setConfirming(false)}>Batal</Button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" disabled={pending} onClick={() => run(() => saveOpnameAction(opnameId, payload), "Draft opname tersimpan.")}>
-            Simpan draft
-          </Button>
-          <Button type="button" size="lg" disabled={pending || rows.some((r) => Number.isNaN(r.counted))} onClick={() => setConfirming(true)}>
-            Finalkan opname
-          </Button>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="outline" disabled={pending} onClick={() => run(() => saveOpnameAction(opnameId, payload), "Draft opname tersimpan.")}>
+          Simpan draft
+        </Button>
+        <ConfirmButton
+          size="lg"
+          disabled={pending || rows.some((r) => Number.isNaN(r.counted))}
+          confirmLabel="Ya, finalkan"
+          message={`Finalkan opname? ${withDiff.length} batch akan disesuaikan dan opname tidak bisa diubah lagi.`}
+          onConfirm={() => run(() => finalizeOpnameAction(opnameId, payload), "Opname difinalkan.")}
+        >
+          {pending ? "Memproses…" : "Finalkan opname"}
+        </ConfirmButton>
+      </div>
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default async function CashPage() {
       <section className="space-y-2">
         <h2 className="text-base font-semibold">Riwayat penutupan</h2>
         <div className="overflow-x-auto rounded-[10px] border bg-card">
-          <table className="w-full min-w-[640px] text-[14.5px]">
+          <table className="w-full min-w-[560px] text-[14.5px]">
             <thead>
               <tr className="border-b text-left text-[13px] text-muted-foreground">
                 <th className="px-4 py-2.5 font-normal">Tanggal</th>

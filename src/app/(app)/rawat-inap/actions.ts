@@ -7,6 +7,7 @@ import { checkInSchema, checkOutSchema, logSchema } from "@/lib/admission-schema
 import { addAdmissionLog, checkOutAdmission, createAdmission } from "@/lib/admissions";
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
+import { flash } from "@/components/flash";
 
 export type AdmissionFormState = { message?: string; nonce?: number; errors?: Record<string, string[] | undefined> };
 
@@ -32,6 +33,7 @@ export async function checkInAction(_prev: AdmissionFormState, formData: FormDat
   if ("error" in result) return { message: result.error };
 
   revalidatePath("/rawat-inap");
+  await flash("Check-in dicatat");
   redirect("/rawat-inap");
 }
 
@@ -53,6 +55,7 @@ export async function addLogAction(admissionId: string, _prev: AdmissionFormStat
   if (result.error) return { message: result.error };
 
   revalidatePath(`/rawat-inap/${admissionId}`);
+  await flash("Monitoring dicatat");
   return { nonce: Date.now() };
 }
 
@@ -66,5 +69,6 @@ export async function checkOutAction(admissionId: string, _prev: AdmissionFormSt
 
   revalidatePath("/rawat-inap");
   revalidatePath("/invoice");
+  await flash("Check-out selesai");
   redirect(can(user.role, "manage_invoice_payment") ? `/invoice/${result.invoiceId}` : "/rawat-inap");
 }

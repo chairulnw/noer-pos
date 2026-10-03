@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, inputClass } from "@/components/ui/input";
+import { MoneyInput } from "@/components/money-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, Section, selectClass } from "@/components/form-fields";
 import { keepValuesOnError } from "@/lib/form";
@@ -39,7 +40,7 @@ export function StockInForm({ products, defaultItemId }: { products: Product[]; 
           <Input id="qty" name="qty" type="number" min={0} step="any" value={qty} onChange={(e) => setQty(e.target.value)} required />
         </Field>
         <Field label={`Harga beli per ${unit ?? "satuan beli"} (Rp)`} name="price" errors={err("price")}>
-          <Input id="price" name="price" type="number" min={0} step={1} required />
+          <MoneyInput id="price" name="price" className={inputClass} required />
         </Field>
         <Field label="No. batch" name="batchNo" errors={err("batchNo")}>
           <Input id="batchNo" name="batchNo" required />

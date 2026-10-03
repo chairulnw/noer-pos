@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireCapability } from "@/lib/require-role";
 import { addAddendum, addAttachment, addVaccination, finalizeRecord, removeVaccination, saveRecord } from "@/lib/records";
 import { addendumSchema, recordItemsSchema, recordSchema, vaccinationSchema } from "@/lib/record-schema";
+import { flash } from "@/components/flash";
 
 export type RecordFormState = { message?: string; ok?: boolean; nonce?: number; errors?: Record<string, string[] | undefined> };
 
@@ -60,10 +61,12 @@ export async function saveRecordAction(
   revalidatePath(`/rekam-medis/${visitId}`);
   if (formData.get("intent") === "finalize") {
     const result = await finalizeRecord(user.id, recordId, parsed.data, items.data);
+    if (!result.error) await flash("Rekam medis difinalkan");
     return result.error ? { message: result.error } : { ok: true, message: "Rekam medis difinalkan." };
   }
 
   const result = await saveRecord(recordId, parsed.data, items.data);
+  if (!result.error) await flash("Draft tersimpan");
   return result.error ? { message: result.error } : { ok: true, message: "Draft tersimpan." };
 }
 
@@ -80,6 +83,7 @@ export async function addVaccinationAction(visitId: string, recordId: string, _p
   const result = await addVaccination(recordId, parsed.data);
   if (result.error) return { message: result.error };
   revalidatePath(`/rekam-medis/${visitId}`);
+  await flash("Vaksin dicatat");
   return { ok: true, nonce: Date.now() };
 }
 
@@ -87,6 +91,7 @@ export async function removeVaccinationAction(visitId: string, id: string) {
   await requireCapability("edit_medical_record");
   await removeVaccination(id);
   revalidatePath(`/rekam-medis/${visitId}`);
+  await flash("Catatan vaksin dihapus");
 }
 
 export async function addAddendumAction(visitId: string, recordId: string, _prev: RecordFormState, formData: FormData): Promise<RecordFormState> {
@@ -97,6 +102,7 @@ export async function addAddendumAction(visitId: string, recordId: string, _prev
   const result = await addAddendum(user.id, recordId, parsed.data.note);
   if (result.error) return { message: result.error };
   revalidatePath(`/rekam-medis/${visitId}`);
+  await flash("Addendum ditambahkan");
   return { ok: true, nonce: Date.now() };
 }
 
@@ -108,5 +114,6 @@ export async function addAttachmentAction(visitId: string, recordId: string, _pr
   const result = await addAttachment(recordId, file);
   if (result.error) return { message: result.error };
   revalidatePath(`/rekam-medis/${visitId}`);
+  await flash("Lampiran diunggah");
   return { ok: true, nonce: Date.now() };
 }

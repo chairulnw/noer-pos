@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       </form>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[680px] text-[14.5px]">
+        <table className="w-full min-w-[600px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Produk</th>
@@ -51,7 +52,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada produk.</td>
+                <td colSpan={5}><EmptyState action={<Button asChild><Link href="/master-data/item/baru">+ Produk baru</Link></Button>}>Belum ada produk.</EmptyState></td>
               </tr>
             )}
             {rows.map((row) => (

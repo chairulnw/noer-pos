@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { MoreMenu, menuItemClass } from "@/components/more-menu";
+import { EmptyState } from "@/components/page-header";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
@@ -28,7 +30,7 @@ export default async function AdmissionsPage() {
       </header>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[720px] text-[14.5px]">
+        <table className="w-full min-w-[600px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Kandang</th>
@@ -42,7 +44,7 @@ export default async function AdmissionsPage() {
           <tbody>
             {admissions.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Tidak ada hewan yang menginap.</td>
+                <td colSpan={6}><EmptyState action={<Button asChild><Link href="/rawat-inap/check-in">+ Check-in</Link></Button>}>Tidak ada hewan yang menginap.</EmptyState></td>
               </tr>
             )}
             {admissions.map((a) => (
@@ -58,10 +60,18 @@ export default async function AdmissionsPage() {
                 <td className="px-4 py-3"><StatusChip tone={a.type === "HOTEL" ? "info" : "warning"}>{a.type === "HOTEL" ? "Hotel" : "Rawat inap"}</StatusChip></td>
                 <td className="px-4 py-3 text-muted-foreground">{formatDate(a.checkIn)} · {formatTime(a.checkIn)}</td>
                 <td className="px-4 py-3 tabular-nums">Hari ke-{stayDay(a.checkIn, now)}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link href={`/rawat-inap/${a.id}/check-out`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Check-out</Link>
-                  {canMonitor && <Link href={`/rawat-inap/${a.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">{a.type === "RAWAT_INAP" ? "Monitoring" : "Detail"}</Link>}
-                  {canInvoice && a.invoices[0] && <Link href={`/invoice/${a.invoices[0].id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Invoice</Link>}
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-2">
+                    {canMonitor ? (
+                      <Button asChild variant="outline"><Link href={`/rawat-inap/${a.id}`}>{a.type === "RAWAT_INAP" ? "Monitoring" : "Detail"}</Link></Button>
+                    ) : (
+                      <Button asChild variant="outline"><Link href={`/rawat-inap/${a.id}/check-out`}>Check-out</Link></Button>
+                    )}
+                    <MoreMenu iconOnly label="Aksi lain">
+                      {canMonitor && <Link role="menuitem" href={`/rawat-inap/${a.id}/check-out`} className={menuItemClass}>Check-out</Link>}
+                      {canInvoice && a.invoices[0] && <Link role="menuitem" href={`/invoice/${a.invoices[0].id}`} className={menuItemClass}>Invoice</Link>}
+                    </MoreMenu>
+                  </div>
                 </td>
               </tr>
             ))}

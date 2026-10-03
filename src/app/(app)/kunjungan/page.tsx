@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { MoreMenu, menuItemClass } from "@/components/more-menu";
+import { EmptyState } from "@/components/page-header";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { ConfirmButton } from "@/components/confirm-button";
@@ -32,7 +34,7 @@ export default async function VisitsPage() {
       </header>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[640px] text-[14.5px]">
+        <table className="w-full min-w-[560px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Jam</th>
@@ -46,8 +48,8 @@ export default async function VisitsPage() {
           <tbody>
             {visits.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                  Belum ada kunjungan hari ini.
+                <td colSpan={6}>
+                  <EmptyState action={<Button asChild><Link href="/pasien">+ Kunjungan baru</Link></Button>}>Belum ada kunjungan hari ini.</EmptyState>
                 </td>
               </tr>
             )}
@@ -70,20 +72,22 @@ export default async function VisitsPage() {
                 <td className="px-4 py-3">
                   <StatusChip tone={VISIT_STATUS[v.status].tone}>{VISIT_STATUS[v.status].label}</StatusChip>
                 </td>
-                <td className="flex items-center justify-end gap-1 px-4 py-3 text-right">
+                <td className="px-4 py-3"><div className="flex items-center justify-end gap-2">
                   {canOpenRecord && v.status !== "BATAL" && (
                     <Button variant={v.status === "DILAYANI" ? "default" : "outline"} asChild>
                       <Link href={`/rekam-medis/${v.id}`}>{v.status === "DILAYANI" ? "Periksa" : "Rekam medis"}</Link>
                     </Button>
                   )}
                   {v.status === "DILAYANI" && (
-                    <form action={cancelVisitAction.bind(null, v.id)}>
-                      <ConfirmButton variant="ghost" message={`Batalkan kunjungan ${v.patient.name}?`}>
-                        Batalkan
-                      </ConfirmButton>
-                    </form>
+                    <MoreMenu iconOnly label="Aksi lain">
+                      <form action={cancelVisitAction.bind(null, v.id)}>
+                        <ConfirmButton variant="ghost" confirmLabel="Ya, batalkan" message={`Batalkan kunjungan ${v.patient.name}?`} className={`${menuItemClass} h-auto justify-start rounded-md px-3 font-medium text-destructive`}>
+                          Batalkan kunjungan
+                        </ConfirmButton>
+                      </form>
+                    </MoreMenu>
                   )}
-                </td>
+                </div></td>
               </tr>
             ))}
           </tbody>

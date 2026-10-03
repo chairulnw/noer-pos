@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { StatusChip } from "@/components/status-chip";
 import { listRooms } from "@/lib/rooms";
@@ -29,8 +30,8 @@ export default async function RoomsPage() {
           <tbody>
             {rooms.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                  Belum ada kandang.
+                <td colSpan={4}>
+                  <EmptyState action={<Button asChild><Link href="/master-data/kandang/baru">+ Kandang baru</Link></Button>}>Belum ada kandang.</EmptyState>
                 </td>
               </tr>
             )}

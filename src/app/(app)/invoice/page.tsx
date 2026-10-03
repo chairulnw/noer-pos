@@ -25,7 +25,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
       <div className="flex flex-wrap items-center gap-3">
         <form className="flex flex-1 basis-80 gap-2">
           {active && <input type="hidden" name="status" value={active} />}
-          <Input name="q" defaultValue={q} placeholder="Cari no. invoice, pasien, atau owner" aria-label="Cari invoice" />
+          <Input name="q" data-search defaultValue={q} placeholder="Cari no. invoice, pasien, atau owner" aria-label="Cari invoice" />
           <Button type="submit" variant="outline">Cari</Button>
         </form>
         <div className="flex gap-1.5">
@@ -38,7 +38,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[640px] text-[14.5px]">
+        <table className="w-full min-w-[560px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">No. invoice</th>

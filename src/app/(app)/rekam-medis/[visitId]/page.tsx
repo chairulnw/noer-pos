@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
 import { ConfirmButton } from "@/components/confirm-button";
+import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { todayJakarta } from "@/lib/date";
 import { formatDate } from "@/lib/format";
@@ -52,25 +52,22 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
 
   return (
     <div className="space-y-4">
-      <header className="overflow-hidden rounded-[10px] border bg-card">
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4 px-5">
-          <div className="space-y-1">
-            <Link href="/kunjungan" className="text-[13px] font-medium text-primary">← Kunjungan hari ini</Link>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-[22px] font-semibold leading-11">{patient.name}</h1>
-              <span className="text-sm text-muted-foreground tabular-nums">{patient.rmNo}</span>
-              <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
-            </div>
-            <p className="text-sm text-muted-foreground">
+      <PageHeader
+        back={{ href: "/kunjungan", label: "Kunjungan hari ini" }}
+        title={<>{patient.name} <span className="text-sm font-normal text-muted-foreground tabular-nums">{patient.rmNo}</span></>}
+        status={<><StatusChip tone={final ? "info" : "neutral"}>{final ? "Final" : "Draft"}</StatusChip><ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} /></>}
+        meta={
+          <>
+            <p>
               {[patient.species, patient.breed, `${SEX[patient.sex]}${patient.neutered ? " steril" : ""}`, patient.birthDate && formatAge(patient.birthDate, today)].filter(Boolean).join(" · ")}
               {" · "}Owner {patient.owner.name} · {formatDate(visit.createdAt)} · {visit.doctor.name}
             </p>
-            <p className="text-sm">Keluhan: {visit.complaint}</p>
-          </div>
-          <StatusChip tone={final ? "info" : "neutral"}>{final ? "Final" : "Draft"}</StatusChip>
-        </div>
+            <p className="text-foreground">Keluhan: {visit.complaint}</p>
+          </>
+        }
+      >
         <ClinicalNotes allergyNote={patient.allergyNote} aggressive={patient.aggressive} behaviorNote={patient.behaviorNote} />
-      </header>
+      </PageHeader>
 
       {final || !canEdit ? (
         <>

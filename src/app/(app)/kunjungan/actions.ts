@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { cancelVisit, createVisit, visitSchema } from "@/lib/visits";
 import { requireCapability } from "@/lib/require-role";
+import { flash } from "@/components/flash";
 
 export type VisitFormState = { message?: string; errors?: Record<string, string[] | undefined> };
 
@@ -23,11 +24,13 @@ export async function createVisitAction(patientId: string, _prev: VisitFormState
   if (result.error) return { message: result.error };
 
   revalidatePath("/kunjungan");
+  await flash("Kunjungan dibuat");
   redirect("/kunjungan");
 }
 
 export async function cancelVisitAction(id: string) {
   await requireCapability("create_visit");
   await cancelVisit(id);
+  await flash("Kunjungan dibatalkan");
   revalidatePath("/kunjungan");
 }

@@ -73,7 +73,7 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
         <p className="text-sm text-muted-foreground">Belum ada tindakan atau obat.</p>
       ) : (
         <div className="overflow-x-auto">
-          <div className="min-w-[640px] text-[14.5px]">
+          <div className="min-w-[560px] text-[14.5px]">
             <div className="grid grid-cols-[90px_minmax(0,2fr)_minmax(0,1.6fr)_90px_44px] gap-3 border-b px-1 py-2 text-[13px] text-muted-foreground">
               <span>Jenis</span>
               <span>Item</span>

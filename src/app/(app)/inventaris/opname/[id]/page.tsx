@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { formatDate } from "@/lib/format";
 import { getOpname } from "@/lib/opname";
@@ -28,19 +28,21 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-5">
-      <header className="space-y-1">
-        <Link href="/inventaris/opname" className="text-[13px] font-medium text-primary">← Stok Opname</Link>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className="text-[22px] font-semibold leading-11">Opname {formatDate(opname.opnameDate)}</h1>
-          <StatusChip tone={final ? "info" : "neutral"}>{final ? "Final" : "Draft"}</StatusChip>
-        </div>
-        <p className="text-sm text-muted-foreground">{opname.user.name}{opname.note && ` · ${opname.note}`}</p>
-        {!final && <p className="text-sm text-muted-foreground">Isi hitung fisik per batch. Batch yang tidak diubah dianggap sesuai. Selisih memerlukan alasan sebelum difinalkan.</p>}
-      </header>
+      <PageHeader
+        back={{ href: "/inventaris/opname", label: "Stok Opname" }}
+        title={`Opname ${formatDate(opname.opnameDate)}`}
+        status={<StatusChip tone={final ? "info" : "neutral"}>{final ? "Final" : "Draft"}</StatusChip>}
+        meta={
+          <>
+            <p>{opname.user.name}{opname.note && ` · ${opname.note}`}</p>
+            {!final && <p>Isi hitung fisik per batch. Batch yang tidak diubah dianggap sesuai. Selisih memerlukan alasan sebelum difinalkan.</p>}
+          </>
+        }
+      />
 
       {final ? (
         <div className="overflow-x-auto rounded-[10px] border bg-card">
-          <table className="w-full min-w-[720px] text-[14.5px]">
+          <table className="w-full min-w-[600px] text-[14.5px]">
             <thead>
               <tr className="border-b text-left text-[13px] text-muted-foreground">
                 <th className="px-4 py-2.5 font-normal">Produk / batch</th>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { selectClass } from "@/components/form-fields";
@@ -37,7 +38,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
       </div>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[720px] text-[14.5px]">
+        <table className="w-full min-w-[600px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Nama</th>
@@ -52,8 +53,8 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
           <tbody>
             {items.length === 0 && (
               <tr>
-                <td colSpan={showCost ? 7 : 6} className="px-4 py-8 text-center text-muted-foreground">
-                  Belum ada item.
+                <td colSpan={showCost ? 7 : 6}>
+                  <EmptyState action={<Button asChild><Link href="/master-data/item/baru">+ Item baru</Link></Button>}>Belum ada item.</EmptyState>
                 </td>
               </tr>
             )}

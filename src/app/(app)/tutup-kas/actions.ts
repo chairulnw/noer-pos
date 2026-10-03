@@ -5,6 +5,7 @@ import { z } from "zod";
 import { cashClosingSchema } from "@/lib/cash-schema";
 import { closeCash } from "@/lib/cash";
 import { requireCapability } from "@/lib/require-role";
+import { flash } from "@/components/flash";
 
 export type CashFormState = {
   ok?: boolean;
@@ -35,5 +36,6 @@ export async function closeCashAction(_prev: CashFormState, formData: FormData):
   }
 
   revalidatePath("/tutup-kas");
+  await flash("Kas ditutup");
   return { ok: true };
 }

@@ -18,12 +18,12 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
     <div className="space-y-4">
       <h1 className="text-[22px] font-semibold leading-11">Riwayat Pembayaran</h1>
       <form className="flex gap-2">
-        <Input name="q" defaultValue={q} placeholder="Cari no. invoice, pasien, atau pelanggan" aria-label="Cari pembayaran" />
+        <Input name="q" data-search defaultValue={q} placeholder="Cari no. invoice, pasien, atau pelanggan" aria-label="Cari pembayaran" />
         <Button type="submit" variant="outline">Cari</Button>
       </form>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[640px] text-[14.5px]">
+        <table className="w-full min-w-[560px] text-[14.5px]">
           <thead>
             <tr className="border-b text-left text-[13px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Waktu</th>

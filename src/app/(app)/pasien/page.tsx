@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/page-header";
 import { Search } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -26,12 +27,19 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center gap-3">
-        <h1 className="mr-3 text-[22px] font-semibold leading-11">Pasien & Owner</h1>
-        <form className="flex h-11 flex-1 basis-80 items-center gap-2.5 rounded-lg border border-input bg-card px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-[22px] font-semibold leading-11">Pasien & Owner</h1>
+        <Button asChild>
+          <Link href="/pasien/owner/baru">+ Owner baru</Link>
+        </Button>
+      </header>
+
+      <div>
+        <form className="flex h-11 w-full items-center gap-2.5 rounded-lg border border-input bg-card px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
           <Search className="size-[18px] text-muted-foreground" />
           <input
             name="q"
+            data-search
             defaultValue={q}
             aria-label="Cari pasien atau owner"
             placeholder="Nama owner/hewan, no. WA, no. RM, microchip"
@@ -39,14 +47,11 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
           />
           <span className="text-[13px] text-muted-foreground">{q ? `${total} hasil` : "Terbaru"}</span>
         </form>
-        <Button asChild>
-          <Link href="/pasien/owner/baru">+ Owner baru</Link>
-        </Button>
-      </header>
+      </div>
 
       <div className="flex flex-wrap items-start gap-5">
         <section aria-label="Hasil pencarian" className="min-w-0 flex-1 basis-72 overflow-hidden rounded-[10px] border bg-card md:max-w-sm">
-          {total === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Tidak ada pasien ditemukan.</p>}
+          {total === 0 && <EmptyState action={<Button asChild variant="outline"><Link href="/pasien/owner/baru">+ Owner baru</Link></Button>}>Tidak ada pasien ditemukan.</EmptyState>}
           {patients.map((p) => (
             <Link
               key={p.id}

@@ -1,27 +1,27 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { Modal } from "@/components/modal";
+import { menuItemClass } from "@/components/more-menu";
+import { toast } from "@/components/toaster";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { voidAction } from "./actions";
 
 export function VoidPanel({ invoiceId, invoiceNo, products }: { invoiceId: string; invoiceNo: string; products: { id: string; name: string; qty: number }[] }) {
-  const [open, setOpen] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
   const [reason, setReason] = useState("");
   const [restock, setRestock] = useState<string[]>(products.map((p) => p.id));
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
 
-  if (!open) {
-    return (
-      <Button type="button" variant="outline" onClick={() => setOpen(true)} className="border-destructive text-destructive">
-        Void invoice
-      </Button>
-    );
-  }
-
   return (
-    <section aria-label="Void invoice" className="space-y-3.5 rounded-[10px] border border-[#F0C4BF] bg-card p-5">
+    <>
+      <button type="button" role="menuitem" onClick={() => dialog.current?.showModal()} className={`${menuItemClass} text-destructive`}>
+        Void invoice
+      </button>
+      <Modal dialogRef={dialog}>
+    <section aria-label="Void invoice" className="space-y-3.5">
       <h2 className="text-base font-semibold text-destructive">Void {invoiceNo}</h2>
       <p className="text-sm text-muted-foreground">
         Void membatalkan invoice, bukan refund. Pembayaran yang sudah masuk tetap tercatat dan ditandai void. Jika uang dikembalikan, lakukan di luar sistem dan catat di alasan.
@@ -56,15 +56,18 @@ export function VoidPanel({ invoiceId, invoiceNo, products }: { invoiceId: strin
             startTransition(async () => {
               const result = await voidAction(invoiceId, { reason, restockLineIds: restock });
               setError(result.error);
+              if (!result.error) { dialog.current?.close(); toast("Invoice di-void"); }
             })
           }
         >
           {pending ? "Memproses…" : "Void invoice"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+        <Button type="button" variant="outline" onClick={() => dialog.current?.close()}>
           Batal
         </Button>
       </div>
     </section>
+      </Modal>
+    </>
   );
 }

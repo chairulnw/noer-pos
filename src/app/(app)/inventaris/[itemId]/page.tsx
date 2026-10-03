@@ -70,7 +70,7 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
       <section className="overflow-hidden rounded-[10px] border bg-card">
         <h2 className="border-b px-5 py-3 text-base font-semibold">Riwayat pergerakan</h2>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-[14.5px]">
+          <table className="w-full min-w-[560px] text-[14.5px]">
             <thead>
               <tr className="border-b text-left text-[13px] text-muted-foreground">
                 <th className="px-5 py-2.5 font-normal">Tanggal</th>

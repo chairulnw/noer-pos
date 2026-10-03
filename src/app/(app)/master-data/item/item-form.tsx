@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, inputClass } from "@/components/ui/input";
+import { MoneyInput } from "@/components/money-input";
 import { CheckField, Field, Section, selectClass } from "@/components/form-fields";
 import { PRODUCT_CATEGORIES, SERVICE_CATEGORIES, type ItemView } from "@/lib/item-schema";
 import { keepValuesOnError } from "@/lib/form";
@@ -65,11 +66,11 @@ export function ItemForm({ item }: { item: ItemView | null }) {
 
       <Section title="Harga & satuan">
         <Field label="Harga jual (Rp)" name="sellPrice" errors={err("sellPrice")}>
-          <Input id="sellPrice" name="sellPrice" type="number" min={0} step={1} defaultValue={item?.sellPrice} required />
+          <MoneyInput id="sellPrice" name="sellPrice" className={inputClass} defaultValue={item?.sellPrice} required />
         </Field>
         {isProduct && (
           <Field label="Harga beli (Rp)" name="buyPrice" errors={err("buyPrice")} hint="Per satuan dasar.">
-            <Input id="buyPrice" name="buyPrice" type="number" min={0} step={1} defaultValue={item?.buyPrice} required />
+            <MoneyInput id="buyPrice" name="buyPrice" className={inputClass} defaultValue={item?.buyPrice} required />
           </Field>
         )}
         <Field label="Satuan dasar" name="baseUnit" errors={err("baseUnit")} hint={isProduct ? "Satuan terkecil, mis. tablet, ml, pcs." : "Mis. kali, hari."}>

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { deleteOwner, deletePatient, saveOwner, savePatient } from "@/lib/patients";
 import { ownerSchema, patientSchema } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
+import { flash } from "@/components/flash";
 
 export type PatientFormState = {
   message?: string;
@@ -39,6 +40,7 @@ export async function saveOwnerAction(id: string | null, _prev: PatientFormState
   if (result.id === undefined) return { message: result.error };
 
   revalidatePath("/pasien");
+  await flash("Owner tersimpan");
   redirect(`/pasien/owner/${result.id}`);
 }
 
@@ -72,6 +74,7 @@ export async function savePatientAction(
   if (result.id === undefined) return { message: result.error };
 
   revalidatePath("/pasien");
+  await flash("Pasien tersimpan");
   redirect(`/pasien?id=${result.id}`);
 }
 
@@ -79,6 +82,7 @@ export async function deletePatientAction(id: string) {
   await requireCapability("manage_patients");
   await deletePatient(id);
   revalidatePath("/pasien");
+  await flash("Pasien dihapus");
   redirect("/pasien");
 }
 
@@ -87,5 +91,6 @@ export async function deleteOwnerAction(id: string) {
   const result = await deleteOwner(id);
   if (result.error) redirect(`/pasien/owner/${id}/ubah?error=${encodeURIComponent(result.error)}`);
   revalidatePath("/pasien");
+  await flash("Owner dihapus");
   redirect("/pasien");
 }

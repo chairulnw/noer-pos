@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
+import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { dateToJakartaLocal, stayDay } from "@/lib/admission-calc";
 import { getAdmission, listAdmissionLogs } from "@/lib/admissions";
@@ -21,24 +21,19 @@ export default async function AdmissionPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="space-y-5">
-      <header className="overflow-hidden rounded-[10px] border bg-card">
-        <div className="flex flex-wrap items-start justify-between gap-3 p-4 px-5">
-          <div className="space-y-1">
-            <Link href="/rawat-inap" className="text-[13px] font-medium text-primary">← Rawat Inap & Hotel</Link>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-[22px] font-semibold leading-11">{patient.name}</h1>
-              <span className="text-sm text-muted-foreground tabular-nums">{patient.rmNo}</span>
-              <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {patient.species} · {admission.type === "HOTEL" ? "Hotel" : "Rawat inap"} {admission.room.name} · masuk {formatDate(admission.checkIn)} {formatTime(admission.checkIn)}
-              {active && ` · Hari ke-${stayDay(admission.checkIn, new Date())}`}
-            </p>
-          </div>
-          <StatusChip tone={active ? "warning" : "neutral"}>{active ? "Menginap" : "Selesai"}</StatusChip>
-        </div>
+      <PageHeader
+        back={{ href: "/rawat-inap", label: "Rawat Inap & Hotel" }}
+        title={<>{patient.name} <span className="text-sm font-normal text-muted-foreground tabular-nums">{patient.rmNo}</span></>}
+        status={<><StatusChip tone={active ? "warning" : "neutral"}>{active ? "Menginap" : "Selesai"}</StatusChip><ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} /></>}
+        meta={
+          <p>
+            {patient.species} · {admission.type === "HOTEL" ? "Hotel" : "Rawat inap"} {admission.room.name} · masuk {formatDate(admission.checkIn)} {formatTime(admission.checkIn)}
+            {active && ` · Hari ke-${stayDay(admission.checkIn, new Date())}`}
+          </p>
+        }
+      >
         <ClinicalNotes allergyNote={patient.allergyNote} aggressive={patient.aggressive} behaviorNote={patient.behaviorNote} />
-      </header>
+      </PageHeader>
 
       {active && admission.type === "RAWAT_INAP" && (
         <section className="space-y-3.5 rounded-[10px] border bg-card p-5">
