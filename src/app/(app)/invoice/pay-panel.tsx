@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { changeDue } from "@/lib/billing";
 import { formatRupiah } from "@/lib/format";
-import { payAction, setDiscountAction } from "./actions";
+import { depositAction, payAction, setDiscountAction } from "./actions";
 
 const METHODS = [
   { id: "TUNAI", label: "Tunai" },
@@ -28,9 +28,12 @@ type Props = {
   canDiscount: boolean;
   hasQris: boolean;
   editable: boolean;
+  canPay: boolean;
+  paid: number;
+  hasPayments: boolean;
 };
 
-export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, editable }: Props) {
+export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, editable, canPay, paid, hasPayments }: Props) {
   const [method, setMethod] = useState<(typeof METHODS)[number]["id"]>("TUNAI");
   const [received, setReceived] = useState<string | null>(null);
   const [reference, setReference] = useState("");
@@ -40,7 +43,11 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
 
-  const total = totals.grandTotal;
+  const total = Math.max(totals.grandTotal - paid, 0);
+  const overpaid = paid > totals.grandTotal;
+  const [dpOpen, setDpOpen] = useState(false);
+  const [dpAmount, setDpAmount] = useState("");
+  const [dpCash, setDpCash] = useState<string | null>(null);
   const cash = Number(received ?? total) || 0;
   const quick = [...new Set([total, roundUp(total, 10_000), roundUp(total, 50_000), roundUp(total, 100_000)])].filter((v) => v > 0).slice(0, 4);
 
@@ -85,11 +92,27 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
 
       <div className="flex items-baseline justify-between border-t pt-3.5">
         <span className="text-[15px] font-medium">Total</span>
-        <span className="text-[28px] font-semibold tabular-nums">{formatRupiah(total)}</span>
+        <span className={`font-semibold tabular-nums ${paid > 0 ? "text-xl" : "text-[28px]"}`}>{formatRupiah(totals.grandTotal)}</span>
       </div>
-
-      {editable && (
+      {paid > 0 && (
         <>
+          <div className="flex justify-between text-[14.5px]"><span className="text-muted-foreground">DP dibayar</span><span className="tabular-nums">− {formatRupiah(paid)}</span></div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-[15px] font-medium">Sisa</span>
+            <span className="text-[28px] font-semibold tabular-nums">{formatRupiah(total)}</span>
+          </div>
+        </>
+      )}
+      {overpaid && (
+        <p role="alert" className="rounded-lg border border-[#E9CFA6] p-3 text-sm text-warning">
+          Total DP ({formatRupiah(paid)}) melebihi total tagihan. Minta Admin mengoreksi jumlah DP sebelum membayar.
+        </p>
+      )}
+
+      {canPay && (
+        <>
+          {total > 0 && (
+            <>
           <div className="text-sm font-medium">Metode pembayaran</div>
           <div className="grid grid-cols-2 gap-2">
             {METHODS.map((m) => (
@@ -137,17 +160,56 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
               )}
             </div>
           )}
+            </>
+          )}
 
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button
             type="button"
             size="lg"
             className="w-full"
-            disabled={pending || (method === "TUNAI" && cash < total)}
-            onClick={() => run(() => payAction(invoiceId, { method, cashReceived: method === "TUNAI" ? cash : null, reference }))}
+            disabled={pending || overpaid || (total > 0 && method === "TUNAI" && cash < total)}
+            onClick={() => run(() => payAction(invoiceId, { method, cashReceived: total > 0 && method === "TUNAI" ? cash : null, reference }))}
           >
-            {pending ? "Memproses…" : `Bayar ${formatRupiah(total)}`}
+            {pending ? "Memproses…" : total > 0 ? `Bayar ${formatRupiah(total)}` : "Selesaikan invoice"}
           </Button>
+
+          {!hasPayments && (
+            <>
+              <Button type="button" variant="outline" className="w-full" onClick={() => setDpOpen(!dpOpen)}>
+                Bayar DP
+              </Button>
+              {dpOpen && (
+                <div className="space-y-2.5 rounded-lg bg-muted/50 p-3">
+                  <label htmlFor="dp-amount" className="text-sm font-medium">Jumlah DP ({METHODS.find((m) => m.id === method)?.label})</label>
+                  <div className="flex h-11 items-center gap-2 rounded-lg border border-input bg-card px-3">
+                    <span className="text-sm text-muted-foreground">Rp</span>
+                    <input id="dp-amount" type="number" min="1" step="1" value={dpAmount} onChange={(e) => setDpAmount(e.target.value)} className="min-w-0 flex-1 bg-transparent font-medium tabular-nums outline-none" />
+                  </div>
+                  {method === "TUNAI" && (
+                    <div className="flex h-11 items-center gap-2 rounded-lg border border-input bg-card px-3">
+                      <span className="text-sm text-muted-foreground">Diterima Rp</span>
+                      <input aria-label="Uang diterima untuk DP" type="number" min="0" step="1" value={dpCash ?? dpAmount} onChange={(e) => setDpCash(e.target.value)} className="min-w-0 flex-1 bg-transparent tabular-nums outline-none" />
+                    </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={pending || !(Number(dpAmount) > 0)}
+                    onClick={() =>
+                      run(async () => {
+                        const r = await depositAction(invoiceId, { amount: Number(dpAmount), method, cashReceived: method === "TUNAI" ? Number(dpCash ?? dpAmount) : null, reference });
+                        if (!r.error) { setDpOpen(false); setDpAmount(""); setDpCash(null); }
+                        return r;
+                      })
+                    }
+                  >
+                    Terima DP
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
     </section>

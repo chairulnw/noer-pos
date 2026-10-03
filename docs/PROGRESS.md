@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1B.4 |
+| Task berikutnya | 1B.5 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -38,7 +38,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1B.1** Rawat inap & hotel: check-in, kandang tunggal, layar admission aktif
 - [x] **1B.2** Monitoring harian rawat inap
 - [x] **1B.3** Check-out + hitung hari (BR-15) + item tarif ke invoice
-- [ ] **1B.4** DP + pelunasan (BR-9)
+- [x] **1B.4** DP + pelunasan (BR-9)
 - [ ] **1B.5** E-invoice PDF
 - [ ] **1B.6** Stok opname
 - [ ] **1B.7** Notifikasi stok rendah/hampir expired di dashboard
@@ -157,6 +157,10 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1B.3 | Check-out menghitung hari dengan BR-15 (selisih tanggal kalender Jakarta, minimal 1), menyimpan `billed_days`, membebaskan kandang, dan menambah item tarif x hari ke draft invoice admission dalam satu transaksi, lalu membuka invoice. Pratinjau hari dan total tampil sebelum konfirmasi (total disembunyikan dari Dokter) | FR-ADM-4, BR-15 (default, menunggu jawaban klien soal per malam atau per 24 jam dan jam batas check-out) |
 | 2026-10-03 | 1B.3 | Harga item tarif memakai harga master saat check-out (bukan saat check-in). Bila invoice admission sudah FINAL, check-out ditolak dan admission tetap aktif; bila VOID, dibuat draft invoice baru | Admission hanya menyimpan item tarif, bukan harga. Penanganan invoice final/void tidak ada di SPEC |
 | 2026-10-03 | 1B.3 | Check-out dilakukan semua role (SPEC bagian 5); hotel dan rawat inap memakai alur yang sama | |
+| 2026-10-03 | 1B.4 | Aturan BR-9 di `src/lib/billing.ts` (diuji): maksimal 2 pembayaran; satu DP lalu pelunasan = sisa; DP pada draft boleh berapa pun karena total belum final, pada invoice FINAL harus lebih kecil dari total; DP > total tagihan menolak finalisasi/pembayaran dengan pesan jelas; overpay hanya tunai (kembalian) | BR-9, R8 |
+| 2026-10-03 | 1B.4 | Tombol **Bayar** pada draft ber-DP = finalisasi + pelunasan sebesar sisa (kind PELUNASAN); bila sisa 0 (DP = total atau total 0) tombol berubah jadi "Selesaikan invoice" tanpa pembayaran tambahan | Alur 9.3 |
+| 2026-10-03 | 1B.4 | Koreksi jumlah DP hanya oleh Admin (kapabilitas baru `correct_deposit`), hanya selama DP satu-satunya pembayaran dan invoice belum void, wajib alasan, teraudit sebelum/sesudah (`payment.deposit_correct`); DP juga diaudit (`payment.deposit`) | BR-9, FR-SYS-1. Matriks bagian 5 tidak punya baris untuk koreksi DP: ditambahkan sebagai capability Admin |
+| 2026-10-03 | 1B.4 | Belum ada tombol "finalkan tanpa bayar", jadi invoice FINAL tidak pernah berstatus DP; jalur DP-pada-FINAL tersedia di logika tetapi belum terjangkau dari UI. Struk menampilkan baris DP/Pelunasan dan SISA | Tidak diminta; hindari invoice final menggantung |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -193,6 +197,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1B.1 | Selesai | `/rawat-inap` (admission aktif: kandang, pasien + tag alergi, jenis, masuk, Hari ke-N, link invoice), `/rawat-inap/check-in` (cari pasien, jenis, kandang kosong, tarif, waktu, kunjungan hari ini), bagian Rawat inap & hotel di profil pasien. 162 test (hari kalender). Skrip: semua validasi, dua check-in bersamaan ke kandang sama (satu ditolak, tanpa invoice yatim). Browser: daftar, form (opsi berganti per jenis), check-in. Lanjut ke 1B.2 |
 | 2026-10-03 | 1B.2 | Selesai | `/rawat-inap/[id]` (tambah monitoring: waktu, suhu, makan/minum, catatan; riwayat terbaru dulu) dan 5 log terakhir di profil pasien. 169 test (skema log, check-in). Skrip: sebelum check-in, masa depan, hotel, setelah check-out, id tak ada ditolak. Browser: tambah log, form ter-reset, tampil di profil. Kasir ditolak (/forbidden). Lanjut ke 1B.3 |
 | 2026-10-03 | 1B.3 | Selesai | `/rawat-inap/[id]/check-out` (waktu keluar, pratinjau N hari x tarif) dan tombol Check-out di daftar aktif. Skrip: hari yang sama jadi 1 hari, 3 hari = Rp 450.000 (PPN 11% ikut), check-out ulang/bersamaan/sebelum masuk/masa depan ditolak, invoice final menolak dan membatalkan seluruh perubahan, invoice void membuat draft baru. Browser: pratinjau 2 hari x Rp 150.000, check-out membuka invoice Rp 300.000. Dokter tidak melihat harga. Lanjut ke 1B.4 |
+| 2026-10-03 | 1B.4 | Selesai | Tombol Bayar DP (jumlah, metode, uang diterima), ringkasan Total/DP dibayar/Sisa, label DP/Pelunasan di invoice dan struk, koreksi DP Admin. 182 test (settlement, deposit, koreksi, permission). Skrip: DP kedua ditolak, pelunasan = sisa, maks 2 pembayaran, DP 600rb > total 300rb ditolak lalu dikoreksi Admin, DP pada FINAL, void invoice ber-DP menandai DP void. Browser: DP Rp 50.000 lalu pelunasan Rp 150.000 menjadi Final/Lunas. Lanjut ke 1B.5 |
 
 ## Perintah Proyek
 

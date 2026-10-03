@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allergyMatch, changeDue, formatInvoiceNo, paymentStatus, invoiceTotals, lineTotals, nextInvoiceNo, type Discount, type LineInput } from "./billing";
+import { allergyMatch, changeDue, correctedDepositError, depositError, formatInvoiceNo, paymentStatus, settlement, invoiceTotals, lineTotals, nextInvoiceNo, type Discount, type LineInput } from "./billing";
 
 const none: Discount = { type: null, value: 0 };
 const line = (qty: number, unitPrice: number, discount: Discount = none): LineInput => ({ qty, unitPrice, discount });
@@ -118,5 +118,61 @@ describe("status pembayaran (BR-9, diturunkan)", () => {
     expect(changeDue(500000, 499500)).toBe(500);
     expect(changeDue(499500, 499500)).toBe(0);
     expect(changeDue(100, 499500)).toBe(0);
+  });
+});
+
+describe("settlement (BR-9)", () => {
+  it("tanpa pembayaran: lunas langsung sebesar total", () => {
+    expect(settlement([], 499500)).toEqual({ remaining: 499500, kind: "LUNAS" });
+  });
+
+  it("setelah DP: pelunasan harus sama dengan sisa", () => {
+    expect(settlement([{ amount: 200000 }], 499500)).toEqual({ remaining: 299500, kind: "PELUNASAN" });
+  });
+
+  it("DP sama dengan total: sisa 0", () => {
+    expect(settlement([{ amount: 499500 }], 499500)).toEqual({ remaining: 0, kind: "PELUNASAN" });
+  });
+
+  it("DP melebihi total tagihan ditolak (R8)", () => {
+    expect(settlement([{ amount: 600000 }], 499500)).toHaveProperty("error");
+  });
+
+  it("maksimal 2 pembayaran, tanpa cicilan", () => {
+    expect(settlement([{ amount: 100000 }, { amount: 100000 }], 499500)).toHaveProperty("error");
+  });
+});
+
+describe("depositError", () => {
+  it("DP pertama pada draft boleh berapa pun di atas 0 (total belum final)", () => {
+    expect(depositError([], 1_000_000, 0, "DRAFT")).toBeNull();
+    expect(depositError([], 0, 0, "DRAFT")).not.toBeNull();
+    expect(depositError([], 100.5, 0, "DRAFT")).not.toBeNull();
+  });
+
+  it("pada invoice final DP harus lebih kecil dari total", () => {
+    expect(depositError([], 100000, 499500, "FINAL")).toBeNull();
+    expect(depositError([], 499500, 499500, "FINAL")).not.toBeNull();
+  });
+
+  it("DP hanya satu kali", () => {
+    expect(depositError([{ amount: 100000 }], 50000, 499500, "DRAFT")).not.toBeNull();
+  });
+});
+
+describe("correctedDepositError", () => {
+  const dp = [{ kind: "DP" as const, amount: 100000 }];
+
+  it("koreksi hanya saat DP satu-satunya pembayaran", () => {
+    expect(correctedDepositError(dp, 80000, 499500, "DRAFT")).toBeNull();
+    expect(correctedDepositError([...dp, { kind: "PELUNASAN", amount: 399500 }], 80000, 499500, "FINAL")).not.toBeNull();
+    expect(correctedDepositError([{ kind: "LUNAS", amount: 499500 }], 80000, 499500, "FINAL")).not.toBeNull();
+    expect(correctedDepositError([], 80000, 499500, "DRAFT")).not.toBeNull();
+  });
+
+  it("jumlah baru valid dan invoice belum void", () => {
+    expect(correctedDepositError(dp, 0, 499500, "DRAFT")).not.toBeNull();
+    expect(correctedDepositError(dp, 80000, 499500, "VOID")).not.toBeNull();
+    expect(correctedDepositError(dp, 499500, 499500, "FINAL")).not.toBeNull();
   });
 });

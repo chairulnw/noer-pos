@@ -71,7 +71,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1.5">
                     <StatusChip tone={INVOICE_STATUS[inv.status].tone}>{INVOICE_STATUS[inv.status].label}</StatusChip>
-                    {inv.status === "FINAL" && (() => {
+                    {inv.status !== "VOID" && (inv.status === "FINAL" || inv.payments.length > 0) && (() => {
                       const state = paymentStatus(inv.payments.reduce((sum, p) => sum + p.amount, 0), inv.grandTotal);
                       return <StatusChip tone={state === "LUNAS" ? "success" : "warning"}>{state === "LUNAS" ? "Lunas" : state === "SEBAGIAN" ? "DP" : "Belum bayar"}</StatusChip>;
                     })()}

@@ -14,9 +14,11 @@ import { Button } from "@/components/ui/button";
 import { replacementAction } from "../actions";
 import { InvoiceEditor } from "../invoice-editor";
 import { PayPanel } from "../pay-panel";
+import { CorrectDeposit } from "../correct-deposit";
 import { VoidPanel } from "../void-panel";
 
 const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const KIND = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Lunas" };
 const PAYMENT = { BELUM_BAYAR: { label: "Belum bayar", tone: "warning" }, SEBAGIAN: { label: "DP", tone: "warning" }, LUNAS: { label: "Lunas", tone: "success" } } as const;
 
 export default async function InvoicePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
@@ -31,9 +33,12 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   const paid = invoice.payments.filter((p) => !p.voided).reduce((sum, p) => sum + p.amount, 0);
   const status = paymentStatus(paid, invoice.grandTotal);
   const editable = invoice.status === "DRAFT";
+  const activePayments = invoice.payments.filter((p) => !p.voided);
+  const canPay = invoice.status === "DRAFT" || (invoice.status === "FINAL" && paid < invoice.grandTotal);
+  const canCorrectDeposit = can(user.role, "correct_deposit") && invoice.status !== "VOID" && activePayments.length === 1 && activePayments[0].kind === "DP";
   const canVoid = can(user.role, "void_invoice") && invoice.status !== "VOID";
   const canReplace = invoice.status === "VOID" && invoice.visit && !(await activeInvoiceForVisit(invoice.visit.id));
-  const [catalog, settings] = editable ? await Promise.all([listSellableItems(), getSettings()]) : [[], null];
+  const [catalog, settings] = editable || canPay ? await Promise.all([editable ? listSellableItems() : [], getSettings()]) : [[], null];
 
   return (
     <div className="max-w-6xl space-y-5">
@@ -42,7 +47,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         <div className="flex flex-wrap items-center gap-2.5">
           <h1 className="text-[22px] font-semibold tabular-nums">{invoice.invoiceNo}</h1>
           <StatusChip tone={INVOICE_STATUS[invoice.status].tone}>{INVOICE_STATUS[invoice.status].label}</StatusChip>
-          {invoice.status === "FINAL" && <StatusChip tone={PAYMENT[status].tone}>{PAYMENT[status].label}</StatusChip>}
+          {(invoice.status === "FINAL" || paid > 0) && invoice.status !== "VOID" && <StatusChip tone={PAYMENT[status].tone}>{PAYMENT[status].label}</StatusChip>}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <span>
@@ -111,12 +116,14 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                 <div key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 text-[14.5px] last:border-0 last:pb-0">
                   <div>
                     <span className="font-medium">{METHOD[p.method]}</span>
+                    {p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}
                     {p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Void</StatusChip></span>}
                     <span className="text-muted-foreground"> · {formatDate(p.paidAt)} · {p.receivedBy.name}</span>
                     {p.reference && <div className="text-[13px] text-muted-foreground">{p.reference}</div>}
                     {p.cashReceived !== null && <div className="text-[13px] text-muted-foreground">Diterima {formatRupiah(p.cashReceived)} · kembalian {formatRupiah(p.cashReceived - p.amount)}</div>}
                   </div>
                   <span className="font-semibold tabular-nums">{formatRupiah(p.amount)}</span>
+                  {canCorrectDeposit && !p.voided && p.kind === "DP" && <div className="basis-full"><CorrectDeposit invoiceId={invoice.id} current={p.amount} /></div>}
                 </div>
               ))}
             </section>
@@ -127,6 +134,9 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
           <PayPanel
             invoiceId={invoice.id}
             editable={editable}
+            canPay={canPay}
+            paid={paid}
+            hasPayments={activePayments.length > 0}
             canDiscount={can(user.role, "apply_discount")}
             hasQris={Boolean(settings?.qris)}
             discount={{ type: invoice.discountType, value: invoice.discountValue }}

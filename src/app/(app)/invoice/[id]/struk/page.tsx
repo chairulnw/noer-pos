@@ -6,6 +6,7 @@ import { getSettings } from "@/lib/settings";
 import { Receipt } from "./receipt";
 
 const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const PREFIX = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Bayar" };
 
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   await requireCapability("manage_invoice_payment");
@@ -34,7 +35,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         taxTotal: invoice.taxTotal,
         taxLabel: invoice.taxRate > 0 ? `PPN ${invoice.taxRate}%${invoice.taxIncluded ? " (incl)" : ""}` : null,
         grandTotal: invoice.grandTotal,
-        payments: payments.map((p) => ({ method: METHOD[p.method], amount: p.amount, cashReceived: p.cashReceived })),
+        payments: payments.map((p) => ({ label: `${PREFIX[p.kind]} ${METHOD[p.method]}`, amount: p.amount, cashReceived: p.cashReceived })),
         remaining: Math.max(0, invoice.grandTotal - paid),
       }}
     />

@@ -21,7 +21,7 @@ export type ReceiptData = {
   taxTotal: number;
   taxLabel: string | null;
   grandTotal: number;
-  payments: { method: string; amount: number; cashReceived: number | null }[];
+  payments: { label: string; amount: number; cashReceived: number | null }[];
   remaining: number;
 };
 
@@ -100,7 +100,7 @@ export function Receipt({ data }: { data: ReceiptData }) {
         <Rule />
         {data.payments.map((p, i) => (
           <div key={i}>
-            <Row left={`Bayar ${p.method}`} right={formatRupiah(p.amount)} />
+            <Row left={p.label} right={formatRupiah(p.amount)} />
             {p.cashReceived !== null && (
               <>
                 <Row left="Diterima" right={formatRupiah(p.cashReceived)} />

@@ -1,7 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
-import { paymentStatus } from "@/lib/billing";
+import { correctedDepositError, depositError, paymentStatus, settlement } from "@/lib/billing";
 import { StockConflictError, deductForInvoiceItem } from "@/lib/inventory";
 import { createDraftInvoiceFromRecord, nextInvoiceNoFor, recomputeInvoice, taxFromSettings } from "@/lib/invoices";
 import type { Discount, PayInput, VoidInput } from "@/lib/invoice-schema";
@@ -116,19 +116,21 @@ export async function payInvoice(userId: string, invoiceId: string, pay: PayInpu
         if (!status) return { error: NOT_FOUND };
         if (status === "VOID") return { error: "Invoice sudah di-void." };
 
-        if (status === "DRAFT") {
-          await recomputeInvoice(tx, invoiceId, tax);
-          await finalizeDraft(tx, userId, invoiceId);
-        }
+        if (status === "DRAFT") await recomputeInvoice(tx, invoiceId, tax);
 
-        const invoice = await tx.invoice.findUniqueOrThrow({
+        const before = await tx.invoice.findUniqueOrThrow({
           where: { id: invoiceId },
-          select: { invoiceNo: true, grandTotal: true, visitId: true, payments: { where: { voided: false }, select: { amount: true } } },
+          select: { grandTotal: true, payments: { where: { voided: false }, select: { amount: true } } },
         });
-        const paid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
-        const remaining = invoice.grandTotal - paid;
+        const plan = settlement(before.payments, before.grandTotal);
+        if ("error" in plan) throw new Rejected(plan.error);
+        if (status === "FINAL" && plan.remaining <= 0) return { error: "Invoice sudah lunas." };
 
-        if (status === "FINAL" && remaining <= 0) return { error: "Invoice sudah lunas." };
+        if (status === "DRAFT") await finalizeDraft(tx, userId, invoiceId);
+
+        const invoice = await tx.invoice.findUniqueOrThrow({ where: { id: invoiceId }, select: { invoiceNo: true, grandTotal: true, visitId: true } });
+        const paid = before.grandTotal - plan.remaining;
+        const remaining = plan.remaining;
 
         let change = 0;
         if (remaining > 0) {
@@ -139,7 +141,7 @@ export async function payInvoice(userId: string, invoiceId: string, pay: PayInpu
           const payment = await tx.payment.create({
             data: {
               invoiceId,
-              kind: paid > 0 ? "PELUNASAN" : "LUNAS",
+              kind: plan.kind,
               method: pay.method,
               amount: remaining,
               cashReceived: pay.cashReceived,
@@ -148,7 +150,7 @@ export async function payInvoice(userId: string, invoiceId: string, pay: PayInpu
             },
             select: { id: true },
           });
-          await logAudit(tx, { userId, action: "payment.create", entity: "invoice", entityId: invoiceId, after: { paymentId: payment.id, method: pay.method, amount: remaining } });
+          await logAudit(tx, { userId, action: "payment.create", entity: "invoice", entityId: invoiceId, after: { paymentId: payment.id, kind: plan.kind, method: pay.method, amount: remaining } });
         }
 
         if (paymentStatus(paid + Math.max(remaining, 0), invoice.grandTotal) === "LUNAS" && invoice.visitId) {
@@ -255,4 +257,58 @@ export async function createReplacementInvoice(userId: string, voidedInvoiceId: 
       if (!clash || attempt >= 3) throw error;
     }
   }
+}
+
+export async function receiveDeposit(userId: string, invoiceId: string, amount: number, method: PayInput["method"], cashReceived: number | null, reference: string): Promise<Fail | { ok: true; change: number }> {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const status = await lockStatus(tx, invoiceId);
+      if (!status) return { error: NOT_FOUND };
+      if (status === "VOID") return { error: "Invoice sudah di-void." };
+
+      const invoice = await tx.invoice.findUniqueOrThrow({
+        where: { id: invoiceId },
+        select: { grandTotal: true, payments: { where: { voided: false }, select: { amount: true } } },
+      });
+      const problem = depositError(invoice.payments, amount, invoice.grandTotal, status);
+      if (problem) return { error: problem };
+
+      let change = 0;
+      if (method === "TUNAI") {
+        if (cashReceived === null || cashReceived < amount) return { error: "Uang diterima kurang dari jumlah DP." };
+        change = cashReceived - amount;
+      }
+      const payment = await tx.payment.create({
+        data: { invoiceId, kind: "DP", method, amount, cashReceived: method === "TUNAI" ? cashReceived : null, reference: reference || null, receivedById: userId },
+        select: { id: true },
+      });
+      await logAudit(tx, { userId, action: "payment.deposit", entity: "invoice", entityId: invoiceId, after: { paymentId: payment.id, method, amount } });
+      return { ok: true as const, change };
+    });
+  } catch (error) {
+    if (error instanceof Rejected) return { error: error.message };
+    throw error;
+  }
+}
+
+export async function correctDeposit(userId: string, invoiceId: string, newAmount: number, reason: string): Promise<Fail | { ok: true }> {
+  return prisma.$transaction(async (tx) => {
+    const status = await lockStatus(tx, invoiceId);
+    if (!status) return { error: NOT_FOUND };
+
+    const invoice = await tx.invoice.findUniqueOrThrow({
+      where: { id: invoiceId },
+      select: { grandTotal: true, payments: { where: { voided: false }, select: { id: true, kind: true, amount: true, method: true, cashReceived: true } } },
+    });
+    const problem = correctedDepositError(invoice.payments, newAmount, invoice.grandTotal, status);
+    if (problem) return { error: problem };
+
+    const deposit = invoice.payments[0];
+    await tx.payment.update({
+      where: { id: deposit.id },
+      data: { amount: newAmount, cashReceived: deposit.method === "TUNAI" ? Math.max(deposit.cashReceived ?? 0, newAmount) : null },
+    });
+    await logAudit(tx, { userId, action: "payment.deposit_correct", entity: "invoice", entityId: invoiceId, before: { paymentId: deposit.id, amount: deposit.amount }, after: { paymentId: deposit.id, amount: newAmount, reason } });
+    return { ok: true as const };
+  });
 }

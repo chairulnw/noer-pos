@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { addInvoiceItem, createReplacementInvoice, createRetailInvoice, payInvoice, removeInvoiceItem, setInvoiceDiscount, updateInvoiceItem, voidInvoice } from "@/lib/invoice-ops";
-import { discountSchema, lineSchema, paySchema, voidSchema, type Discount, type PayInput, type VoidInput } from "@/lib/invoice-schema";
+import { addInvoiceItem, correctDeposit, createReplacementInvoice, createRetailInvoice, payInvoice, receiveDeposit, removeInvoiceItem, setInvoiceDiscount, updateInvoiceItem, voidInvoice } from "@/lib/invoice-ops";
+import { correctDepositSchema, depositSchema, discountSchema, lineSchema, paySchema, voidSchema, type DepositInput, type Discount, type PayInput, type VoidInput } from "@/lib/invoice-schema";
 import { requireCapability } from "@/lib/require-role";
 
 export type ActionResult = { error?: string; ok?: boolean; change?: number };
@@ -91,4 +91,26 @@ export async function markReceiptPrintedAction(invoiceId: string) {
   if (!id.safeParse(invoiceId).success) return;
   await prisma.invoice.updateMany({ where: { id: invoiceId, status: "FINAL" }, data: { receiptPrints: { increment: 1 } } });
   revalidatePath(`/invoice/${invoiceId}/struk`);
+}
+
+export async function depositAction(invoiceId: string, input: DepositInput): Promise<ActionResult> {
+  const user = await requireCapability("manage_invoice_payment");
+  const parsed = depositSchema.safeParse(input);
+  if (!parsed.success || !id.safeParse(invoiceId).success) return parsed.success ? { error: "Data tidak valid." } : invalid(parsed.error);
+  const { amount, method, cashReceived, reference } = parsed.data;
+  const result = await receiveDeposit(user.id, invoiceId, amount, method, cashReceived, reference);
+  revalidatePath("/invoice");
+  revalidatePath("/pembayaran");
+  refresh(invoiceId);
+  return "error" in result ? { error: result.error } : { ok: true, change: result.change };
+}
+
+export async function correctDepositAction(invoiceId: string, amount: number, reason: string): Promise<ActionResult> {
+  const user = await requireCapability("correct_deposit");
+  const parsed = correctDepositSchema.safeParse({ amount, reason });
+  if (!parsed.success || !id.safeParse(invoiceId).success) return parsed.success ? { error: "Data tidak valid." } : invalid(parsed.error);
+  const result = await correctDeposit(user.id, invoiceId, parsed.data.amount, parsed.data.reason);
+  revalidatePath("/pembayaran");
+  refresh(invoiceId);
+  return "error" in result ? { error: result.error } : { ok: true };
 }

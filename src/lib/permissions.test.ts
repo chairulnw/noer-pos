@@ -17,6 +17,7 @@ const EXPECTED: Record<Capability, Record<Role, boolean>> = {
   manage_invoice_payment: { ADMIN: true, DOKTER: false, KASIR: true },
   apply_discount: { ADMIN: true, DOKTER: false, KASIR: true },
   void_invoice: { ADMIN: true, DOKTER: false, KASIR: false },
+  correct_deposit: { ADMIN: true, DOKTER: false, KASIR: false },
   manage_stock: { ADMIN: true, DOKTER: false, KASIR: false },
   view_revenue_reports: { ADMIN: true, DOKTER: false, KASIR: false },
   view_audit_log: { ADMIN: true, DOKTER: false, KASIR: false },
