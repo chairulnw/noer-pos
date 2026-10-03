@@ -54,3 +54,5 @@ export function stockStatus(
 
 export const weightedCost = (oldQty: number, oldCost: number, inQty: number, inCost: number) =>
   Math.round((oldQty * oldCost + inQty * inCost) / (oldQty + inQty));
+
+export const opnameDiff = (system: number, counted: number) => (milli(counted) - milli(system)) / 1000;

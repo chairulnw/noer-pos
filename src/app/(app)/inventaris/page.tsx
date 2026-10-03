@@ -23,9 +23,14 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
     <div className="space-y-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[22px] font-semibold">Inventaris</h1>
-        <Button asChild>
-          <Link href="/inventaris/masuk">+ Stok masuk</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/inventaris/opname">Stok opname</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/inventaris/masuk">+ Stok masuk</Link>
+          </Button>
+        </div>
       </header>
       <form className="flex max-w-xl gap-2">
         <Input name="q" defaultValue={q} placeholder="Cari nama, SKU, atau barcode" aria-label="Cari produk" />

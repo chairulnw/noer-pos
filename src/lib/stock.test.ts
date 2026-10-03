@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { costPerBaseUnit, fefoAllocate, isExpired, stockStatus, toBaseQty, weightedCost, type StockBatchInfo } from "./stock";
+import { costPerBaseUnit, fefoAllocate, isExpired, opnameDiff, stockStatus, toBaseQty, weightedCost, type StockBatchInfo } from "./stock";
 
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
 const today = day("2026-10-03");
@@ -123,5 +123,14 @@ describe("weightedCost", () => {
   it("rata-rata tertimbang HPP batch yang sama", () => {
     expect(weightedCost(100, 1000, 100, 1200)).toBe(1100);
     expect(weightedCost(30, 1000, 10, 2000)).toBe(1250);
+  });
+});
+
+describe("opnameDiff", () => {
+  it("hitung fisik dikurangi stok sistem, tanpa galat floating point", () => {
+    expect(opnameDiff(100, 97)).toBe(-3);
+    expect(opnameDiff(100, 100)).toBe(0);
+    expect(opnameDiff(0.3, 0.1)).toBe(-0.2);
+    expect(opnameDiff(2, 2.5)).toBe(0.5);
   });
 });

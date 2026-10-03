@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1B.6 |
+| Task berikutnya | 1B.7 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -40,7 +40,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1B.3** Check-out + hitung hari (BR-15) + item tarif ke invoice
 - [x] **1B.4** DP + pelunasan (BR-9)
 - [x] **1B.5** E-invoice PDF
-- [ ] **1B.6** Stok opname
+- [x] **1B.6** Stok opname
 - [ ] **1B.7** Notifikasi stok rendah/hampir expired di dashboard
 
 **Gate 1B:** tagihan menginap benar, DP dan pelunasan benar, e-invoice terunduh.
@@ -163,6 +163,9 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1B.4 | Belum ada tombol "finalkan tanpa bayar", jadi invoice FINAL tidak pernah berstatus DP; jalur DP-pada-FINAL tersedia di logika tetapi belum terjangkau dari UI. Struk menampilkan baris DP/Pelunasan dan SISA | Tidak diminta; hindari invoice final menggantung |
 | 2026-10-03 | 1B.5 | E-invoice PDF A4 di `/api/invoice/[id]/pdf` (`@react-pdf/renderer`, tanpa Puppeteer): logo, data klinik, ditagihkan kepada (owner/pelanggan), pasien, item dengan diskon, subtotal/diskon/PPN/total, pembayaran (DP, pelunasan), sisa, status bayar, footer, dan pernyataan bukan faktur pajak (BR-16). Hanya untuk yang boleh mengelola invoice (Admin, Kasir); invoice VOID tidak bisa diunduh; draft boleh diunduh dengan label DRAFT | FR-POS-12 |
 | 2026-10-03 | 1B.5 | Logo di PDF memakai logo Pengaturan bila PNG/JPEG; logo WebP tidak didukung renderer sehingga dilewati. Tanpa logo terunggah dipakai logo bawaan NOER | Keterbatasan @react-pdf/renderer |
+| 2026-10-03 | 1B.6 | Sesi opname (`/inventaris/opname`) menyalin semua batch bertotal > 0 (termasuk yang sudah expired); hanya satu sesi DRAFT pada satu waktu (tombol berubah jadi "Lanjutkan sesi draft"). Baris yang tidak diubah dianggap sesuai | FR-INV-6 |
+| 2026-10-03 | 1B.6 | Selisih = hitung fisik - stok sistem **pada saat angka hitung diisi/diubah** (disimpan sebagai `system_qty`), bukan stok saat finalisasi. Finalisasi menerapkan selisih itu sebagai gerakan `ADJUST` bertanda; bila stok kini tidak cukup untuk selisih negatif, seluruh finalisasi dibatalkan dengan pesan "hitung ulang batch ini" | Penjualan yang terjadi di sela hitungan tidak boleh dihitung dua kali |
+| 2026-10-03 | 1B.6 | Alasan wajib untuk setiap selisih (ditolak saat finalisasi, draft boleh kosong); opname FINAL tidak bisa diubah; finalisasi memakai langkah konfirmasi di halaman (bukan dialog browser) dan teraudit (`stock.opname` berisi daftar penyesuaian) | FR-INV-6, FR-SYS-1 |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -201,6 +204,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1B.3 | Selesai | `/rawat-inap/[id]/check-out` (waktu keluar, pratinjau N hari x tarif) dan tombol Check-out di daftar aktif. Skrip: hari yang sama jadi 1 hari, 3 hari = Rp 450.000 (PPN 11% ikut), check-out ulang/bersamaan/sebelum masuk/masa depan ditolak, invoice final menolak dan membatalkan seluruh perubahan, invoice void membuat draft baru. Browser: pratinjau 2 hari x Rp 150.000, check-out membuka invoice Rp 300.000. Dokter tidak melihat harga. Lanjut ke 1B.4 |
 | 2026-10-03 | 1B.4 | Selesai | Tombol Bayar DP (jumlah, metode, uang diterima), ringkasan Total/DP dibayar/Sisa, label DP/Pelunasan di invoice dan struk, koreksi DP Admin. 182 test (settlement, deposit, koreksi, permission). Skrip: DP kedua ditolak, pelunasan = sisa, maks 2 pembayaran, DP 600rb > total 300rb ditolak lalu dikoreksi Admin, DP pada FINAL, void invoice ber-DP menandai DP void. Browser: DP Rp 50.000 lalu pelunasan Rp 150.000 menjadi Final/Lunas. Lanjut ke 1B.5 |
 | 2026-10-03 | 1B.5 | Selesai | Tombol Unduh e-invoice (PDF) di halaman invoice. Test render PDF (termasuk 80 item multi-halaman, 183 test). Diuji: tanpa login 401, Dokter 403, Kasir 200 dengan header unduhan; tampilan PDF diperiksa di viewer browser (item diskon, PPN, DP, sisa). Lanjut ke 1B.6 |
+| 2026-10-03 | 1B.6 | Selesai | `/inventaris/opname` (daftar + mulai/lanjutkan) dan `/inventaris/opname/[id]` (tabel hitung fisik, selisih langsung, alasan, simpan draft, finalkan dengan konfirmasi; tampilan final baca saja). 184 test. Skrip: sesi ganda melanjutkan yang lama, alasan wajib, penjualan di sela hitungan tidak dihitung ganda, penguncian setelah final, rollback saat stok tidak cukup, audit. Browser: 100 -> 96 dengan alasan, gerakan ADJUST -4. Lanjut ke 1B.7 |
 
 ## Perintah Proyek
 
