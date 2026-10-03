@@ -8,6 +8,8 @@ import { getStockAlerts, receiveStock } from "../src/lib/inventory";
 import * as Opname from "../src/lib/opname";
 import { addInvoiceItem, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
 import { getSettings, saveSettings } from "../src/lib/settings";
+import { resolveRange, sumRows } from "../src/lib/report";
+import { getSalesByDay } from "../src/lib/reports";
 import { saveOwner, savePatient } from "../src/lib/patients";
 import * as R from "../src/lib/records";
 import { createVisit } from "../src/lib/visits";
@@ -84,6 +86,11 @@ async function main() {
   assert.equal((await prisma.visit.findUniqueOrThrow({ where: { id: visit.id } })).status, "SELESAI");
   ok("dibayar tunai: invoice FINAL, stok 100->70 dan 5->4, kunjungan SELESAI");
 
+  const todayRange = resolveRange({ preset: "hari-ini" }, todayJakarta());
+  if ("error" in todayRange) throw new Error(todayRange.error);
+  assert.deepEqual(sumRows(await getSalesByDay(todayRange)), { invoices: 1, sales: 360_000, cost: 30 * 1_200 + 150_000 });
+  ok("laporan: penjualan tanpa PPN Rp 360.000, HPP dari snapshot");
+
   assert.ok("error" in (await payInvoice(kasir.id, invoice.id, { method: "TUNAI", cashReceived: 9_999_999, reference: "" })));
   const due = await R.listDueVaccinations(400);
   assert.equal(due.length, 1);
@@ -94,6 +101,7 @@ async function main() {
   assert.equal(await stock(amox.id), 100);
   assert.equal(await stock(vaccine.id), 4, "item yang tidak dicentang tetap terpotong");
   assert.equal((await prisma.payment.findFirstOrThrow({ where: { invoiceId: invoice.id } })).voided, true);
+  assert.equal(sumRows(await getSalesByDay(todayRange)).invoices, 0);
   ok("void: amoxicillin kembali 100, vaksin tetap 4, pembayaran ditandai void");
 
   console.log("Rawat inap, DP, dan opname");
