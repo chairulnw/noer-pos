@@ -8,6 +8,7 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { selectClass } from "@/components/form-fields";
 import { keepValuesOnError } from "@/lib/form";
 import { saveRecordAction, type RecordFormState } from "./actions";
+import { ItemsPicker, type CatalogItem, type RecordItemRow } from "./items-picker";
 
 export type Vitals = { temp: number | null; hr: number | null; rr: number | null; weight: number | null; bcs: number | null; crt: number | null };
 
@@ -15,6 +16,9 @@ type Props = {
   visitId: string;
   recordId: string;
   diagnoses: string[];
+  catalog: CatalogItem[];
+  allergyNote: string | null;
+  items: RecordItemRow[];
   initial: { subjective: string; objective: string; assessment: string; plan: string; diagnosis: string; vitals: Vitals };
 };
 
@@ -44,7 +48,7 @@ function Vital({ name, label, unit, error, value, step = "any", min }: { name: s
   );
 }
 
-export function RecordForm({ visitId, recordId, diagnoses, initial }: Props) {
+export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote, items, initial }: Props) {
   const [state, formAction, pending] = useActionState<RecordFormState, FormData>(saveRecordAction.bind(null, visitId, recordId), {});
   const err = (key: string) => state.errors?.[key];
   const v = initial.vitals;
@@ -106,6 +110,8 @@ export function RecordForm({ visitId, recordId, diagnoses, initial }: Props) {
           ))}
         </div>
       </section>
+
+      <ItemsPicker catalog={catalog} allergyNote={allergyNote} initial={items} error={err("items")} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="text-[13.5px] text-muted-foreground">Setelah final, catatan terkunci. Perubahan lewat addendum.</span>

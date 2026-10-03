@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1A.9 |
+| Task berikutnya | 1A.10 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -24,7 +24,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1A.6** Owner & pasien: CRUD, pencarian, nomor RM, alert alergi/agresif
 - [x] **1A.7** Kunjungan walk-in + halaman "Pasien Hari Ini"
 - [x] **1A.8** Rekam medis: SOAP, vital, diagnosa, lampiran, vaksinasi, finalisasi, addendum, halaman jatuh tempo
-- [ ] **1A.9** Resep & tindakan → draft invoice otomatis
+- [x] **1A.9** Resep & tindakan → draft invoice otomatis
 - [ ] **1A.10** Inventaris dasar: stok masuk manual, batch, kartu stok, FEFO, blokir expired
 - [ ] **1A.11** Kasir: invoice auto/manual/retail, diskon, PPN, pembayaran penuh, kembalian, finalisasi
 - [ ] **1A.12** Void invoice (Admin) + restock
@@ -118,6 +118,13 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1A.8 | Halaman Jatuh Tempo hanya untuk Admin dan Dokter (kapabilitas lihat rekam medis), mengikuti desain dan matriks. Hanya dosis vaksin terbaru per pasien dan vaksin yang dihitung; rentang 7/14/30 hari, yang sudah lewat tetap tampil | US-10 menyebut Kasir, tetapi matriks bagian 5 dan desain tidak memberi Kasir akses rekam medis. "Kontrol" (jadwal kontrol) belum punya data terstruktur, hanya vaksin |
 | 2026-10-03 | 1A.8 | Berat dari vital signs memperbarui `last_weight_kg` pasien saat draft disimpan. Diagnosa baru otomatis masuk master diagnosa (tanpa duplikat, tidak peka huruf besar-kecil) | FR-MR-2, FR-MR-3 |
 | 2026-10-03 | 1A.8 | Finalisasi dan addendum masuk audit log; Dokter mana pun boleh membuka dan mengisi rekam medis semua kunjungan | FR-SYS-1. Matriks tidak membatasi per dokter |
+| 2026-10-03 | 1A.9 | Tindakan dan resep disimpan di `prescription_item` (jenis dilihat dari `item.type`; layanan qty 1). Disimpan bersama draft rekam medis (hapus-lalu-buat ulang dalam transaksi), terkunci setelah final | ERD tidak punya tabel tindakan terpisah; desain menampilkan keduanya dalam satu tabel |
+| 2026-10-03 | 1A.9 | Draft invoice dibuat **saat finalisasi rekam medis** (bukan saat item pertama ditambah): salin item dengan snapshot nama, harga jual, dan HPP (BR-6), hitung total, nomor `INV-YYYYMMDD-NNN` (BR-10) | Nomor invoice tidak boleh dipakai ulang, jadi tidak dibuat untuk rekam medis yang tidak pernah final. Sesuai alur 9.1. Finalisasi diulang hingga 3x jika nomor bentrok |
+| 2026-10-03 | 1A.9 | Rumus uang di `src/lib/billing.ts` (diuji): qty x harga dibulatkan ke Rupiah; diskon item persen (bilangan bulat 0-100) atau nominal (maks harga); `subtotal` = jumlah item setelah diskon item; `discount_total` = diskon level invoice saja; PPN dihitung dari (subtotal - diskon invoice), dibulatkan, mode exclude/include | Mengikuti contoh angka di desain (462.500 - 12.500 + PPN 11% = 499.500) |
+| 2026-10-03 | 1A.9 | Kolom baru di invoice: `discount_type`, `discount_value` (diskon total), `tax_rate`, `tax_included` (tarif PPN yang dipakai). Draft ikut tarif Pengaturan terbaru saat dihitung ulang; tarif dibekukan saat FINAL | Permintaan user soal diskon total dan pertanyaan tarif PPN |
+| 2026-10-03 | 1A.9 | Dokter tidak menerima harga di pemilih item (hanya nama, jenis, satuan); invoice yang dikirim ke UI tidak membawa `unit_cost_snapshot` | SPEC bagian 5 (dokter tidak melihat harga), BR-7 |
+| 2026-10-03 | 1A.9 | Peringatan alergi saat memilih obat berupa pencocokan kata nama obat (min. 5 huruf) dengan catatan alergi; hanya informasi, tidak memblokir | Keputusan user (sistem hanya menunjukkan). Pencocokan teks bebas bisa meleset untuk nama dagang |
+| 2026-10-03 | 1A.9 | Halaman `/invoice` (daftar + filter) dan `/invoice/[id]` baru versi baca saja; edit item, diskon, dan pembayaran di 1A.11 | AC 1A.9: item dokter muncul di invoice |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -146,6 +153,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.6 | Selesai | `/pasien`: pencarian (nama owner/hewan, no. WA, no. RM, microchip; tanpa kata kunci = 50 terbaru) + profil sesuai desain, tag Alergi/Agresif dan baris catatan klinis. Form owner (peringatan WA duplikat), form hewan (tanggal lahir atau perkiraan umur, berat), halaman owner, ubah, hapus lunak. Logika murni diuji (WA, umur, nomor RM, skema; 102 test lulus). Diuji di browser dan skrip: 3 pendaftaran bersamaan menghasilkan RM berurutan, duplikat WA, tombol "Tetap simpan", owner tanpa hewan tetap ditemukan, hapus owner berhewan ditolak. Belum: profil belum punya tab riwayat kunjungan/vaksin/rawat inap (menyusul 1A.7, 1A.8, 1B), tombol "+ Buat kunjungan" (1A.7), foto. Lanjut ke 1A.7 |
 | 2026-10-03 | 1A.7 | Selesai | `/kunjungan` (daftar hari ini, auto-refresh 10 dtk, batalkan) dan `/kunjungan/baru?patient=` (pilih dokter, keluhan; tag dan catatan alergi tampil di atas form). `visit_date` memakai hari Jakarta. Diuji lewat skrip (dokter tidak valid, pasien tidak ada, filter per dokter, batalkan sekali) dan HTTP per role. Tanpa nomor antrean. Lanjut ke 1A.8 |
 | 2026-10-03 | 1A.8 | Selesai | `/rekam-medis/[visitId]`: vital signs, SOAP, diagnosa (autocomplete master), vaksinasi (jatuh tempo otomatis dari interval), lampiran, finalisasi (kunjungan jadi MENUNGGU_BAYAR), addendum. `/jatuh-tempo`. Riwayat kunjungan dan vaksinasi di profil pasien (Admin/Dokter). 113 test lulus. Diuji lewat skrip: final terkunci (simpan, vaksin, finalisasi ulang ditolak), addendum, lampiran palsu ditolak, audit; akses per role dan lampiran 401/403; simpan draft di browser. Finalisasi lewat tombol tidak diuji di browser karena dialog konfirmasi. Belum: tindakan & resep (1A.9). Lanjut ke 1A.9 |
+| 2026-10-03 | 1A.9 | Selesai | Bagian Tindakan & resep di form rekam medis (cari, qty, aturan pakai, peringatan alergi). Finalisasi membuat draft invoice dengan snapshot harga/HPP, total (PPN dari Pengaturan), nomor berurutan; finalisasi ganda bersamaan tetap satu invoice. 128 test lulus (rumus uang, nomor, alergi). Diuji lewat skrip dan browser (picker, peringatan, simpan). Lanjut ke 1A.10 |
 
 ## Perintah Proyek
 

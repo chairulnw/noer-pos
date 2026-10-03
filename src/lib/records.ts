@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
+import { createDraftInvoiceFromRecord, taxFromSettings } from "@/lib/invoices";
+import { Prisma } from "@/generated/prisma/client";
 import { todayJakarta } from "@/lib/date";
 import { storeFile, readStoredFile } from "@/lib/uploads";
 import {
@@ -7,6 +9,7 @@ import {
   detectAttachment,
   isRecordEmpty,
   type RecordInput,
+  type RecordItemInput,
   type VaccinationInput,
 } from "@/lib/record-schema";
 
@@ -38,6 +41,7 @@ export async function getRecordView(visitId: string) {
       addenda: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "asc" } },
       attachments: { orderBy: { createdAt: "asc" } },
       vaccinations: { include: { item: { select: { name: true } } }, orderBy: { givenAt: "asc" } },
+      prescriptionItems: { include: { item: { select: { name: true, type: true, baseUnit: true } } }, orderBy: { id: "asc" } },
     },
   });
   return { visit, record };
@@ -50,7 +54,7 @@ export async function ensureRecord(visitId: string) {
   return true;
 }
 
-export async function saveRecord(recordId: string, input: RecordInput) {
+export async function saveRecord(recordId: string, input: RecordInput, items: RecordItemInput[]) {
   const { vitals, ...soap } = input;
   return prisma.$transaction(async (tx) => {
     const { count } = await tx.medicalRecord.updateMany({
@@ -58,6 +62,12 @@ export async function saveRecord(recordId: string, input: RecordInput) {
       data: { ...soap, diagnosis: soap.diagnosis || null, vitals },
     });
     if (count === 0) return { error: LOCKED };
+
+    const ids = [...new Set(items.map((i) => i.itemId))];
+    const found = await tx.item.count({ where: { id: { in: ids }, active: true, deletedAt: null } });
+    if (found !== ids.length) return { error: "Ada item yang tidak ditemukan atau sudah nonaktif." };
+    await tx.prescriptionItem.deleteMany({ where: { recordId } });
+    await tx.prescriptionItem.createMany({ data: items.map((i) => ({ recordId, itemId: i.itemId, qty: i.qty, instruction: i.instruction || null })) });
 
     if (vitals.weight !== null) {
       const record = await tx.medicalRecord.findUniqueOrThrow({ where: { id: recordId }, select: { visit: { select: { patientId: true } } } });
@@ -71,12 +81,24 @@ export async function saveRecord(recordId: string, input: RecordInput) {
   });
 }
 
-export async function finalizeRecord(userId: string, recordId: string, input: RecordInput) {
+export async function finalizeRecord(userId: string, recordId: string, input: RecordInput, items: RecordItemInput[]) {
   if (isRecordEmpty(input)) return { error: "Isi minimal satu bagian (SOAP atau diagnosa) sebelum difinalkan." };
 
-  const saved = await saveRecord(recordId, input);
+  const saved = await saveRecord(recordId, input, items);
   if (saved.error) return saved;
 
+  const tax = await taxFromSettings();
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await finalizeTransaction(userId, recordId, tax);
+    } catch (error) {
+      const clash = error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+      if (!clash || attempt >= 3) throw error;
+    }
+  }
+}
+
+function finalizeTransaction(userId: string, recordId: string, tax: { rate: number; included: boolean }) {
   return prisma.$transaction(async (tx) => {
     const { count } = await tx.medicalRecord.updateMany({
       where: { id: recordId, finalized: false },
@@ -86,6 +108,7 @@ export async function finalizeRecord(userId: string, recordId: string, input: Re
 
     const record = await tx.medicalRecord.findUniqueOrThrow({ where: { id: recordId }, select: { visitId: true } });
     await tx.visit.updateMany({ where: { id: record.visitId, status: "DILAYANI" }, data: { status: "MENUNGGU_BAYAR" } });
+    await createDraftInvoiceFromRecord(tx, userId, recordId, tax);
     await logAudit(tx, { userId, action: "medical_record.finalize", entity: "medical_record", entityId: recordId });
     return { visitId: record.visitId };
   });
@@ -189,3 +212,10 @@ export async function listDueVaccinations(days: number) {
 export const listDiagnoses = () => prisma.diagnosisMaster.findMany({ select: { name: true }, orderBy: { name: "asc" } });
 
 export type RecordView = NonNullable<Awaited<ReturnType<typeof getRecordView>>>;
+
+export const listCatalog = () =>
+  prisma.item.findMany({
+    where: { active: true, deletedAt: null },
+    select: { id: true, name: true, type: true, category: true, baseUnit: true },
+    orderBy: [{ type: "desc" }, { name: "asc" }],
+  });

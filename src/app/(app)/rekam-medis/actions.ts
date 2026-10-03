@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireCapability } from "@/lib/require-role";
 import { addAddendum, addAttachment, addVaccination, finalizeRecord, removeVaccination, saveRecord } from "@/lib/records";
-import { addendumSchema, recordSchema, vaccinationSchema } from "@/lib/record-schema";
+import { addendumSchema, recordItemsSchema, recordSchema, vaccinationSchema } from "@/lib/record-schema";
 
 export type RecordFormState = { message?: string; ok?: boolean; nonce?: number; errors?: Record<string, string[] | undefined> };
 
@@ -41,6 +41,14 @@ export async function saveRecordAction(
       crt: num(formData, "crt"),
     },
   });
+  const itemIds = formData.getAll("itemId").map(String);
+  const qtys = formData.getAll("qty").map((q) => Number(String(q).replace(",", ".")));
+  const instructions = formData.getAll("instruction").map(String);
+  const items = recordItemsSchema.safeParse(itemIds.map((itemId, i) => ({ itemId, qty: qtys[i], instruction: instructions[i] ?? "" })));
+  if (!items.success) {
+    return { message: items.error.issues[0]?.message ?? "Item tidak valid.", errors: { items: [items.error.issues[0]?.message ?? "Item tidak valid"] } };
+  }
+
   if (!parsed.success) {
     const flat = z.flattenError(parsed.error);
     const vitalErrors = Object.fromEntries(
@@ -51,11 +59,11 @@ export async function saveRecordAction(
 
   revalidatePath(`/rekam-medis/${visitId}`);
   if (formData.get("intent") === "finalize") {
-    const result = await finalizeRecord(user.id, recordId, parsed.data);
+    const result = await finalizeRecord(user.id, recordId, parsed.data, items.data);
     return result.error ? { message: result.error } : { ok: true, message: "Rekam medis difinalkan." };
   }
 
-  const result = await saveRecord(recordId, parsed.data);
+  const result = await saveRecord(recordId, parsed.data, items.data);
   return result.error ? { message: result.error } : { ok: true, message: "Draft tersimpan." };
 }
 

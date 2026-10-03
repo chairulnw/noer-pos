@@ -444,7 +444,11 @@ model Invoice {
   customerName  String?       @map("customer_name")
   status        InvoiceStatus @default(DRAFT)
   subtotal      Int           @default(0)
+  discountType  DiscountType? @map("discount_type")
+  discountValue Int           @default(0) @map("discount_value")
   discountTotal Int           @default(0) @map("discount_total")
+  taxRate       Int           @default(0) @map("tax_rate")
+  taxIncluded   Boolean       @default(false) @map("tax_included")
   taxTotal      Int           @default(0) @map("tax_total")
   grandTotal    Int           @default(0) @map("grand_total")
   createdById   String        @map("created_by") @db.Uuid

@@ -8,7 +8,7 @@ import { todayJakarta } from "@/lib/date";
 import { formatDate } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { formatAge } from "@/lib/patient-schema";
-import { ensureRecord, getRecordView, listDiagnoses, listVaccines } from "@/lib/records";
+import { ensureRecord, getRecordView, listCatalog, listDiagnoses, listVaccines } from "@/lib/records";
 import { requireCapability } from "@/lib/require-role";
 import { removeVaccinationAction } from "../actions";
 import { RecordForm, type Vitals } from "../record-form";
@@ -48,7 +48,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
   const vitals = { ...EMPTY_VITALS, ...(record.vitals as Partial<Vitals> | null) };
   const today = todayJakarta();
 
-  const [diagnoses, vaccines] = final || !canEdit ? [[], []] : await Promise.all([listDiagnoses(), listVaccines()]);
+  const [diagnoses, vaccines, catalog] = final || !canEdit ? [[], [], []] : await Promise.all([listDiagnoses(), listVaccines(), listCatalog()]);
 
   return (
     <div className="max-w-5xl space-y-4">
@@ -105,8 +105,27 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
           visitId={visit.id}
           recordId={record.id}
           diagnoses={diagnoses.map((d) => d.name)}
+          catalog={catalog}
+          allergyNote={patient.allergyNote}
+          items={record.prescriptionItems.map((p) => ({ itemId: p.itemId, qty: Number(p.qty), instruction: p.instruction ?? "" }))}
           initial={{ subjective: record.subjective ?? "", objective: record.objective ?? "", assessment: record.assessment ?? "", plan: record.plan ?? "", diagnosis: record.diagnosis ?? "", vitals }}
         />
+      )}
+
+      {(final || !canEdit) && (
+        <Card title="Tindakan & resep">
+          {record.prescriptionItems.length === 0 && <p className="text-sm text-muted-foreground">Tidak ada tindakan atau obat.</p>}
+          {record.prescriptionItems.map((p) => (
+            <div key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 last:border-0 last:pb-0">
+              <div>
+                <span className="font-medium">{p.item.name}</span>
+                <span className="text-[13.5px] text-muted-foreground"> · {p.item.type === "SERVICE" ? "Tindakan" : "Resep"}</span>
+                {p.instruction && <div className="text-[13.5px] text-muted-foreground">{p.instruction}</div>}
+              </div>
+              <span className="tabular-nums">{Number(p.qty)} {p.item.baseUnit}</span>
+            </div>
+          ))}
+        </Card>
       )}
 
       <Card title="Vaksinasi">

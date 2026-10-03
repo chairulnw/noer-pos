@@ -58,3 +58,15 @@ export function detectAttachment(head: Uint8Array, size: number) {
   const match = SIGNATURES.find(({ bytes }) => bytes.every((b, i) => head[i] === b));
   return match ? ({ mime: match.mime, ext: match.ext } as const) : ({ error: "Format harus PDF, JPG, atau PNG" } as const);
 }
+
+export const recordItemsSchema = z
+  .array(
+    z.object({
+      itemId: z.uuid({ error: "Item tidak valid" }),
+      qty: number().gt(0, "Jumlah harus lebih dari 0").max(99999, "Terlalu besar"),
+      instruction: text(200),
+    }),
+  )
+  .max(50, "Maksimal 50 item");
+
+export type RecordItemInput = z.infer<typeof recordItemsSchema>[number];
