@@ -2,8 +2,11 @@ import "dotenv/config";
 import assert from "node:assert/strict";
 import { prisma } from "../src/lib/db";
 import { todayJakarta } from "../src/lib/date";
-import { receiveStock } from "../src/lib/inventory";
-import { payInvoice, voidInvoice } from "../src/lib/invoice-ops";
+import { addAdmissionLog, checkOutAdmission, createAdmission } from "../src/lib/admissions";
+import { billedDays, dateToJakartaLocal } from "../src/lib/admission-calc";
+import { getStockAlerts, receiveStock } from "../src/lib/inventory";
+import * as Opname from "../src/lib/opname";
+import { addInvoiceItem, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
 import { getSettings, saveSettings } from "../src/lib/settings";
 import { saveOwner, savePatient } from "../src/lib/patients";
 import * as R from "../src/lib/records";
@@ -15,11 +18,12 @@ const stock = async (itemId: string) =>
 const ok = (label: string) => console.log(`  ok  ${label}`);
 
 async function wipe() {
-  await prisma.stockMovement.deleteMany(); await prisma.payment.deleteMany(); await prisma.invoiceItem.deleteMany(); await prisma.invoice.deleteMany();
+  await prisma.stockMovement.deleteMany(); await prisma.payment.deleteMany(); await prisma.opnameItem.deleteMany(); await prisma.stockOpname.deleteMany(); await prisma.invoiceItem.deleteMany(); await prisma.invoice.deleteMany();
+  await prisma.admissionLog.deleteMany(); await prisma.admission.deleteMany(); await prisma.room.deleteMany({ where: { name: "K-E2E" } });
   await prisma.stockBatch.deleteMany(); await prisma.prescriptionItem.deleteMany(); await prisma.recordAddendum.deleteMany(); await prisma.attachment.deleteMany();
   await prisma.vaccination.deleteMany(); await prisma.medicalRecord.deleteMany(); await prisma.visit.deleteMany(); await prisma.diagnosisMaster.deleteMany();
   await prisma.patient.deleteMany({ where: { name: "E2E Mochi" } }); await prisma.owner.deleteMany({ where: { name: "E2E Rina" } });
-  await prisma.item.deleteMany({ where: { sku: "E2E-VAKSIN" } }); await prisma.auditLog.deleteMany(); await prisma.settings.deleteMany();
+  await prisma.item.deleteMany({ where: { sku: { in: ["E2E-VAKSIN", "E2E-RI"] } } }); await prisma.auditLog.deleteMany(); await prisma.settings.deleteMany();
 }
 
 async function main() {
@@ -92,8 +96,58 @@ async function main() {
   assert.equal((await prisma.payment.findFirstOrThrow({ where: { invoiceId: invoice.id } })).voided, true);
   ok("void: amoxicillin kembali 100, vaksin tetap 4, pembayaran ditandai void");
 
+  console.log("Rawat inap, DP, dan opname");
+  const room = await prisma.room.create({ data: { name: "K-E2E", type: "RAWAT_INAP" } });
+  const rate = await prisma.item.create({ data: { type: "SERVICE", category: "rawat inap", sku: "E2E-RI", name: "E2E Rawat Inap", sellPrice: 150_000, buyPrice: 0, baseUnit: "hari", billingUnit: "PER_DAY" } });
+  const checkIn = new Date(Date.now() - (3 * 24 + 2) * 3_600_000);
+  const stay = { patientId: patient.id, type: "RAWAT_INAP" as const, roomId: room.id, rateItemId: rate.id, visitId: "", notes: "" };
+
+  const adm = await createAdmission(kasir.id, { ...stay, checkIn: dateToJakartaLocal(checkIn) });
+  if (!("id" in adm)) throw new Error(adm.error);
+  assert.ok("error" in (await createAdmission(kasir.id, { ...stay, checkIn: dateToJakartaLocal(new Date()) })), "pasien tidak boleh check-in ganda");
+  ok("check-in rawat inap; check-in ganda ditolak");
+
+  const stayInvoice = await prisma.invoice.findFirstOrThrow({ where: { admissionId: adm.id } });
+  assert.deepEqual(await receiveDeposit(kasir.id, stayInvoice.id, 200_000, "TUNAI", 200_000, ""), { ok: true, change: 0 });
+  assert.deepEqual(await addAdmissionLog(dokter.id, adm.id, { loggedAt: dateToJakartaLocal(new Date()), temp: 38.5, intake: "Makan setengah porsi", note: "" }), {});
+  ok("DP Rp 200.000 diterima pada invoice DRAFT; monitoring harian tersimpan");
+
+  const out = await checkOutAdmission(kasir.id, adm.id, dateToJakartaLocal(new Date()));
+  assert.ok("days" in out);
+  const days = billedDays(checkIn, new Date());
+  assert.equal(out.days, days);
+  assert.ok(days >= 3);
+  assert.deepEqual(await addInvoiceItem(stayInvoice.id, amox.id, 10), {});
+  const billed = await prisma.invoice.findUniqueOrThrow({ where: { id: stayInvoice.id } });
+  assert.equal(billed.subtotal, days * 150_000 + 10 * 2_000);
+  assert.equal(billed.grandTotal, billed.subtotal + Math.round(billed.subtotal * 0.11));
+  ok(`check-out: ${days} hari x Rp 150.000 + obat 10 tablet, total Rp ${billed.grandTotal.toLocaleString("id-ID")}`);
+
+  assert.ok("ok" in (await payInvoice(kasir.id, stayInvoice.id, { method: "QRIS", cashReceived: null, reference: "" })));
+  const settled = await prisma.invoice.findUniqueOrThrow({ where: { id: stayInvoice.id }, include: { payments: { orderBy: { paidAt: "asc" } }, admission: true } });
+  assert.deepEqual(settled.payments.map((x) => x.kind), ["DP", "PELUNASAN"]);
+  assert.equal(settled.payments[1].amount, settled.grandTotal - 200_000);
+  assert.equal(settled.status, "FINAL");
+  assert.equal(settled.admission!.status, "SELESAI");
+  assert.equal(await stock(amox.id), 90);
+  ok("pelunasan = total - DP, invoice FINAL, rawat inap SELESAI, stok obat 100->90");
+
+  const alerts = await getStockAlerts();
+  assert.ok(Array.isArray(alerts.low) && Array.isArray(alerts.expiring));
+
+  const session = await Opname.createOpname(admin.id, "e2e");
+  if (!("id" in session) || !session.id) throw new Error("opname gagal dibuat");
+  const opname = (await Opname.getOpname(session.id))!;
+  const rows = opname.items.map((i) => ({ id: i.id, counted: Math.max(0, Number(i.systemQty) - 2), reason: "" }));
+  const before = await stock(amox.id);
+  assert.ok("error" in (await Opname.finalizeOpname(admin.id, session.id, rows)), "selisih tanpa alasan harus ditolak");
+  const withReason = rows.map((r) => ({ ...r, reason: "Rusak" }));
+  assert.ok(!("error" in (await Opname.finalizeOpname(admin.id, session.id, withReason))));
+  assert.ok((await stock(amox.id)) < before);
+  ok("opname: selisih wajib beralasan, stok disesuaikan lewat ADJUST");
+
   const audit = (await prisma.auditLog.findMany({ select: { action: true } })).map((a) => a.action);
-  for (const action of ["stock.in", "medical_record.finalize", "medical_record.addendum", "invoice.finalize", "payment.create", "invoice.void"]) {
+  for (const action of ["stock.in", "medical_record.finalize", "medical_record.addendum", "invoice.finalize", "payment.create", "invoice.void", "payment.deposit", "admission.check_in", "admission.check_out", "stock.opname"]) {
     assert.ok(audit.includes(action), `audit ${action} harus ada`);
   }
   ok("audit log lengkap");

@@ -87,6 +87,10 @@ pnpm e2e
 
 # prisma studio
 pnpm prisma:studio
+
+# backup / restore (ke DB baru), deploy: docs/DEPLOY.md
+scripts/backup.sh
+scripts/restore.sh <folder-backup> <nama-db>
 ```
 
 ## Next.js

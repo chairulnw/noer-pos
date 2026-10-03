@@ -8,8 +8,8 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 
 | | |
 |---|---|
-| Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1C.5 |
+| Fase / milestone aktif | Fase 1 selesai (1A, 1B, 1C). Fase 2 belum dimulai, menunggu keputusan user |
+| Task berikutnya | Tidak ada di Fase 1. Lihat "Sebelum go-live" di bawah |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -52,10 +52,10 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1C.2** Audit log viewer (Admin)
 - [x] **1C.3** Backup harian + prosedur restore
 - [x] **1C.4** Dokumentasi deploy VPS
-- [ ] **1C.5** Uji end-to-end alur utama + perbaikan
+- [x] **1C.5** Uji end-to-end alur utama + perbaikan
 
 **Gate 1C:** semua story Must Fase 1 lulus, backup dan restore teruji.
-- [ ] Gate 1C lulus
+- [x] Gate 1C lulus
 
 ---
 
@@ -211,6 +211,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1C.3 | Selesai | `scripts/backup.sh` (pg_dump format custom + tar folder lampiran, ditulis ke folder sementara lalu di-rename agar tidak ada backup setengah jadi, dump diverifikasi `pg_restore -l`, retensi 14 hari via RETENTION_DAYS) dan `scripts/restore.sh <folder> <db-baru> [folder-uploads]` (menolak DB yang sudah ada, tidak menimpa data berjalan). Teruji: restore ke DB kosong, jumlah baris user/item/settings/audit_log sama, file lampiran kembali, folder backup berumur >14 hari terhapus. Jadwal cron dan prosedur pemulihan penuh ditulis di 1C.4. Lanjut ke 1C.4 |
 | 2026-10-03 | 1C.3a | Selesai | Tambahan agar bisa go-live (FR-AUTH-2 dan FR-AUTH-3 ternyata belum ada): `/pengguna` (Admin: tambah, ubah nama/role, aktif/nonaktif, reset password; tanpa hard delete; tidak bisa menonaktifkan/menurunkan akun sendiri sehingga selalu ada Admin aktif) dan `/akun` (ganti password sendiri, wajib password lama). Semua tercatat audit tanpa hash. Sesi JWT kini dicek ke DB tiap `auth()`: akun nonaktif langsung ditolak walau sesinya masih berlaku, perubahan role langsung berlaku. Password minimal 8 karakter. 192 test. Diuji skrip, HTTP per role, dan browser |
 | 2026-10-03 | 1C.4 | Selesai | `Dockerfile` (multi-stage, output standalone), `docker-compose.prod.yml` (db tanpa port publik, app, Caddy HTTPS otomatis, profil `tools` untuk migrasi dan `scripts/create-admin.ts`), `deploy/Caddyfile`, `.env.production.example`, `docs/DEPLOY.md` (instal, update, cron backup + salin ke server lain, uji restore, pemulihan nyata). Diuji dari nol: DB kosong, migrate deploy, create-admin, login via HTTPS, halaman Admin, PDF dan struk di container, backup lalu restore. `backup.sh` diperbaiki agar mengambil lampiran dari volume container app di produksi. Seed TIDAK dipakai di produksi (password contoh). Keputusan: tanpa CI/CD dan tanpa registry, build di VPS |
+| 2026-10-03 | 1C.5 | Selesai | `pnpm e2e` diperluas: selain alur kunjungan -> rekam medis -> invoice -> bayar -> void, kini mencakup check-in rawat inap (check-in ganda ditolak), DP pada invoice DRAFT, monitoring, check-out 3 hari, obat tambahan, pelunasan = total - DP, invoice FINAL, opname (alasan wajib) dan audit. Semua lulus. Story Must PRD 7.1-7.6 ditelusuri ke log task; semuanya sudah dibangun dan diuji. Gate 1C lulus, **Fase 1 selesai** |
 
 ## Perintah Proyek
 
@@ -225,3 +226,16 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | Seed | `pnpm prisma:seed` |
 | Uji alur utama (hapus data transaksi DB dev) | `pnpm e2e` |
 | Prisma Studio | `pnpm prisma:studio` |
+| Backup | `scripts/backup.sh` |
+| Restore (ke DB baru) | `scripts/restore.sh <folder-backup> <nama-db> [folder-uploads]` |
+| Deploy produksi | `docs/DEPLOY.md` |
+
+---
+
+## Sebelum go-live (bukan task Fase 1, perlu keputusan/aksi klien)
+
+- Hapus/ganti akun seed (`admin`/`dokter`/`kasir`, password `password123`) di DB produksi: produksi memakai `scripts/create-admin.ts`, jangan jalankan seed.
+- Isi data nyata: Pengaturan klinik (nama, alamat, NPWP, logo, QRIS, lebar printer), layanan, produk, kandang, stok awal.
+- Uji cetak struk di printer thermal sungguhan (dialog print browser belum diuji otomatis) dan sesuaikan lebar kertas.
+- Pertanyaan terbuka yang memakai default SPEC: hitung hari menginap (BR-15), DP lebih besar dari tagihan (finalisasi ditolak, Admin koreksi), PPN default nonaktif 11% exclude.
+- Siapkan server tujuan backup terpisah (rsync) dan jadwalkan cron sesuai `docs/DEPLOY.md`.
