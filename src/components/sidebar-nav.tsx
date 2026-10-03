@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BedDouble, Barcode, CalendarDays, Clock, CreditCard, Database, Package, Receipt, LayoutDashboard, PawPrint, SlidersHorizontal, type LucideIcon } from "lucide-react";
+import { BedDouble, Barcode, CalendarDays, Clock, CreditCard, Database, Package, Receipt, LayoutDashboard, PawPrint, ScrollText, SlidersHorizontal, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; capability?: Capabil
   { href: "/pembayaran", label: "Riwayat Pembayaran", icon: CreditCard, capability: "manage_invoice_payment" },
   { href: "/inventaris", label: "Inventaris", icon: Package, capability: "manage_stock" },
   { href: "/master-data", label: "Master Data", icon: Database, capability: "manage_service_price" },
+  { href: "/audit", label: "Audit Log", icon: ScrollText, capability: "view_audit_log" },
   { href: "/pengaturan", label: "Pengaturan", icon: SlidersHorizontal, capability: "manage_users_settings" },
 ];
 

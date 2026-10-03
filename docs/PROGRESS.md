@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1C.2 |
+| Task berikutnya | 1C.3 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -49,7 +49,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 ## Fase 1, Milestone 1C: Penutup
 
 - [x] **1C.1** Dashboard dasar (omzet hanya Admin)
-- [ ] **1C.2** Audit log viewer (Admin)
+- [x] **1C.2** Audit log viewer (Admin)
 - [ ] **1C.3** Backup harian + prosedur restore
 - [ ] **1C.4** Dokumentasi deploy VPS
 - [ ] **1C.5** Uji end-to-end alur utama + perbaikan
@@ -207,6 +207,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1B.6 | Selesai | `/inventaris/opname` (daftar + mulai/lanjutkan) dan `/inventaris/opname/[id]` (tabel hitung fisik, selisih langsung, alasan, simpan draft, finalkan dengan konfirmasi; tampilan final baca saja). 184 test. Skrip: sesi ganda melanjutkan yang lama, alasan wajib, penjualan di sela hitungan tidak dihitung ganda, penguncian setelah final, rollback saat stok tidak cukup, audit. Browser: 100 -> 96 dengan alasan, gerakan ADJUST -4. Lanjut ke 1B.7 |
 | 2026-10-03 | 1B.7 | Selesai | Kartu "Notifikasi stok" di Beranda untuk Admin (kapabilitas manage_stock): produk habis/menipis (ambang per item) dan batch expired/hampir expired (hari peringatan dari Pengaturan). 187 test. Kasir/dokter tidak melihat kartu. Gate 1B terbukti lewat uji 1B.3-1B.5 (tagihan menginap, DP/pelunasan, PDF). Lanjut ke 1C.1 |
 | 2026-10-03 | 1C.1 | Selesai | Beranda: kartu Omzet hari ini (hanya kapabilitas view_revenue_reports = Admin; diambil dari invoice FINAL dengan finalized_at hari ini WIB, VOID/DRAFT diabaikan), Kunjungan hari ini (tanpa BATAL), Rawat inap aktif, Hotel aktif. Query di `src/lib/dashboard.ts`; non-Admin tidak menerima angka omzet dari server. Diuji dengan data invoice FINAL/VOID/DRAFT/kemarin. Lanjut ke 1C.2 |
+| 2026-10-03 | 1C.2 | Selesai | `/audit` (Admin saja, kapabilitas view_audit_log; Dokter/Kasir diarahkan ke forbidden): filter pengguna, entitas, rentang tanggal (hari WIB, "sampai" inklusif), 50 baris per halaman, diff sebelum/sesudah dalam JSON, hanya baca. Menu "Audit Log" di sidebar. 189 test. Diuji HTTP per role dan dengan baris uji (dihapus). Lanjut ke 1C.3 |
 
 ## Perintah Proyek
 
