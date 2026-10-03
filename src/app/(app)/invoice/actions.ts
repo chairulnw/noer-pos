@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { addInvoiceItem, createRetailInvoice, payInvoice, removeInvoiceItem, setInvoiceDiscount, updateInvoiceItem } from "@/lib/invoice-ops";
-import { discountSchema, lineSchema, paySchema, type Discount, type PayInput } from "@/lib/invoice-schema";
+import { addInvoiceItem, createReplacementInvoice, createRetailInvoice, payInvoice, removeInvoiceItem, setInvoiceDiscount, updateInvoiceItem, voidInvoice } from "@/lib/invoice-ops";
+import { discountSchema, lineSchema, paySchema, voidSchema, type Discount, type PayInput, type VoidInput } from "@/lib/invoice-schema";
 import { requireCapability } from "@/lib/require-role";
 
 export type ActionResult = { error?: string; ok?: boolean; change?: number };
@@ -63,4 +63,24 @@ export async function createRetailAction(formData: FormData) {
   const invoiceId = await createRetailInvoice(user.id, name);
   revalidatePath("/invoice");
   redirect(`/invoice/${invoiceId}`);
+}
+
+export async function voidAction(invoiceId: string, input: VoidInput): Promise<ActionResult> {
+  const user = await requireCapability("void_invoice");
+  const parsed = voidSchema.safeParse(input);
+  if (!parsed.success || !id.safeParse(invoiceId).success) return parsed.success ? { error: "Data tidak valid." } : invalid(parsed.error);
+  const result = await voidInvoice(user.id, invoiceId, parsed.data);
+  revalidatePath("/invoice");
+  revalidatePath("/pembayaran");
+  refresh(invoiceId);
+  return "error" in result ? { error: result.error } : { ok: true };
+}
+
+export async function replacementAction(invoiceId: string) {
+  const user = await requireCapability("manage_invoice_payment");
+  if (!id.safeParse(invoiceId).success) redirect("/invoice");
+  const result = await createReplacementInvoice(user.id, invoiceId);
+  if ("error" in result) redirect(`/invoice/${invoiceId}?error=${encodeURIComponent(result.error)}`);
+  revalidatePath("/invoice");
+  redirect(`/invoice/${result.id}`);
 }

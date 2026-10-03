@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 1, Milestone 1A |
-| Task berikutnya | 1A.12 |
+| Task berikutnya | 1A.13 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -27,7 +27,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [x] **1A.9** Resep & tindakan → draft invoice otomatis
 - [x] **1A.10** Inventaris dasar: stok masuk manual, batch, kartu stok, FEFO, blokir expired
 - [x] **1A.11** Kasir: invoice auto/manual/retail, diskon, PPN, pembayaran penuh, kembalian, finalisasi
-- [ ] **1A.12** Void invoice (Admin) + restock
+- [x] **1A.12** Void invoice (Admin) + restock
 - [ ] **1A.13** Struk thermal 80mm (+58mm via setting)
 
 **Gate 1A:** satu pasien bisa dilayani dari pendaftaran sampai struk, stok berkurang benar.
@@ -140,6 +140,10 @@ Catat keputusan teknis atau produk yang muncul selama pengerjaan. Format: `tangg
 | 2026-10-03 | 1A.11 | Retail walk-in: nomor invoice dibuat saat "Mulai invoice retail" ditekan; draft kosong yang ditinggalkan tetap ada (tidak dihapus, BR-10). Nama pelanggan opsional | Tanpa mekanisme hapus draft sampai 1A.12 (void) |
 | 2026-10-03 | 1A.11 | QRIS statis ditampilkan lewat `/api/qris` (login + role), bukan dikirim sebagai props ke halaman | Gambar bisa 1 MB |
 | 2026-10-03 | 1A.11 | Riwayat Pembayaran (FR-POS-14): daftar per transaksi tanpa total/omzet; cetak ulang struk menyusul di 1A.13. DP dan metode bayar kedua baru di 1B.4, tombol "Bayar DP" dari desain belum ada | BR-7 |
+| 2026-10-03 | 1A.12 | `invoice.visit_id` dan `admission_id` tidak lagi UNIQUE penuh, diganti **unique parsial** yang mengabaikan status VOID (migrasi `invoice_partial_unique`, SQL manual); relasi Prisma `Visit.invoice` menjadi `Visit.invoices` | BR-14 (koreksi = void + invoice baru) mustahil bila satu kunjungan hanya boleh punya satu invoice selamanya. Tetap hanya satu invoice **aktif** per kunjungan |
+| 2026-10-03 | 1A.12 | Void (Admin, alasan min. 3 karakter): invoice DRAFT atau FINAL; nomor invoice tetap; seluruh pembayaran ditandai `voided` dan tetap tampil di riwayat; kunjungan SELESAI kembali ke MENUNGGU_BAYAR; teraudit dengan daftar item yang di-restock | BR-13. Dashboard omzet (1C.1) harus mengabaikan invoice VOID dan pembayaran void |
+| 2026-10-03 | 1A.12 | Restock dipilih per item produk; stok kembali ke **batch asal** lewat gerakan `VOID_RETURN` (bisa ke batch yang kini expired, tetap tidak bisa dijual). Item yang tidak dicentang tetap terpotong (mis. rusak). DRAFT tidak punya stok terpotong sehingga tanpa pilihan restock | Void dua kali ditolak sehingga stok tidak bisa kembali ganda |
+| 2026-10-03 | 1A.12 | Tombol "Buat invoice baru dari kunjungan" pada invoice kunjungan yang void membuat draft baru dari tindakan/resep rekam medis (harga master saat ini). Retail memakai "Mulai invoice retail" baru | Jalur koreksi yang diminta BR-14 |
 | 2026-10-03 | 1A.3 | Login pakai `username` (huruf kecil, UNIQUE + CHECK `username = lower(username)`), bukan email | Keputusan user. Tidak ada fitur email di sistem; staf hanya 3 orang. Migrasi `email_to_username` memakai RENAME agar data tetap. SPEC (FR-AUTH-1/2, ERD) diperbarui. Login seed: `admin` / `dokter` / `kasir`, password `password123` |
 | 2026-10-03 | 1A.3 | FR-AUTH-2 (Admin CRUD user) dan FR-AUTH-3 (ganti password sendiri) **belum dikerjakan** | AC task 1A.3 hanya "matriks bagian 5 lolos tes" (role guard), bukan UI manajemen user. Perlu task/task baru terpisah sebelum go-live |
 
@@ -171,6 +175,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1A.9 | Selesai | Bagian Tindakan & resep di form rekam medis (cari, qty, aturan pakai, peringatan alergi). Finalisasi membuat draft invoice dengan snapshot harga/HPP, total (PPN dari Pengaturan), nomor berurutan; finalisasi ganda bersamaan tetap satu invoice. 128 test lulus (rumus uang, nomor, alergi). Diuji lewat skrip dan browser (picker, peringatan, simpan). Lanjut ke 1A.10 |
 | 2026-10-03 | 1A.10 | Selesai | `/inventaris`, `/inventaris/masuk`, `/inventaris/[itemId]` (kartu stok). Logika FEFO, konversi, expired, status stok diuji (144 test). Data layer diuji lewat skrip: lintas batch, HPP tertimbang 1.250, expired dilewati, stok kurang ditolak tanpa mengubah stok, dua pengambilan bersamaan tidak negatif, CHECK stok negatif. Browser: stok masuk 2 box = 200 tablet tampil di kartu stok. Lanjut ke 1A.11 |
 | 2026-10-03 | 1A.11 | Selesai | `/invoice` (editor draft: cari/scan, qty, diskon item, diskon invoice, hapus; panel bayar tunai/QRIS/transfer/kartu, kembalian, QRIS), `/retail`, `/pembayaran`. 155 test (rumus uang, status bayar, skema). Skrip: edit, audit diskon, stok kurang membatalkan semua, bayar tunai kurang ditolak, bayar bersamaan hanya sekali, kunci setelah final, HPP tertimbang, kunjungan SELESAI. Browser: retail dari awal sampai Lunas dan stok berkurang. Role: dokter ditolak, kasir tanpa HPP di halaman. Lanjut ke 1A.12 |
+| 2026-10-03 | 1A.12 | Selesai | Panel Void di halaman invoice (Admin saja): alasan wajib, pilihan restock per produk, bukan refund; pembayaran ditandai Void di invoice dan Riwayat Pembayaran. Skrip: restock ke batch asal, void ganda ditolak, edit/bayar invoice void ditolak, invoice pengganti, void draft, audit. Browser: alasan kosong ditolak, void berhasil. Kasir tidak melihat tombol. Lanjut ke 1A.13 |
 
 ## Perintah Proyek
 

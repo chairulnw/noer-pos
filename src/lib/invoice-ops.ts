@@ -3,14 +3,14 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import { paymentStatus } from "@/lib/billing";
 import { StockConflictError, deductForInvoiceItem } from "@/lib/inventory";
-import { nextInvoiceNoFor, recomputeInvoice, taxFromSettings } from "@/lib/invoices";
-import type { Discount, PayInput } from "@/lib/invoice-schema";
+import { createDraftInvoiceFromRecord, nextInvoiceNoFor, recomputeInvoice, taxFromSettings } from "@/lib/invoices";
+import type { Discount, PayInput, VoidInput } from "@/lib/invoice-schema";
 
 type Tx = Prisma.TransactionClient;
 type Fail = { error: string };
 
 const NOT_FOUND = "Invoice tidak ditemukan.";
-const LOCKED = "Invoice sudah final dan tidak bisa diubah.";
+const LOCKED = "Invoice sudah final atau di-void dan tidak bisa diubah.";
 
 class Rejected extends Error {}
 
@@ -188,3 +188,71 @@ async function finalizeDraft(tx: Tx, userId: string, invoiceId: string) {
   await logAudit(tx, { userId, action: "invoice.finalize", entity: "invoice", entityId: invoiceId, after: { invoiceNo: invoice.invoiceNo, grandTotal: invoice.grandTotal } });
 }
 
+
+export async function voidInvoice(userId: string, invoiceId: string, input: VoidInput): Promise<Fail | { ok: true; restocked: number }> {
+  return prisma.$transaction(async (tx) => {
+    const status = await lockStatus(tx, invoiceId);
+    if (!status) return { error: NOT_FOUND };
+    if (status === "VOID") return { error: "Invoice sudah di-void." };
+
+    const invoice = await tx.invoice.findUniqueOrThrow({
+      where: { id: invoiceId },
+      select: { invoiceNo: true, grandTotal: true, visitId: true, items: { select: { id: true, nameSnapshot: true } } },
+    });
+
+    const restock: { item: string; qty: number }[] = [];
+    if (status === "FINAL") {
+      const lines = new Map(invoice.items.map((i) => [i.id, i.nameSnapshot]));
+      for (const lineId of new Set(input.restockLineIds)) {
+        if (!lines.has(lineId)) continue;
+        const outs = await tx.stockMovement.findMany({ where: { invoiceItemId: lineId, type: "OUT" }, select: { batchId: true, qty: true } });
+        let total = 0;
+        for (const out of outs) {
+          const back = -Number(out.qty);
+          await tx.stockBatch.update({ where: { id: out.batchId }, data: { qtyOnHand: { increment: back } } });
+          await tx.stockMovement.create({
+            data: { batchId: out.batchId, type: "VOID_RETURN", qty: back, refType: "invoice_void", refId: lineId, invoiceItemId: lineId, note: invoice.invoiceNo, userId },
+          });
+          total += back;
+        }
+        if (total > 0) restock.push({ item: lines.get(lineId)!, qty: total });
+      }
+    }
+
+    await tx.invoice.update({ where: { id: invoiceId }, data: { status: "VOID", voidReason: input.reason, voidedById: userId } });
+    await tx.payment.updateMany({ where: { invoiceId }, data: { voided: true } });
+    if (invoice.visitId) {
+      await tx.visit.updateMany({ where: { id: invoice.visitId, status: "SELESAI" }, data: { status: "MENUNGGU_BAYAR" } });
+    }
+    await logAudit(tx, {
+      userId,
+      action: "invoice.void",
+      entity: "invoice",
+      entityId: invoiceId,
+      before: { status, invoiceNo: invoice.invoiceNo, grandTotal: invoice.grandTotal },
+      after: { status: "VOID", reason: input.reason, restocked: restock },
+    });
+    return { ok: true as const, restocked: restock.length };
+  });
+}
+
+export async function createReplacementInvoice(userId: string, voidedInvoiceId: string): Promise<Fail | { id: string }> {
+  const tax = await taxFromSettings();
+  const source = await prisma.invoice.findUnique({
+    where: { id: voidedInvoiceId },
+    select: { status: true, visit: { select: { medicalRecord: { select: { id: true } } } } },
+  });
+  if (!source || source.status !== "VOID") return { error: "Invoice asal harus berstatus void." };
+  const recordId = source.visit?.medicalRecord?.id;
+  if (!recordId) return { error: "Invoice pengganti hanya untuk invoice kunjungan. Untuk retail, buat invoice retail baru." };
+
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const id = await prisma.$transaction((tx) => createDraftInvoiceFromRecord(tx, userId, recordId, tax));
+      return id ? { id } : { error: "Kunjungan ini sudah punya invoice aktif." };
+    } catch (error) {
+      const clash = error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+      if (!clash || attempt >= 3) throw error;
+    }
+  }
+}

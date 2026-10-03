@@ -54,7 +54,7 @@ export async function createDraftInvoiceFromRecord(tx: Tx, userId: string, recor
     },
   });
   const { visit } = record;
-  if (await tx.invoice.findUnique({ where: { visitId: visit.id }, select: { id: true } })) return;
+  if (await tx.invoice.findFirst({ where: { visitId: visit.id, status: { not: "VOID" } }, select: { id: true } })) return false;
 
   const invoice = await tx.invoice.create({
     data: {
@@ -77,6 +77,7 @@ export async function createDraftInvoiceFromRecord(tx: Tx, userId: string, recor
     select: { id: true },
   });
   await recomputeInvoice(tx, invoice.id, tax);
+  return invoice.id;
 }
 
 export const listInvoices = (filter: { q?: string; status?: "DRAFT" | "FINAL" | "VOID" } = {}) =>
@@ -112,14 +113,15 @@ export const getInvoice = (id: string) =>
     where: { id },
     include: {
       items: {
-        select: { id: true, itemId: true, nameSnapshot: true, qty: true, unitPriceSnapshot: true, discountType: true, discountValue: true, lineTotal: true },
+        select: { id: true, itemId: true, nameSnapshot: true, qty: true, unitPriceSnapshot: true, discountType: true, discountValue: true, lineTotal: true, item: { select: { type: true } } },
         orderBy: [{ position: "asc" }, { id: "asc" }],
       },
-      payments: { where: { voided: false }, select: { id: true, kind: true, method: true, amount: true, cashReceived: true, reference: true, paidAt: true, receivedBy: { select: { name: true } } }, orderBy: { paidAt: "asc" } },
+      payments: { select: { id: true, kind: true, method: true, amount: true, cashReceived: true, reference: true, paidAt: true, voided: true, receivedBy: { select: { name: true } } }, orderBy: { paidAt: "asc" } },
       owner: { select: { name: true, whatsapp: true } },
       createdBy: { select: { name: true } },
       visit: {
         select: {
+          id: true,
           createdAt: true,
           doctor: { select: { name: true } },
           patient: { select: { id: true, name: true, rmNo: true, allergyNote: true, aggressive: true } },
@@ -146,7 +148,6 @@ export const listRetailDrafts = () =>
 export const listPayments = (q?: string) =>
   prisma.payment.findMany({
     where: {
-      voided: false,
       ...(q && {
         invoice: {
           OR: [
@@ -164,8 +165,12 @@ export const listPayments = (q?: string) =>
       method: true,
       amount: true,
       paidAt: true,
+      voided: true,
       invoice: { select: { id: true, invoiceNo: true, customerName: true, visit: { select: { patient: { select: { name: true } } } } } },
     },
     orderBy: { paidAt: "desc" },
     take: 100,
   });
+
+export const activeInvoiceForVisit = (visitId: string) =>
+  prisma.invoice.findFirst({ where: { visitId, status: { not: "VOID" } }, select: { id: true } });

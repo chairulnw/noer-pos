@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDate, formatRupiah, formatTime } from "@/lib/format";
@@ -43,8 +44,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                 <td className="px-4 py-3 text-muted-foreground tabular-nums">{formatDate(p.paidAt)} · {formatTime(p.paidAt)}</td>
                 <td className="px-4 py-3"><Link href={`/invoice/${p.invoice.id}`} className="font-medium text-primary tabular-nums">{p.invoice.invoiceNo}</Link></td>
                 <td className="px-4 py-3">{p.invoice.visit?.patient.name ?? p.invoice.customerName ?? "Retail"}</td>
-                <td className="px-4 py-3">{METHOD[p.method]}{p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}</td>
-                <td className="px-4 py-3 text-right font-medium tabular-nums">{formatRupiah(p.amount)}</td>
+                <td className="px-4 py-3">{METHOD[p.method]}{p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}{p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Void</StatusChip></span>}</td>
+                <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.voided ? "text-muted-foreground line-through" : ""}`}>{formatRupiah(p.amount)}</td>
               </tr>
             ))}
           </tbody>

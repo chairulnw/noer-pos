@@ -183,7 +183,7 @@ model Visit {
   doctor        User           @relation("VisitDoctor", fields: [doctorId], references: [id])
   createdBy     User           @relation("VisitCreatedBy", fields: [createdById], references: [id])
   medicalRecord MedicalRecord?
-  invoice       Invoice?
+  invoices      Invoice[]
   admissions    Admission[]
 
   @@index([visitDate, status])
@@ -411,7 +411,7 @@ model Admission {
   visit    Visit?         @relation(fields: [visitId], references: [id])
   rateItem Item           @relation(fields: [rateItemId], references: [id])
   logs     AdmissionLog[]
-  invoice  Invoice?
+  invoices Invoice[]
 
   // BR-17: unique index parsial (room_id WHERE status = AKTIF) ada di migrasi SQL
   @@index([roomId, status])
@@ -438,8 +438,8 @@ model AdmissionLog {
 model Invoice {
   id            String        @id @default(uuid()) @db.Uuid
   invoiceNo     String        @unique @map("invoice_no")
-  visitId       String?       @unique @map("visit_id") @db.Uuid
-  admissionId   String?       @unique @map("admission_id") @db.Uuid
+  visitId       String?       @map("visit_id") @db.Uuid
+  admissionId   String?       @map("admission_id") @db.Uuid
   ownerId       String?       @map("owner_id") @db.Uuid
   customerName  String?       @map("customer_name")
   status        InvoiceStatus @default(DRAFT)
