@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fillDays, groupMonthly, marginPercent, profit, resolveRange, sumRows } from "./report";
+import { barHeights, daysBetween, fillDays, trendRange, groupMonthly, marginPercent, profit, resolveRange, sumRows } from "./report";
 
 const today = new Date("2026-10-04T00:00:00Z");
 
@@ -57,5 +57,19 @@ describe("agregasi", () => {
     const filled = fillDays(rows, "2026-10-01", "2026-10-03");
     expect(filled.map((r) => r.day)).toEqual(["2026-10-01", "2026-10-02", "2026-10-03"]);
     expect(filled[1]).toEqual({ day: "2026-10-02", invoices: 0, sales: 0, cost: 0 });
+  });
+});
+
+describe("tren", () => {
+  it("trendRange menutup n hari termasuk hari ini dan menolak nilai asing", () => {
+    expect(trendRange(7, today)).toEqual({ days: 7, from: "2026-09-28", to: "2026-10-04" });
+    expect(trendRange(5, today).days).toBe(30);
+    expect(daysBetween("2026-09-28", "2026-10-04")).toHaveLength(7);
+  });
+
+  it("barHeights: relatif ke nilai terbesar, nol tetap nol, nilai kecil tetap terlihat", () => {
+    expect(barHeights([0, 50, 100])).toEqual([0, 0.5, 1]);
+    expect(barHeights([0, 0])).toEqual([0, 0]);
+    expect(barHeights([1, 1000])[0]).toBe(0.02);
   });
 });

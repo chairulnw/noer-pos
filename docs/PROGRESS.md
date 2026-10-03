@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 2, dimulai atas permintaan user. Urutan: 2.2, 2.4, 2.5. Task 2.1 (import) dan 2.3 (export) ditunda sampai user minta |
-| Task berikutnya | 2.4 |
+| Task berikutnya | 2.5 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -64,7 +64,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [ ] **2.1** Import data lama (preview, validasi, konfirmasi)
 - [x] **2.2** Laporan lengkap
 - [ ] **2.3** Export PDF dan Excel
-- [ ] **2.4** Dashboard lanjut
+- [x] **2.4** Dashboard lanjut
 - [ ] **2.5** Tutup kas harian (jika klien setuju)
 
 ---
@@ -213,6 +213,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-03 | 1C.4 | Selesai | `Dockerfile` (multi-stage, output standalone), `docker-compose.prod.yml` (db tanpa port publik, app, Caddy HTTPS otomatis, profil `tools` untuk migrasi dan `scripts/create-admin.ts`), `deploy/Caddyfile`, `.env.production.example`, `docs/DEPLOY.md` (instal, update, cron backup + salin ke server lain, uji restore, pemulihan nyata). Diuji dari nol: DB kosong, migrate deploy, create-admin, login via HTTPS, halaman Admin, PDF dan struk di container, backup lalu restore. `backup.sh` diperbaiki agar mengambil lampiran dari volume container app di produksi. Seed TIDAK dipakai di produksi (password contoh). Keputusan: tanpa CI/CD dan tanpa registry, build di VPS |
 | 2026-10-03 | 1C.5 | Selesai | `pnpm e2e` diperluas: selain alur kunjungan -> rekam medis -> invoice -> bayar -> void, kini mencakup check-in rawat inap (check-in ganda ditolak), DP pada invoice DRAFT, monitoring, check-out 3 hari, obat tambahan, pelunasan = total - DP, invoice FINAL, opname (alasan wajib) dan audit. Semua lulus. Story Must PRD 7.1-7.6 ditelusuri ke log task; semuanya sudah dibangun dan diuji. Gate 1C lulus, **Fase 1 selesai** |
 | 2026-10-04 | 2.2 | Selesai | `/laporan` (Admin saja, view_revenue_reports; menu "Laporan"): tab Omzet & Laba (harian/bulanan, preset hari ini/7 hari/bulan ini/bulan lalu atau rentang bebas maks 366 hari), Produk & Layanan (10 teratas menurut penjualan dengan HPP dan laba kotor), Kunjungan (per hari, per dokter, check-in rawat inap/hotel), Stok & Jatuh Tempo (stok menipis, expired, vaksin 30 hari; kondisi saat ini). Definisi: hanya invoice FINAL; penjualan = grand total − PPN; HPP = qty × harga beli snapshot; laba kotor = penjualan − HPP; diskon tingkat invoice tidak dialokasikan ke per item. Hari dihitung WIB (kolom waktu Prisma `timestamp` tanpa zona, konversi `AT TIME ZONE 'UTC'` lalu Jakarta; tes batas tengah malam). Diuji: angka manual cocok, VOID/DRAFT/bulan lain diabaikan, Kasir/Dokter ditolak. Laba bersih (pengeluaran operasional) di luar scope (PRD Q3) |
+| 2026-10-04 | 2.4 | Selesai | Beranda: grafik batang Omzet harian (hanya Admin) dan Kunjungan harian (semua peran) dengan pilihan 7/30/90 hari. Tanpa library grafik (batang dari elemen HTML, aksesibel via aria-label dan tooltip). Kartu "Omzet hari ini" disamakan dengan laporan: tanpa PPN (sebelumnya total termasuk PPN). Diuji: total 30 hari cocok hitungan manual (Rp 1.300.000, 33 kunjungan), Dokter/Kasir tidak menerima omzet. 202 test |
 
 ## Perintah Proyek
 

@@ -1,9 +1,14 @@
 import Link from "next/link";
+import { TrendChart } from "@/components/trend-chart";
 import { getDashboardSummary } from "@/lib/dashboard";
+import { todayJakarta } from "@/lib/date";
 import { getStockAlerts } from "@/lib/inventory";
+import { daysBetween, fillDays, resolveRange, sumRows, trendRange, TREND_DAYS } from "@/lib/report";
+import { getSalesByDay, getVisitStats } from "@/lib/reports";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { requireUser } from "@/lib/require-role";
+import { cn } from "@/lib/utils";
 
 const DOT = { danger: "bg-destructive", warning: "bg-warning", info: "bg-info" };
 
@@ -31,8 +36,15 @@ function AlertRow({ tone, title, detail, href, action }: { tone: keyof typeof DO
   );
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ tren?: string }> }) {
   const user = await requireUser();
+  const trend = trendRange(Number((await searchParams).tren), todayJakarta());
+  const range = resolveRange({ from: trend.from, to: trend.to }, todayJakarta());
+  if ("error" in range) throw new Error(range.error);
+  const showRevenue = can(user.role, "view_revenue_reports");
+  const [sales, visits] = await Promise.all([showRevenue ? getSalesByDay(range) : [], getVisitStats(range)]);
+  const visitByDay = new Map(visits.perDay.map((d) => [d.day, d.count]));
+  const dayLabel = (ymd: string) => formatDate(new Date(`${ymd}T00:00:00+07:00`));
   const summary = await getDashboardSummary(can(user.role, "view_revenue_reports"));
   const alerts = can(user.role, "manage_stock") ? await getStockAlerts() : null;
   const total = alerts ? alerts.low.length + alerts.expiring.length : 0;
@@ -45,10 +57,33 @@ export default async function HomePage() {
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
-        {summary.revenue && <Stat label="Omzet hari ini" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final`} />}
+        {summary.revenue && <Stat label="Omzet hari ini (tanpa PPN)" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final`} />}
         <Stat label="Kunjungan hari ini" value={String(summary.visits)} href={can(user.role, "create_visit") ? "/kunjungan" : undefined} />
         <Stat label="Rawat inap aktif" value={String(summary.rawatInap)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
         <Stat label="Hotel aktif" value={String(summary.hotel)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold">Tren</h2>
+        <div className="flex gap-1.5">
+          {TREND_DAYS.map((n) => (
+            <Link key={n} href={`/?tren=${n}`} className={cn("flex h-11 items-center rounded-lg border px-4 text-sm font-medium", n === trend.days ? "border-primary bg-accent text-primary" : "bg-card")}>{n} hari</Link>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2">
+        {showRevenue && (
+          <TrendChart
+            title="Omzet harian"
+            total={formatRupiah(sumRows(sales).sales)}
+            points={fillDays(sales, trend.from, trend.to).map((d) => ({ label: dayLabel(d.day), value: d.sales, text: formatRupiah(d.sales) }))}
+          />
+        )}
+        <TrendChart
+          title="Kunjungan harian"
+          total={`${visits.perDay.reduce((t, d) => t + d.count, 0)} kunjungan`}
+          points={daysBetween(trend.from, trend.to).map((d) => ({ label: dayLabel(d), value: visitByDay.get(d) ?? 0, text: `${visitByDay.get(d) ?? 0} kunjungan` }))}
+        />
       </div>
 
       {alerts && (

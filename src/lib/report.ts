@@ -67,12 +67,25 @@ export function groupMonthly(rows: DayRow[]): DayRow[] {
   return [...byMonth.values()].sort((a, b) => a.day.localeCompare(b.day));
 }
 
+export function daysBetween(from: string, to: string) {
+  const out: string[] = [];
+  for (let t = new Date(`${from}T00:00:00Z`).getTime(); t <= new Date(`${to}T00:00:00Z`).getTime(); t += DAY_MS) out.push(ymd(new Date(t)));
+  return out;
+}
+
 export function fillDays(rows: DayRow[], from: string, to: string): DayRow[] {
   const byDay = new Map(rows.map((r) => [r.day, r]));
-  const out: DayRow[] = [];
-  for (let t = new Date(`${from}T00:00:00Z`).getTime(); t <= new Date(`${to}T00:00:00Z`).getTime(); t += DAY_MS) {
-    const day = ymd(new Date(t));
-    out.push(byDay.get(day) ?? { day, invoices: 0, sales: 0, cost: 0 });
-  }
-  return out;
+  return daysBetween(from, to).map((day) => byDay.get(day) ?? { day, invoices: 0, sales: 0, cost: 0 });
+}
+
+export const TREND_DAYS = [7, 30, 90] as const;
+
+export function trendRange(days: number, today: Date) {
+  const n = (TREND_DAYS as readonly number[]).includes(days) ? days : 30;
+  return { days: n, from: ymd(new Date(today.getTime() - (n - 1) * DAY_MS)), to: ymd(today) };
+}
+
+export function barHeights(values: number[]) {
+  const max = Math.max(0, ...values);
+  return values.map((v) => (max === 0 || v <= 0 ? 0 : Math.max(v / max, 0.02)));
 }

@@ -12,7 +12,7 @@ export async function getDashboardSummary(withRevenue: boolean) {
     prisma.visit.count({ where: { visitDate: day, status: { not: "BATAL" } } }),
     prisma.admission.groupBy({ by: ["type"], where: { status: "AKTIF" }, _count: true }),
     withRevenue
-      ? prisma.invoice.aggregate({ where: { status: "FINAL", finalizedAt: { gte: start, lt: end } }, _sum: { grandTotal: true }, _count: true })
+      ? prisma.invoice.aggregate({ where: { status: "FINAL", finalizedAt: { gte: start, lt: end } }, _sum: { grandTotal: true, taxTotal: true }, _count: true })
       : null,
   ]);
 
@@ -21,6 +21,6 @@ export async function getDashboardSummary(withRevenue: boolean) {
     visits,
     rawatInap: count("RAWAT_INAP"),
     hotel: count("HOTEL"),
-    revenue: revenue && { total: revenue._sum.grandTotal ?? 0, invoices: revenue._count },
+    revenue: revenue && { total: (revenue._sum.grandTotal ?? 0) - (revenue._sum.taxTotal ?? 0), invoices: revenue._count },
   };
 }
