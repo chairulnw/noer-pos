@@ -2,7 +2,11 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import type { Role } from "@/lib/permissions";
+import { todayJakarta } from "@/lib/date";
+import { groupCategories } from "@/lib/item-groups";
 import { normalizeItem, toItemView, type ItemInput } from "@/lib/item-schema";
+import { getSettings } from "@/lib/settings";
+import { stockStatus } from "@/lib/stock";
 
 const SELECT = {
   id: true,
@@ -41,6 +45,33 @@ export async function listItems(role: Role, filter: { q?: string; type?: "SERVIC
     orderBy: [{ type: "asc" }, { category: "asc" }, { name: "asc" }],
   });
   return rows.map((row) => toItemView(row, role));
+}
+
+export async function pageItems(role: Role, { q, group, skip, take }: { q?: string; group?: string; skip: number; take: number }) {
+  const categories = groupCategories(group);
+  const where: Prisma.ItemWhereInput = {
+    deletedAt: null,
+    ...(categories && { category: { in: categories } }),
+    ...(q && { OR: [{ name: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }, { barcode: { contains: q } }] }),
+  };
+  const [rows, total, settings] = await Promise.all([
+    prisma.item.findMany({ where, select: SELECT, orderBy: [{ type: "asc" }, { category: "asc" }, { name: "asc" }], skip, take }),
+    prisma.item.count({ where }),
+    getSettings(),
+  ]);
+  const productIds = rows.filter((r) => r.type === "PRODUCT").map((r) => r.id);
+  const batches = productIds.length ? await prisma.stockBatch.findMany({ where: { itemId: { in: productIds } }, select: { itemId: true, expiryDate: true, qtyOnHand: true } }) : [];
+  const today = todayJakarta();
+
+  return {
+    total,
+    rows: rows.map((row) => {
+      const view = toItemView(row, role);
+      if (row.type !== "PRODUCT") return { ...view, stock: null };
+      const own = batches.filter((b) => b.itemId === row.id).map((b) => ({ expiry: b.expiryDate, qty: Number(b.qtyOnHand) }));
+      return { ...view, stock: stockStatus(own, view.lowStockThreshold, today, settings.expiryWarningDays) };
+    }),
+  };
 }
 
 export async function getItem(id: string, role: Role) {

@@ -185,3 +185,25 @@ export async function getUsableStock() {
   });
   return Object.fromEntries(rows.map((r) => [r.itemId, Number(r._sum.qtyOnHand ?? 0)])) as Record<string, number>;
 }
+
+export async function pageStockMovements(q: string | undefined, skip: number, take: number) {
+  const term = q?.trim();
+  const where: Prisma.StockMovementWhereInput = term
+    ? { OR: [{ batch: { item: { name: { contains: term, mode: "insensitive" } } } }, { batch: { batchNo: { contains: term, mode: "insensitive" } } }, { note: { contains: term, mode: "insensitive" } }] }
+    : {};
+  const [rows, total] = await Promise.all([
+    prisma.stockMovement.findMany({
+      where,
+      select: {
+        id: true, type: true, qty: true, note: true, createdAt: true,
+        batch: { select: { batchNo: true, item: { select: { id: true, name: true, baseUnit: true } } } },
+        user: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.stockMovement.count({ where }),
+  ]);
+  return { rows, total };
+}
