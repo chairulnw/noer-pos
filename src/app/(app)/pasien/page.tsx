@@ -1,20 +1,68 @@
 import Link from "next/link";
+import { PawPrint } from "lucide-react";
+import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
 import { EmptyState } from "@/components/page-header";
 import { Search } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { cn } from "@/lib/utils";
-import { getPatient, getPatientHistory, searchPatients } from "@/lib/patients";
+import { parsePaging, type PagingParams } from "@/lib/paging";
+import { getPatient, getPatientHistory, pagePatients, searchPatients } from "@/lib/patients";
 import { latestRawatInapLogs, listPatientAdmissions } from "@/lib/admissions";
 import { can } from "@/lib/permissions";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
 import { PatientProfile } from "./patient-profile";
 
-export default async function PatientsPage({ searchParams }: { searchParams: Promise<{ q?: string; id?: string }> }) {
+const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
+
+async function PatientTable({ params }: { params: { q?: string } & PagingParams }) {
+  const { page, size, skip, take } = parsePaging(params);
+  const { rows, total } = await pagePatients(params.q ?? "", skip, take);
+  const keep = { q: params.q, baris: params.baris };
+  const add = <Button asChild><Link href="/pemilik/baru">+ Pasien Baru</Link></Button>;
+
+  return (
+    <ListPage>
+      <ListHeader icon={PawPrint} title="Pasien & Anabul" subtitle="Daftar identitas hewan pasien klinik, pemilik, jenis, ras, dan profil klinis" actions={add} />
+      <ListToolbar base="/pasien" params={keep} placeholder="Cari nama hewan, pemilik, no. WA, no. RM, microchip…" total={total} />
+      <TableCard
+        columns={[{ label: "Nama pasien (anabul)" }, { label: "Jenis & ras" }, { label: "Jenis kelamin" }, { label: "Pemilik (owner)" }, { label: "Berat badan", align: "right" }, { label: "Aksi", align: "right" }]}
+        total={total}
+        page={page}
+        size={size}
+        base="/pasien"
+        params={keep}
+        minWidth={800}
+        empty={<EmptyState action={add}>{params.q ? "Tidak ada pasien ditemukan." : "Belum ada data pasien. Mulai daftarkan pemilik, lalu tambahkan hewannya."}</EmptyState>}
+      >
+        {rows.map((p) => (
+          <tr key={p.id} className="border-b last:border-0">
+            <td className="px-4 py-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Link href={`/pasien?id=${p.id}`} className="font-medium">{p.name}</Link>
+                <ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} />
+              </div>
+              <div className="text-[13px] text-muted-foreground">{p.rmNo}</div>
+            </td>
+            <td className="px-4 py-3">{[p.species, p.breed].filter(Boolean).join(" · ")}</td>
+            <td className="px-4 py-3">{SEX[p.sex]}</td>
+            <td className="px-4 py-3"><Link href={`/pemilik/${p.owner.id}`} className="font-medium">{p.owner.name}</Link><div className="text-[13px] text-muted-foreground">{formatWhatsapp(p.owner.whatsapp)}</div></td>
+            <td className="px-4 py-3 text-right tabular-nums">{p.lastWeightKg === null ? "—" : `${p.lastWeightKg.toLocaleString("id-ID")} kg`}</td>
+            <td className="px-4 py-3 text-right"><Link href={`/pasien?id=${p.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Profil</Link></td>
+          </tr>
+        ))}
+      </TableCard>
+    </ListPage>
+  );
+}
+
+export default async function PatientsPage({ searchParams }: { searchParams: Promise<{ q?: string; id?: string } & PagingParams> }) {
   const user = await requireCapability("manage_patients");
-  const { q = "", id } = await searchParams;
+  const params = await searchParams;
+  const { q = "", id } = params;
+  if (!id || !z.guid().safeParse(id).success) return <PatientTable params={params} />;
   const [{ patients, ownersWithoutPets }, selected] = await Promise.all([
     searchPatients(q),
     id && z.guid().safeParse(id).success ? getPatient(id) : null,

@@ -80,35 +80,42 @@ export async function createDraftInvoiceFromRecord(tx: Tx, userId: string, recor
   return invoice.id;
 }
 
-export const listInvoices = (filter: { q?: string; status?: "DRAFT" | "FINAL" | "VOID" } = {}) =>
-  prisma.invoice.findMany({
-    where: {
-      ...(filter.status && { status: filter.status }),
-      ...(filter.q && {
-        OR: [
-          { invoiceNo: { contains: filter.q, mode: "insensitive" } },
-          { customerName: { contains: filter.q, mode: "insensitive" } },
-          { visit: { patient: { name: { contains: filter.q, mode: "insensitive" } } } },
-          { admission: { patient: { name: { contains: filter.q, mode: "insensitive" } } } },
-          { owner: { name: { contains: filter.q, mode: "insensitive" } } },
-        ],
-      }),
-    },
-    select: {
-      id: true,
-      invoiceNo: true,
-      status: true,
-      grandTotal: true,
-      customerName: true,
-      payments: { where: { voided: false }, select: { amount: true } },
-      createdAt: true,
-      owner: { select: { name: true } },
-      visit: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
-      admission: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+export async function listInvoices(filter: { q?: string; status?: "DRAFT" | "FINAL" | "VOID" } = {}, skip = 0, take = 50) {
+  const where: Prisma.InvoiceWhereInput = {
+    ...(filter.status && { status: filter.status }),
+    ...(filter.q && {
+      OR: [
+        { invoiceNo: { contains: filter.q, mode: "insensitive" } },
+        { customerName: { contains: filter.q, mode: "insensitive" } },
+        { visit: { patient: { name: { contains: filter.q, mode: "insensitive" } } } },
+        { admission: { patient: { name: { contains: filter.q, mode: "insensitive" } } } },
+        { owner: { name: { contains: filter.q, mode: "insensitive" } } },
+      ],
+    }),
+  };
+  const [rows, total] = await Promise.all([
+    prisma.invoice.findMany({
+      where,
+      select: {
+        id: true,
+        invoiceNo: true,
+        status: true,
+        grandTotal: true,
+        customerName: true,
+        payments: { where: { voided: false }, select: { amount: true } },
+        createdAt: true,
+        owner: { select: { name: true } },
+        visit: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
+        admission: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.invoice.count({ where }),
+  ]);
+  return { rows, total };
+}
 
 export const getInvoice = (id: string) =>
   prisma.invoice.findUnique({
@@ -148,33 +155,40 @@ export const listRetailDrafts = () =>
     take: 20,
   });
 
-export const listPayments = (q?: string) =>
-  prisma.payment.findMany({
-    where: {
-      ...(q && {
-        invoice: {
-          OR: [
-            { invoiceNo: { contains: q, mode: "insensitive" } },
-            { customerName: { contains: q, mode: "insensitive" } },
-            { owner: { name: { contains: q, mode: "insensitive" } } },
-            { visit: { patient: { name: { contains: q, mode: "insensitive" } } } },
-            { admission: { patient: { name: { contains: q, mode: "insensitive" } } } },
-          ],
-        },
-      }),
-    },
-    select: {
-      id: true,
-      kind: true,
-      method: true,
-      amount: true,
-      paidAt: true,
-      voided: true,
-      invoice: { select: { id: true, invoiceNo: true, customerName: true, visit: { select: { patient: { select: { name: true } } } }, admission: { select: { patient: { select: { name: true } } } } } },
-    },
-    orderBy: { paidAt: "desc" },
-    take: 100,
-  });
+export async function listPayments(q: string | undefined, skip = 0, take = 50) {
+  const where: Prisma.PaymentWhereInput = {
+    ...(q && {
+      invoice: {
+        OR: [
+          { invoiceNo: { contains: q, mode: "insensitive" } },
+          { customerName: { contains: q, mode: "insensitive" } },
+          { owner: { name: { contains: q, mode: "insensitive" } } },
+          { visit: { patient: { name: { contains: q, mode: "insensitive" } } } },
+          { admission: { patient: { name: { contains: q, mode: "insensitive" } } } },
+        ],
+      },
+    }),
+  };
+  const [rows, total] = await Promise.all([
+    prisma.payment.findMany({
+      where,
+      select: {
+        id: true,
+        kind: true,
+        method: true,
+        amount: true,
+        paidAt: true,
+        voided: true,
+        invoice: { select: { id: true, invoiceNo: true, customerName: true, owner: { select: { name: true } }, visit: { select: { patient: { select: { name: true } } } }, admission: { select: { patient: { select: { name: true } } } } } },
+      },
+      orderBy: { paidAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.payment.count({ where }),
+  ]);
+  return { rows, total };
+}
 
 export const activeInvoiceForVisit = (visitId: string) =>
   prisma.invoice.findFirst({ where: { visitId, status: { not: "VOID" } }, select: { id: true } });

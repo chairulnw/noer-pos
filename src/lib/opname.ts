@@ -27,12 +27,20 @@ export async function createOpname(userId: string, note: string) {
   return { id: opname.id, resumed: false };
 }
 
-export const listOpnames = () =>
-  prisma.stockOpname.findMany({
-    select: { id: true, opnameDate: true, status: true, note: true, user: { select: { name: true } }, _count: { select: { items: true } }, items: { where: { diff: { not: 0 } }, select: { id: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+export async function listOpnames(skip = 0, take = 50) {
+  const [rows, total] = await Promise.all([
+    prisma.stockOpname.findMany({
+      select: { id: true, opnameDate: true, status: true, note: true, user: { select: { name: true } }, _count: { select: { items: true } }, items: { where: { diff: { not: 0 } }, select: { id: true } } },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.stockOpname.count(),
+  ]);
+  return { rows, total };
+}
+
+export const hasDraftOpname = async () => (await prisma.stockOpname.count({ where: { status: "DRAFT" } })) > 0;
 
 export const getOpname = (id: string) =>
   prisma.stockOpname.findUnique({

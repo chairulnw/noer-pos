@@ -85,6 +85,34 @@ export async function pageOwners(query: string, skip: number, take: number) {
   return { rows: rows.map(withPets), total };
 }
 
+export async function pagePatients(query: string, skip: number, take: number) {
+  const term = query.trim();
+  const phone = term.replace(/\D/g, "").replace(/^0/, "");
+  const where: Prisma.PatientWhereInput = {
+    deletedAt: null,
+    owner: { deletedAt: null },
+    ...(term && {
+      OR: [
+        { name: { contains: term, mode: "insensitive" as const } },
+        { rmNo: { contains: term, mode: "insensitive" as const } },
+        { microchip: { contains: term } },
+        { owner: { OR: [{ name: { contains: term, mode: "insensitive" as const } }, ...(phone.length >= 3 ? [{ whatsapp: { contains: phone } }] : [])] } },
+      ],
+    }),
+  };
+  const [rows, total] = await Promise.all([
+    prisma.patient.findMany({
+      where,
+      select: { id: true, rmNo: true, name: true, species: true, breed: true, sex: true, lastWeightKg: true, allergyNote: true, aggressive: true, owner: { select: { id: true, name: true, whatsapp: true } } },
+      orderBy: term ? { name: "asc" } : { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.patient.count({ where }),
+  ]);
+  return { rows: rows.map((r) => ({ ...r, lastWeightKg: r.lastWeightKg === null ? null : Number(r.lastWeightKg) })), total };
+}
+
 export async function getPatient(id: string) {
   const row = await prisma.patient.findFirst({
     where: { id, deletedAt: null, owner: { deletedAt: null } },
