@@ -131,6 +131,7 @@ model User {
   paymentsReceived     Payment[]
   auditLogs            AuditLog[]
   cashClosings         CashClosing[]
+  operationalCosts     OperationalCost[]
   walletTransactions   WalletTransaction[]
   examinationsCreated  Examination[]
   appointmentsAsDoctor Appointment[]       @relation("AppointmentDoctor")
@@ -612,6 +613,25 @@ model WalletTransaction {
   @@index([ownerId, createdAt])
   @@index([createdAt])
   @@map("wallet_transaction")
+}
+
+model OperationalCost {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  amount      Int
+  category    String
+  costDate    DateTime  @map("cost_date") @db.Date
+  notes       String?
+  createdById String    @map("created_by") @db.Uuid
+  deletedAt   DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([costDate])
+  @@map("operational_cost")
 }
 
 model CashClosing {

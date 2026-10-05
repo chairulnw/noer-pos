@@ -46,7 +46,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/master-data/item", label: "Produk", icon: Package, capability: "manage_service_price" },
       { href: "/riwayat-stok", label: "Riwayat Stok", icon: History, capability: "manage_stock" },
       { href: "/inventaris/opname", label: "Stok Opname", icon: ClipboardCheck, capability: "manage_stock" },
-      { href: "/biaya-operasional", label: "Biaya Operasional", icon: Banknote, capability: "view_revenue_reports", soon: true },
+      { href: "/biaya-operasional", label: "Biaya Operasional", icon: Banknote, capability: "view_revenue_reports" },
     ],
   },
   {
