@@ -634,6 +634,32 @@ model OperationalCost {
   @@map("operational_cost")
 }
 
+model AnimalSpecies {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  breeds AnimalBreed[]
+
+  @@map("animal_species")
+}
+
+model AnimalBreed {
+  id        String   @id @default(uuid()) @db.Uuid
+  speciesId String   @map("species_id") @db.Uuid
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  species AnimalSpecies @relation(fields: [speciesId], references: [id])
+
+  @@unique([speciesId, name])
+  @@map("animal_breed")
+}
+
 model CashClosing {
   id          String   @id @default(uuid()) @db.Uuid
   closingDate DateTime @unique @map("closing_date") @db.Date

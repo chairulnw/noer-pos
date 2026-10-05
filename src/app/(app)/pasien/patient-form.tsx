@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckField, Field, Section, selectClass } from "@/components/form-fields";
+import { breedsOf } from "@/lib/animal-schema";
 import { keepValuesOnError } from "@/lib/form";
 import { savePatientAction, type PatientFormState } from "./actions";
 
@@ -25,14 +26,14 @@ type Patient = {
   behaviorNote: string | null;
 };
 
-const SPECIES = ["Kucing", "Anjing", "Kelinci", "Burung", "Hamster", "Reptil"];
-
-export function PatientForm({ ownerId, ownerName, patient }: { ownerId: string; ownerName: string; patient: Patient | null }) {
+export function PatientForm({ ownerId, ownerName, patient, options }: { ownerId: string; ownerName: string; patient: Patient | null; options: { species: string[]; breeds: { species: string; name: string }[] } }) {
   const [state, formAction, pending] = useActionState<PatientFormState, FormData>(
     savePatientAction.bind(null, ownerId, patient?.id ?? null),
     {},
   );
   const err = (key: string) => state.errors?.[key];
+  const [species, setSpecies] = useState(patient?.species ?? "");
+  const speciesOptions = species && !options.species.some((s) => s.toLowerCase() === species.toLowerCase()) ? [species, ...options.species] : options.species;
 
   return (
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
@@ -49,16 +50,15 @@ export function PatientForm({ ownerId, ownerName, patient }: { ownerId: string; 
             <option value="BETINA">Betina</option>
           </select>
         </Field>
-        <Field label="Spesies" name="species" errors={err("species")}>
-          <Input id="species" name="species" list="species-options" defaultValue={patient?.species} required />
-          <datalist id="species-options">
-            {SPECIES.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
+        <Field label="Jenis hewan" name="species" errors={err("species")}>
+          <select id="species" name="species" value={species} onChange={(e) => setSpecies(e.target.value)} className={selectClass} required>
+            <option value="" disabled>Pilih jenis hewan</option>
+            {speciesOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
         </Field>
-        <Field label="Ras" name="breed" errors={err("breed")}>
-          <Input id="breed" name="breed" defaultValue={patient?.breed ?? ""} />
+        <Field label="Ras" name="breed" errors={err("breed")} hint="Pilih dari saran atau ketik bila belum ada.">
+          <Input id="breed" name="breed" list="breed-options" defaultValue={patient?.breed ?? ""} />
+          <datalist id="breed-options">{breedsOf(options.breeds, species).map((b) => <option key={b} value={b} />)}</datalist>
         </Field>
         <Field label="Tanggal lahir" name="birthDate" errors={err("birthDate")}>
           <Input id="birthDate" name="birthDate" type="date" defaultValue={patient?.birthDate} />

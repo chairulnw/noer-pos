@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ConfirmButton } from "@/components/confirm-button";
+import { listActiveAnimalOptions } from "@/lib/animals";
 import { getPatient } from "@/lib/patients";
 import { requireCapability } from "@/lib/require-role";
 import { deletePatientAction } from "../../actions";
@@ -10,7 +11,7 @@ export default async function EditPatientPage({ params }: { params: Promise<{ id
   await requireCapability("manage_patients");
   const { id } = await params;
   if (!z.guid().safeParse(id).success) notFound();
-  const patient = await getPatient(id);
+  const [patient, options] = await Promise.all([getPatient(id), listActiveAnimalOptions()]);
   if (!patient) notFound();
 
   return (
@@ -20,6 +21,7 @@ export default async function EditPatientPage({ params }: { params: Promise<{ id
         ownerId={patient.owner.id}
         ownerName={patient.owner.name}
         patient={{ ...patient, birthDate: patient.birthDate?.toISOString().slice(0, 10) ?? "" }}
+        options={options}
       />
       <form action={deletePatientAction.bind(null, patient.id)} className="pt-4">
         <ConfirmButton variant="destructive" message={`Hapus ${patient.name} dari daftar pasien?`}>
