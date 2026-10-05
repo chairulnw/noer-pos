@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 3 (`docs/PRD-fase3.md`, disetujui 6 Okt 2026), tahap 3A. 2.1 (import) dan 2.3 (export) tetap ditunda |
-| Task berikutnya | 3A.1 |
+| Task berikutnya | 3A.2 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -74,7 +74,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 Menu mengikuti VetCloud, gaya NOER tetap. Kehadiran tidak dibuat. Satu tahap = beberapa task, tiap task di-commit.
 
 **3A (navigasi + kasir)**
-- [ ] **3A.1** Sidebar grup VetCloud
+- [x] **3A.1** Sidebar grup VetCloud
 - [ ] **3A.2** Pisah Hewan Peliharaan / Pemilik Hewan
 - [ ] **3A.3** Pisah Rawat Inap / Pet Hotel
 - [ ] **3A.4** Kasir (POS) satu layar
@@ -248,6 +248,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-04 | 2.2 | Selesai | `/laporan` (Admin saja, view_revenue_reports; menu "Laporan"): tab Omzet & Laba (harian/bulanan, preset hari ini/7 hari/bulan ini/bulan lalu atau rentang bebas maks 366 hari), Produk & Layanan (10 teratas menurut penjualan dengan HPP dan laba kotor), Kunjungan (per hari, per dokter, check-in rawat inap/hotel), Stok & Jatuh Tempo (stok menipis, expired, vaksin 30 hari; kondisi saat ini). Definisi: hanya invoice FINAL; penjualan = grand total − PPN; HPP = qty × harga beli snapshot; laba kotor = penjualan − HPP; diskon tingkat invoice tidak dialokasikan ke per item. Hari dihitung WIB (kolom waktu Prisma `timestamp` tanpa zona, konversi `AT TIME ZONE 'UTC'` lalu Jakarta; tes batas tengah malam). Diuji: angka manual cocok, VOID/DRAFT/bulan lain diabaikan, Kasir/Dokter ditolak. Laba bersih (pengeluaran operasional) di luar scope (PRD Q3) |
 | 2026-10-04 | 2.4 | Selesai | Beranda: grafik batang Omzet harian (hanya Admin) dan Kunjungan harian (semua peran) dengan pilihan 7/30/90 hari. Tanpa library grafik (batang dari elemen HTML, aksesibel via aria-label dan tooltip). Kartu "Omzet hari ini" disamakan dengan laporan: tanpa PPN (sebelumnya total termasuk PPN). Diuji: total 30 hari cocok hitungan manual (Rp 1.300.000, 33 kunjungan), Dokter/Kasir tidak menerima omzet. 202 test |
 | 2026-10-04 | 2.5 | Selesai | `/tutup-kas` (Kasir dan Admin, kapabilitas baru close_cash; Dokter ditolak): modal awal (terisi dari hitung fisik penutupan terakhir), hitung fisik, catatan. Tunai sistem = jumlah pembayaran TUNAI tidak void pada hari WIB itu; selisih = fisik − (modal + tunai sistem); catatan wajib bila selisih ≠ 0. Satu penutupan per tanggal (unik), tidak bisa diubah, konfirmasi dua langkah di halaman, tercatat audit `cash.close`. Tabel `cash_closing` (migrasi, CHECK nominal ≥ 0). Keputusan default: **Kasir tidak menerima angka tunai sistem** (aturan 3), hanya modal, fisik, selisih (catatan: dari selisih Kasir bisa menghitung mundur tunai sistem, ini kompromi agar bisa hitung ulang); Admin melihat tunai sistem dan peringatan bila ada transaksi tunai setelah penutupan. Pembayaran void tidak dihitung sebagai kas (pengembalian dana di luar sistem, BR-13). Hanya hari ini yang bisa ditutup. Diuji: batas tengah malam WIB, void, non-tunai, hari lain, penutupan ganda, tampilan Kasir, browser. Ditambah ke `pnpm e2e` |
+| 2026-10-06 | 3A.1 | Selesai | Sidebar mengikuti grup VetCloud: Ikhtisar, Penjualan (Kasir/POS, Transaksi Lunas, Tagihan/Invoice, Tutup Kas), Operasional Klinik, Pelanggan, Inventaris & Ritel (Produk & Layanan, Stok, Stok Opname), Laporan, Data Master (Klinik, Kandang, Pengguna). Grup dan menu hanya tampil bila fiturnya ada dan peran berhak. Menu aktif memakai kecocokan terpanjang (Stok Opname tidak ikut menyalakan Stok). "Kasir (POS)" sementara menuju /retail sampai 3A.4. Kehadiran tidak dibuat. Diuji per peran lewat HTTP. Catatan: Docker Desktop sempat mati sehingga login 500; dinyalakan ulang, data utuh |
 | 2026-10-04 | UI/UX | Selesai | 14 catatan review UI/UX. Sidebar dikelompokkan (Pelayanan/Kasir/Stok/Admin), tetap di tempat dengan scroll sendiri, ikon saja di layar tablet; kolom cari global + pintasan `/`. Beranda Dokter (pasien belum diperiksa) dan Kasir (menunggu bayar, draft retail, pengingat tutup kas). Input uang berpemisah ribuan (`MoneyInput`, server tetap menerima integer). Void invoice dipindah ke menu "Lainnya"; semua konfirmasi memakai dialog yang sama (`ConfirmButton`, termasuk Tutup Kas dan finalisasi opname). Toast setelah simpan (cookie `flash` untuk aksi server, `toast()` untuk aksi klien). `PageHeader` seragam di Rekam Medis, Rawat Inap, Invoice, Opname; aksi tabel = satu tombol + menu; empty state dengan tombol aksi; grafik tren dengan skala dan ketuk-untuk-nilai; fokus otomatis ke kolom scan, Enter untuk bayar; lebar minimum tabel diturunkan untuk tablet. Butir 13 (form login) tidak direproduksi di kode: isian hilang hanya saat mengetik sebelum halaman siap di alat otomasi, perlu dicoba manual |
 
 ## Perintah Proyek
