@@ -7,6 +7,8 @@ import { billedDays, dateToJakartaLocal } from "../src/lib/admission-calc";
 import { getStockAlerts, receiveStock } from "../src/lib/inventory";
 import * as Opname from "../src/lib/opname";
 import { addInvoiceItem, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
+import { createAppointment, startVisitFromAppointment } from "../src/lib/appointments";
+import { jakartaYmd } from "../src/lib/appointment-calc";
 import { closeCash } from "../src/lib/cash";
 import { getSettings, saveSettings } from "../src/lib/settings";
 import { resolveRange, sumRows } from "../src/lib/report";
@@ -21,7 +23,7 @@ const stock = async (itemId: string) =>
 const ok = (label: string) => console.log(`  ok  ${label}`);
 
 async function wipe() {
-  await prisma.cashClosing.deleteMany();
+  await prisma.cashClosing.deleteMany(); await prisma.appointment.deleteMany();
   await prisma.stockMovement.deleteMany(); await prisma.payment.deleteMany(); await prisma.opnameItem.deleteMany(); await prisma.stockOpname.deleteMany(); await prisma.invoiceItem.deleteMany(); await prisma.invoice.deleteMany();
   await prisma.admissionLog.deleteMany(); await prisma.admission.deleteMany(); await prisma.room.deleteMany({ where: { name: "K-E2E" } });
   await prisma.stockBatch.deleteMany(); await prisma.prescriptionItem.deleteMany(); await prisma.recordAddendum.deleteMany(); await prisma.attachment.deleteMany();
@@ -160,6 +162,15 @@ async function main() {
   assert.ok(!("error" in (await Opname.finalizeOpname(admin.id, session.id, withReason))));
   assert.ok((await stock(amox.id)) < before);
   ok("opname: selisih wajib beralasan, stok disesuaikan lewat ADJUST");
+
+  const apptDay = jakartaYmd(new Date(Date.now() + 86_400_000));
+  const appt = await createAppointment(kasir.id, patient.id, { doctorId: dokter.id, scheduledAt: `${apptDay}T09:00`, purpose: "Kontrol E2E", notes: "" }, false);
+  if (!("id" in appt)) throw new Error("janji temu gagal dibuat");
+  assert.ok("conflict" in (await createAppointment(kasir.id, patient.id, { doctorId: dokter.id, scheduledAt: `${apptDay}T09:15`, purpose: "Bentrok", notes: "" }, false)));
+  const started = await startVisitFromAppointment(kasir.id, appt.id);
+  assert.ok("visitId" in started && started.visitId);
+  assert.ok("error" in (await startVisitFromAppointment(kasir.id, appt.id)));
+  ok("janji temu: bentrok diperingatkan, jadi kunjungan sekali saja");
 
   const audit = (await prisma.auditLog.findMany({ select: { action: true } })).map((a) => a.action);
   for (const action of ["stock.in", "medical_record.finalize", "medical_record.addendum", "invoice.finalize", "payment.create", "invoice.void", "payment.deposit", "admission.check_in", "admission.check_out", "stock.opname"]) {

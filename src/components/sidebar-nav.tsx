@@ -23,7 +23,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Operasional Klinik",
     items: [
-      { href: "/janji-temu", label: "Janji Temu", icon: CalendarClock, capability: "create_visit", soon: true },
+      { href: "/janji-temu", label: "Janji Temu", icon: CalendarClock, capability: "create_visit" },
       { href: "/kunjungan", label: "Kunjungan", icon: CalendarDays, capability: "create_visit", roleLabel: { DOKTER: "Pasien Hari Ini" } },
       { href: "/rekam-medis", label: "Rekam Medis", icon: Stethoscope, capability: "view_medical_record", soon: true },
       { href: "/rawat-inap", label: "Rawat Inap", icon: BedDouble, capability: "manage_admission" },

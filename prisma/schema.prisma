@@ -20,6 +20,12 @@ enum PatientSex {
   BETINA
 }
 
+enum AppointmentStatus {
+  TERJADWAL
+  SELESAI
+  BATAL
+}
+
 enum VisitStatus {
   DILAYANI
   MENUNGGU_BAYAR
@@ -101,17 +107,19 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  visitsAsDoctor   Visit[]          @relation("VisitDoctor")
-  visitsCreated    Visit[]          @relation("VisitCreatedBy")
-  recordAddenda    RecordAddendum[]
-  stockMovements   StockMovement[]
-  stockOpnames     StockOpname[]
-  admissionLogs    AdmissionLog[]
-  invoicesCreated  Invoice[]        @relation("InvoiceCreatedBy")
-  invoicesVoided   Invoice[]        @relation("InvoiceVoidedBy")
-  paymentsReceived Payment[]
-  auditLogs        AuditLog[]
-  cashClosings     CashClosing[]
+  visitsAsDoctor       Visit[]          @relation("VisitDoctor")
+  visitsCreated        Visit[]          @relation("VisitCreatedBy")
+  recordAddenda        RecordAddendum[]
+  stockMovements       StockMovement[]
+  stockOpnames         StockOpname[]
+  admissionLogs        AdmissionLog[]
+  invoicesCreated      Invoice[]        @relation("InvoiceCreatedBy")
+  invoicesVoided       Invoice[]        @relation("InvoiceVoidedBy")
+  paymentsReceived     Payment[]
+  auditLogs            AuditLog[]
+  cashClosings         CashClosing[]
+  appointmentsAsDoctor Appointment[]    @relation("AppointmentDoctor")
+  appointmentsCreated  Appointment[]    @relation("AppointmentCreatedBy")
 
   @@map("user")
 }
@@ -158,9 +166,10 @@ model Patient {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  owner      Owner       @relation(fields: [ownerId], references: [id])
-  visits     Visit[]
-  admissions Admission[]
+  owner        Owner         @relation(fields: [ownerId], references: [id])
+  visits       Visit[]
+  appointments Appointment[]
+  admissions   Admission[]
 
   @@index([microchip])
   @@map("patient")
@@ -186,6 +195,7 @@ model Visit {
   medicalRecord MedicalRecord?
   invoices      Invoice[]
   admissions    Admission[]
+  appointment   Appointment?
 
   @@index([visitDate, status])
   @@map("visit")
@@ -509,6 +519,29 @@ model Payment {
   receivedBy User    @relation(fields: [receivedById], references: [id])
 
   @@map("payment")
+}
+
+model Appointment {
+  id          String            @id @default(uuid()) @db.Uuid
+  patientId   String            @map("patient_id") @db.Uuid
+  doctorId    String            @map("doctor_id") @db.Uuid
+  scheduledAt DateTime          @map("scheduled_at")
+  purpose     String
+  notes       String?
+  status      AppointmentStatus @default(TERJADWAL)
+  visitId     String?           @unique @map("visit_id") @db.Uuid
+  createdById String            @map("created_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient   Patient @relation(fields: [patientId], references: [id])
+  doctor    User    @relation("AppointmentDoctor", fields: [doctorId], references: [id])
+  createdBy User    @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
+  visit     Visit?  @relation(fields: [visitId], references: [id])
+
+  @@index([scheduledAt])
+  @@map("appointment")
 }
 
 model CashClosing {
