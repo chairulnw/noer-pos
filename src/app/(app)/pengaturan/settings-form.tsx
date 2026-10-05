@@ -76,6 +76,20 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         </Field>
       </Section>
 
+      <Section title="Pilihan cepat rekam medis">
+        <p className="text-sm text-muted-foreground md:col-span-2">Tombol pintas di form pemeriksaan. Satu pilihan per baris, maksimal 20 pilihan.</p>
+        {([
+          ["quickSubjective", "S · Keluhan (Subjective)"],
+          ["quickObjective", "O · Pemeriksaan fisik (Objective)"],
+          ["quickAssessment", "A · Diagnosis (Assessment)"],
+          ["quickPlan", "P · Rencana tindakan (Plan)"],
+        ] as const).map(([name, label]) => (
+          <Field key={name} label={label} name={name} errors={err(name)}>
+            <Textarea id={name} name={name} rows={6} defaultValue={settings[name]} />
+          </Field>
+        ))}
+      </Section>
+
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : "Simpan"}

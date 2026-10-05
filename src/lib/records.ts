@@ -219,3 +219,39 @@ export const listCatalog = () =>
     select: { id: true, name: true, type: true, category: true, baseUnit: true },
     orderBy: [{ type: "desc" }, { name: "asc" }],
   });
+
+export type RecordListFilter = { q?: string; status?: "BELUM" | "DRAFT" | "FINAL"; doctorId?: string; from?: string; to?: string };
+
+export function listRecords({ q, status, doctorId, from, to }: RecordListFilter) {
+  const term = q?.trim();
+  const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
+  return prisma.visit.findMany({
+    where: {
+      status: { not: "BATAL" },
+      ...(doctorId && { doctorId }),
+      ...((from || to) && { visitDate: { ...(from && { gte: day(from) }), ...(to && { lte: day(to) }) } }),
+      ...(status === "BELUM" && { medicalRecord: null }),
+      ...(status === "DRAFT" && { medicalRecord: { is: { finalized: false } } }),
+      ...(status === "FINAL" && { medicalRecord: { is: { finalized: true } } }),
+      ...(term && {
+        OR: [
+          { patient: { name: { contains: term, mode: "insensitive" } } },
+          { patient: { owner: { name: { contains: term, mode: "insensitive" } } } },
+          { patient: { rmNo: { contains: term, mode: "insensitive" } } },
+          { complaint: { contains: term, mode: "insensitive" } },
+          { medicalRecord: { is: { diagnosis: { contains: term, mode: "insensitive" } } } },
+        ],
+      }),
+    },
+    select: {
+      id: true,
+      visitDate: true,
+      complaint: true,
+      patient: { select: { id: true, name: true, species: true, rmNo: true, allergyNote: true, aggressive: true, owner: { select: { name: true } } } },
+      doctor: { select: { name: true } },
+      medicalRecord: { select: { diagnosis: true, finalized: true } },
+    },
+    orderBy: [{ visitDate: "desc" }, { createdAt: "desc" }],
+    take: 100,
+  });
+}

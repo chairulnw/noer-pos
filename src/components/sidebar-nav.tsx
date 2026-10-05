@@ -25,7 +25,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/janji-temu", label: "Janji Temu", icon: CalendarClock, capability: "create_visit" },
       { href: "/kunjungan", label: "Kunjungan", icon: CalendarDays, capability: "create_visit", roleLabel: { DOKTER: "Pasien Hari Ini" } },
-      { href: "/rekam-medis", label: "Rekam Medis", icon: Stethoscope, capability: "view_medical_record", soon: true },
+      { href: "/rekam-medis", label: "Rekam Medis", icon: Stethoscope, capability: "view_medical_record" },
       { href: "/rawat-inap", label: "Rawat Inap", icon: BedDouble, capability: "manage_admission" },
       { href: "/pet-hotel", label: "Pet Hotel", icon: Hotel, capability: "manage_admission" },
       { href: "/jatuh-tempo", label: "Vaksin", icon: Syringe, capability: "view_medical_record" },

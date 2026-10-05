@@ -40,6 +40,10 @@ export async function updateSettings(_prev: SettingsState, formData: FormData): 
     taxMode: text(formData, "taxMode"),
     paperWidth: Number(text(formData, "paperWidth")),
     expiryWarningDays: Number(text(formData, "expiryWarningDays")),
+    quickSubjective: text(formData, "quickSubjective"),
+    quickObjective: text(formData, "quickObjective"),
+    quickAssessment: text(formData, "quickAssessment"),
+    quickPlan: text(formData, "quickPlan"),
     ...images,
   });
 

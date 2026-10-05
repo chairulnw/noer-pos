@@ -9,7 +9,9 @@ import { formatDate } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { formatAge } from "@/lib/patient-schema";
 import { ensureRecord, getRecordView, listCatalog, listDiagnoses, listVaccines } from "@/lib/records";
+import { parsePicks } from "@/lib/quick-picks";
 import { requireCapability } from "@/lib/require-role";
+import { getSettings } from "@/lib/settings";
 import { removeVaccinationAction } from "../actions";
 import { RecordForm, type Vitals } from "../record-form";
 import { AddendumForm, AttachmentForm, VaccinationForm } from "../side-forms";
@@ -48,7 +50,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
   const vitals = { ...EMPTY_VITALS, ...(record.vitals as Partial<Vitals> | null) };
   const today = todayJakarta();
 
-  const [diagnoses, vaccines, catalog] = final || !canEdit ? [[], [], []] : await Promise.all([listDiagnoses(), listVaccines(), listCatalog()]);
+  const [diagnoses, vaccines, catalog, settings] = final || !canEdit ? [[], [], [], await getSettings()] : await Promise.all([listDiagnoses(), listVaccines(), listCatalog(), getSettings()]);
 
   return (
     <div className="space-y-5">
@@ -104,6 +106,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
           diagnoses={diagnoses.map((d) => d.name)}
           catalog={catalog}
           allergyNote={patient.allergyNote}
+          picks={{ subjective: parsePicks(settings.quickSubjective), objective: parsePicks(settings.quickObjective), assessment: parsePicks(settings.quickAssessment), plan: parsePicks(settings.quickPlan) }}
           items={record.prescriptionItems.map((p) => ({ itemId: p.itemId, qty: Number(p.qty), instruction: p.instruction ?? "" }))}
           initial={{ subjective: record.subjective ?? "", objective: record.objective ?? "", assessment: record.assessment ?? "", plan: record.plan ?? "", diagnosis: record.diagnosis ?? "", vitals }}
         />

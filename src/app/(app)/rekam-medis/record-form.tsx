@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmButton } from "@/components/confirm-button";
 import { selectClass } from "@/components/form-fields";
 import { keepValuesOnError } from "@/lib/form";
+import { appendPick } from "@/lib/quick-picks";
 import { saveRecordAction, type RecordFormState } from "./actions";
 import { ItemsPicker, type CatalogItem, type RecordItemRow } from "./items-picker";
 
@@ -19,6 +20,7 @@ type Props = {
   catalog: CatalogItem[];
   allergyNote: string | null;
   items: RecordItemRow[];
+  picks: Record<"subjective" | "objective" | "assessment" | "plan", string[]>;
   initial: { subjective: string; objective: string; assessment: string; plan: string; diagnosis: string; vitals: Vitals };
 };
 
@@ -48,10 +50,11 @@ function Vital({ name, label, unit, error, value, step = "any", min }: { name: s
   );
 }
 
-export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote, items, initial }: Props) {
+export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote, items, initial, picks }: Props) {
   const [state, formAction, pending] = useActionState<RecordFormState, FormData>(saveRecordAction.bind(null, visitId, recordId), {});
   const err = (key: string) => state.errors?.[key];
   const v = initial.vitals;
+  const [soap, setSoap] = useState({ subjective: initial.subjective, objective: initial.objective, assessment: initial.assessment, plan: initial.plan });
 
   return (
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-4">
@@ -85,7 +88,17 @@ export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote,
             <label htmlFor={name} className="text-[14.5px] font-semibold">
               <span className="text-primary">{letter}</span> · {title} <span className="text-[13px] font-normal text-muted-foreground">{hint}</span>
             </label>
-            <Textarea id={name} name={name} rows={rows} defaultValue={initial[name]} className="min-h-24 text-[15px] leading-relaxed" />
+            <Textarea id={name} name={name} rows={rows} value={soap[name]} onChange={(e) => setSoap({ ...soap, [name]: e.target.value })} className="min-h-24 text-[15px] leading-relaxed" />
+            {picks[name].length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Pilih cepat ${title}`}>
+                <span className="text-[12.5px] text-muted-foreground">Pilih cepat:</span>
+                {picks[name].map((pick) => (
+                  <button key={pick} type="button" onClick={() => setSoap({ ...soap, [name]: appendPick(soap[name], pick) })} className="min-h-9 rounded-full border bg-card px-3 text-[13px] font-medium text-primary hover:bg-accent">
+                    + {pick}
+                  </button>
+                ))}
+              </div>
+            )}
             {err(name)?.map((e) => (
               <p key={e} className="text-[12.5px] text-destructive">
                 {e}

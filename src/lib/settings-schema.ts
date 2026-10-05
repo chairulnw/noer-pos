@@ -13,6 +13,10 @@ export const settingsSchema = z.object({
   expiryWarningDays: z.number().int("Harus bilangan bulat").min(1, "Minimal 1 hari").max(365, "Maksimal 365 hari"),
   logo: z.string(),
   qris: z.string(),
+  quickSubjective: z.string().max(1500, "Maksimal 1500 karakter"),
+  quickObjective: z.string().max(1500, "Maksimal 1500 karakter"),
+  quickAssessment: z.string().max(1500, "Maksimal 1500 karakter"),
+  quickPlan: z.string().max(1500, "Maksimal 1500 karakter"),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -30,6 +34,10 @@ export const DEFAULT_SETTINGS: Settings = {
   expiryWarningDays: 90,
   logo: "",
   qris: "",
+  quickSubjective: "Muntah\nDiare\nLesu\nAnoreksia\nGatal/Garuk\nBatuk/Bersin\nPincang\nDemam",
+  quickObjective: "Suhu Normal\nFebris (>39.5°C)\nDehidrasi Ringan\nMukosa Pucat\nCRT < 2 dtk\nGizi Baik",
+  quickAssessment: "Gastroenteritis\nScabies\nCat Flu (FCV)\nDermatitis\nSehat/Vaksinasi\nGingivitis",
+  quickPlan: "Rawat Jalan\nInjeksi Antibiotik\nVitamin\nRawat Inap\nObservasi\nKontrol Ulang",
 };
 
 export const IMAGE_LIMITS = { logo: 200 * 1024, qris: 1024 * 1024 } as const;
