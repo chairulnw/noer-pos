@@ -37,7 +37,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/pasien", label: "Hewan Peliharaan", icon: PawPrint, capability: "manage_patients" },
       { href: "/pemilik", label: "Pemilik Hewan", icon: UserRound, capability: "manage_patients" },
-      { href: "/deposit", label: "Deposit / Wallet", icon: WalletCards, capability: "manage_invoice_payment", soon: true },
+      { href: "/deposit", label: "Deposit / Wallet", icon: WalletCards, capability: "manage_invoice_payment" },
     ],
   },
   {

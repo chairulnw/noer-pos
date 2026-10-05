@@ -1,3 +1,4 @@
+import { METHOD_LABEL } from "@/lib/payment-method";
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
@@ -8,7 +9,7 @@ import { can } from "@/lib/permissions";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { getSettings } from "@/lib/settings";
 
-const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const METHOD = METHOD_LABEL;
 const PREFIX = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Bayar" };
 
 async function logoSource(stored: string) {

@@ -6,10 +6,11 @@ import { addAdmissionLog, checkOutAdmission, createAdmission } from "../src/lib/
 import { billedDays, dateToJakartaLocal } from "../src/lib/admission-calc";
 import { getStockAlerts, receiveStock } from "../src/lib/inventory";
 import * as Opname from "../src/lib/opname";
-import { addInvoiceItem, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
+import { addInvoiceItem, createRetailInvoice, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
 import { createAppointment, startVisitFromAppointment } from "../src/lib/appointments";
 import { jakartaYmd } from "../src/lib/appointment-calc";
 import { closeCash } from "../src/lib/cash";
+import { topUp } from "../src/lib/wallet";
 import { getSettings, saveSettings } from "../src/lib/settings";
 import { resolveRange, sumRows } from "../src/lib/report";
 import { getSalesByDay } from "../src/lib/reports";
@@ -23,6 +24,8 @@ const stock = async (itemId: string) =>
 const ok = (label: string) => console.log(`  ok  ${label}`);
 
 async function wipe() {
+  await prisma.walletTransaction.deleteMany();
+  await prisma.owner.updateMany({ data: { walletBalance: 0 } });
   await prisma.cashClosing.deleteMany(); await prisma.appointment.deleteMany();
   await prisma.stockMovement.deleteMany(); await prisma.payment.deleteMany(); await prisma.opnameItem.deleteMany(); await prisma.stockOpname.deleteMany(); await prisma.invoiceItem.deleteMany(); await prisma.invoice.deleteMany();
   await prisma.admissionLog.deleteMany(); await prisma.admission.deleteMany(); await prisma.room.deleteMany({ where: { name: "K-E2E" } });
@@ -163,6 +166,15 @@ async function main() {
   assert.ok(!("error" in (await Opname.finalizeOpname(admin.id, session.id, withReason))));
   assert.ok((await stock(amox.id)) < before);
   ok("opname: selisih wajib beralasan, stok disesuaikan lewat ADJUST");
+
+  const walletOwner = await prisma.owner.findFirstOrThrow({ where: { name: "E2E Rina" } });
+  assert.deepEqual(await topUp(kasir.id, { ownerId: walletOwner.id, amount: 100_000, method: "TRANSFER", note: "" }), { balance: 100_000 });
+  const walletInvoice = await createRetailInvoice(kasir.id, "");
+  await prisma.invoice.update({ where: { id: walletInvoice }, data: { ownerId: walletOwner.id } });
+  assert.deepEqual(await addInvoiceItem(walletInvoice, konsul.id, 1), {});
+  assert.ok("ok" in (await payInvoice(kasir.id, walletInvoice, { method: "WALLET", cashReceived: null, reference: "" })));
+  assert.equal((await prisma.owner.findUniqueOrThrow({ where: { id: walletOwner.id } })).walletBalance, 100_000 - 50_000);
+  ok("deposit: top-up Rp 100.000, bayar dengan saldo Rp 50.000, sisa saldo Rp 50.000");
 
   const apptDay = jakartaYmd(new Date(Date.now() + 86_400_000));
   const appt = await createAppointment(kasir.id, patient.id, { doctorId: dokter.id, scheduledAt: `${apptDay}T09:00`, purpose: "Kontrol E2E", notes: "" }, false);

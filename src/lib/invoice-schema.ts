@@ -14,7 +14,7 @@ export const lineSchema = z.object({
 
 export const paySchema = z
   .object({
-    method: z.enum(["TUNAI", "QRIS", "TRANSFER", "KARTU"], { error: "Pilih metode pembayaran" }),
+    method: z.enum(["TUNAI", "QRIS", "TRANSFER", "KARTU", "WALLET"], { error: "Pilih metode pembayaran" }),
     cashReceived: intValue.nullable(),
     reference: z.string().trim().max(100, "Maksimal 100 karakter"),
   })
@@ -33,7 +33,7 @@ export type VoidInput = z.infer<typeof voidSchema>;
 export const depositSchema = z
   .object({
     amount: z.number({ error: "Isi dengan angka" }).int("Harus bilangan bulat").min(1, "Minimal Rp 1").max(1_000_000_000, "Terlalu besar"),
-    method: z.enum(["TUNAI", "QRIS", "TRANSFER", "KARTU"], { error: "Pilih metode pembayaran" }),
+    method: z.enum(["TUNAI", "QRIS", "TRANSFER", "KARTU", "WALLET"], { error: "Pilih metode pembayaran" }),
     cashReceived: intValue.nullable(),
     reference: z.string().trim().max(100, "Maksimal 100 karakter"),
   })

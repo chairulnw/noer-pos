@@ -117,6 +117,7 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
                 hasPayments={invoice.payments.some((p) => !p.voided)}
                 canDiscount={can(user.role, "apply_discount")}
                 hasQris={Boolean(settings.qris)}
+                wallet={invoice.owner ? { owner: invoice.owner.name, balance: invoice.owner.walletBalance } : null}
                 discount={{ type: invoice.discountType, value: invoice.discountValue }}
                 totals={{ subtotal: invoice.subtotal, discountTotal: invoice.discountTotal, taxTotal: invoice.taxTotal, grandTotal: invoice.grandTotal, taxRate: invoice.taxRate, taxIncluded: invoice.taxIncluded }}
               />

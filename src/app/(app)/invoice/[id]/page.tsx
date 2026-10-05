@@ -1,3 +1,4 @@
+import { METHOD_LABEL } from "@/lib/payment-method";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -19,7 +20,7 @@ import { PayPanel } from "../pay-panel";
 import { CorrectDeposit } from "../correct-deposit";
 import { VoidPanel } from "../void-panel";
 
-const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const METHOD = METHOD_LABEL;
 const KIND = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Lunas" };
 const PAYMENT = { BELUM_BAYAR: { label: "Belum bayar", tone: "warning" }, SEBAGIAN: { label: "DP", tone: "warning" }, LUNAS: { label: "Lunas", tone: "success" } } as const;
 
@@ -153,6 +154,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
             hasPayments={activePayments.length > 0}
             canDiscount={can(user.role, "apply_discount")}
             hasQris={Boolean(settings?.qris)}
+            wallet={invoice.owner ? { owner: invoice.owner.name, balance: invoice.owner.walletBalance } : null}
             discount={{ type: invoice.discountType, value: invoice.discountValue }}
             totals={{ subtotal: invoice.subtotal, discountTotal: invoice.discountTotal, taxTotal: invoice.taxTotal, grandTotal: invoice.grandTotal, taxRate: invoice.taxRate, taxIncluded: invoice.taxIncluded }}
           />

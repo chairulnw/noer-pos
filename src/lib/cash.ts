@@ -15,11 +15,12 @@ function dayWindow(day: Date) {
 
 export async function getCashSales(db: Db, day: Date) {
   const where = { method: "TUNAI" as const, paidAt: dayWindow(day) };
-  const [counted, voided] = await Promise.all([
+  const [counted, voided, topUps] = await Promise.all([
     db.payment.aggregate({ where: { ...where, voided: false }, _sum: { amount: true } }),
     db.payment.aggregate({ where: { ...where, voided: true }, _sum: { amount: true } }),
+    db.walletTransaction.aggregate({ where: { type: "TOPUP", method: "TUNAI", createdAt: dayWindow(day) }, _sum: { amount: true } }),
   ]);
-  return { cashSales: counted._sum.amount ?? 0, voidedCash: voided._sum.amount ?? 0 };
+  return { cashSales: (counted._sum.amount ?? 0) + (topUps._sum.amount ?? 0), voidedCash: voided._sum.amount ?? 0 };
 }
 
 export async function closeCash(userId: string, input: CashClosingInput) {

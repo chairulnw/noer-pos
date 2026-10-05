@@ -5,6 +5,7 @@ import { correctedDepositError, depositError, paymentStatus, settlement } from "
 import { StockConflictError, deductForInvoiceItem } from "@/lib/inventory";
 import { createDraftInvoiceFromRecord, nextInvoiceNoFor, recomputeInvoice, taxFromSettings } from "@/lib/invoices";
 import type { Discount, PayInput, VoidInput } from "@/lib/invoice-schema";
+import { WalletRejected, creditWallet, debitWallet } from "@/lib/wallet";
 
 type Tx = Prisma.TransactionClient;
 type Fail = { error: string };
@@ -138,12 +139,13 @@ export async function payInvoice(userId: string, invoiceId: string, pay: PayInpu
 
         if (status === "DRAFT") await finalizeDraft(tx, userId, invoiceId);
 
-        const invoice = await tx.invoice.findUniqueOrThrow({ where: { id: invoiceId }, select: { invoiceNo: true, grandTotal: true, visitId: true } });
+        const invoice = await tx.invoice.findUniqueOrThrow({ where: { id: invoiceId }, select: { invoiceNo: true, grandTotal: true, visitId: true, ownerId: true } });
         const paid = before.grandTotal - plan.remaining;
         const remaining = plan.remaining;
 
         let change = 0;
         if (remaining > 0) {
+          if (pay.method === "WALLET" && !invoice.ownerId) throw new Rejected("Pilih pelanggan (pemilik) terlebih dahulu untuk membayar dengan saldo deposit.");
           if (pay.method === "TUNAI") {
             if (pay.cashReceived === null || pay.cashReceived < remaining) throw new Rejected("Uang diterima kurang dari total tagihan.");
             change = pay.cashReceived - remaining;
@@ -160,6 +162,7 @@ export async function payInvoice(userId: string, invoiceId: string, pay: PayInpu
             },
             select: { id: true },
           });
+          if (pay.method === "WALLET") await debitWallet(tx, "PAYMENT", { ownerId: invoice.ownerId!, amount: remaining, invoiceId, paymentId: payment.id, method: "WALLET", note: `Pembayaran ${invoice.invoiceNo}`, userId });
           await logAudit(tx, { userId, action: "payment.create", entity: "invoice", entityId: invoiceId, after: { paymentId: payment.id, kind: plan.kind, method: pay.method, amount: remaining } });
         }
 
@@ -171,7 +174,7 @@ export async function payInvoice(userId: string, invoiceId: string, pay: PayInpu
       { timeout: 20_000 },
     );
   } catch (error) {
-    if (error instanceof Rejected) return { error: error.message };
+    if (error instanceof Rejected || error instanceof WalletRejected) return { error: error.message };
     if (error instanceof StockConflictError) return { error: "Stok berubah saat diproses. Coba lagi." };
     throw error;
   }
@@ -209,7 +212,7 @@ export async function voidInvoice(userId: string, invoiceId: string, input: Void
 
     const invoice = await tx.invoice.findUniqueOrThrow({
       where: { id: invoiceId },
-      select: { invoiceNo: true, grandTotal: true, visitId: true, items: { select: { id: true, nameSnapshot: true } } },
+      select: { invoiceNo: true, grandTotal: true, visitId: true, ownerId: true, items: { select: { id: true, nameSnapshot: true } } },
     });
 
     const restock: { item: string; qty: number }[] = [];
@@ -232,7 +235,13 @@ export async function voidInvoice(userId: string, invoiceId: string, input: Void
     }
 
     await tx.invoice.update({ where: { id: invoiceId }, data: { status: "VOID", voidReason: input.reason, voidedById: userId } });
+    const walletPayments = await tx.payment.findMany({ where: { invoiceId, voided: false, method: "WALLET" }, select: { id: true, amount: true } });
     await tx.payment.updateMany({ where: { invoiceId }, data: { voided: true } });
+    if (invoice.ownerId) {
+      for (const wp of walletPayments) {
+        await creditWallet(tx, "RETURN", { ownerId: invoice.ownerId, amount: wp.amount, invoiceId, paymentId: wp.id, method: "WALLET", note: `Void ${invoice.invoiceNo}`, userId });
+      }
+    }
     if (invoice.visitId) {
       await tx.visit.updateMany({ where: { id: invoice.visitId, status: "SELESAI" }, data: { status: "MENUNGGU_BAYAR" } });
     }
@@ -278,10 +287,11 @@ export async function receiveDeposit(userId: string, invoiceId: string, amount: 
 
       const invoice = await tx.invoice.findUniqueOrThrow({
         where: { id: invoiceId },
-        select: { grandTotal: true, payments: { where: { voided: false }, select: { amount: true } } },
+        select: { invoiceNo: true, ownerId: true, grandTotal: true, payments: { where: { voided: false }, select: { amount: true } } },
       });
       const problem = depositError(invoice.payments, amount, invoice.grandTotal, status);
       if (problem) return { error: problem };
+      if (method === "WALLET" && !invoice.ownerId) return { error: "Pilih pelanggan (pemilik) terlebih dahulu untuk membayar dengan saldo deposit." };
 
       let change = 0;
       if (method === "TUNAI") {
@@ -292,11 +302,12 @@ export async function receiveDeposit(userId: string, invoiceId: string, amount: 
         data: { invoiceId, kind: "DP", method, amount, cashReceived: method === "TUNAI" ? cashReceived : null, reference: reference || null, receivedById: userId },
         select: { id: true },
       });
+      if (method === "WALLET") await debitWallet(tx, "PAYMENT", { ownerId: invoice.ownerId!, amount, invoiceId, paymentId: payment.id, method: "WALLET", note: `DP ${invoice.invoiceNo}`, userId });
       await logAudit(tx, { userId, action: "payment.deposit", entity: "invoice", entityId: invoiceId, after: { paymentId: payment.id, method, amount } });
       return { ok: true as const, change };
     });
   } catch (error) {
-    if (error instanceof Rejected) return { error: error.message };
+    if (error instanceof Rejected || error instanceof WalletRejected) return { error: error.message };
     throw error;
   }
 }
@@ -314,6 +325,7 @@ export async function correctDeposit(userId: string, invoiceId: string, newAmoun
     if (problem) return { error: problem };
 
     const deposit = invoice.payments[0];
+    if (deposit.method === "WALLET") return { error: "DP dari saldo deposit tidak bisa dikoreksi. Void invoice untuk mengembalikan saldo." };
     await tx.payment.update({
       where: { id: deposit.id },
       data: { amount: newAmount, cashReceived: deposit.method === "TUNAI" ? Math.max(deposit.cashReceived ?? 0, newAmount) : null },

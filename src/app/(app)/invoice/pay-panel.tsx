@@ -13,12 +13,14 @@ const METHODS = [
   { id: "QRIS", label: "QRIS" },
   { id: "TRANSFER", label: "Transfer" },
   { id: "KARTU", label: "Kartu" },
+  { id: "WALLET", label: "Saldo" },
 ] as const;
 
 const HINT = {
   QRIS: "Tampilkan QRIS klinik ke pelanggan. Tekan Bayar setelah dana masuk terkonfirmasi.",
   TRANSFER: "Cek mutasi rekening klinik, lalu tekan Bayar.",
   KARTU: "Proses di mesin EDC, isi 4 digit terakhir kartu dan no. approval.",
+  WALLET: "Dipotong dari saldo deposit pelanggan.",
 } as const;
 
 const roundUp = (n: number, step: number) => Math.ceil(n / step) * step;
@@ -33,10 +35,12 @@ type Props = {
   canPay: boolean;
   paid: number;
   hasPayments: boolean;
+  wallet?: { owner: string; balance: number } | null;
 };
 
-export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, editable, canPay, paid, hasPayments }: Props) {
+export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, editable, canPay, paid, hasPayments, wallet = null }: Props) {
   const [method, setMethod] = useState<(typeof METHODS)[number]["id"]>("TUNAI");
+  const methods = METHODS.filter((m) => m.id !== "WALLET" || wallet !== null);
   const [received, setReceived] = useState<string | null>(null);
   const [reference, setReference] = useState("");
   const [discOpen, setDiscOpen] = useState(false);
@@ -59,7 +63,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
       setError(result.error);
       if (!result.error && done) toast(done);
     });
-  const canSubmit = !pending && !overpaid && !(total > 0 && method === "TUNAI" && cash < total);
+  const canSubmit = !pending && !overpaid && !(total > 0 && method === "TUNAI" && cash < total) && !(total > 0 && method === "WALLET" && (wallet?.balance ?? 0) < total);
   const pay = () => run(() => payAction(invoiceId, { method, cashReceived: total > 0 && method === "TUNAI" ? cash : null, reference }), "Pembayaran tersimpan");
 
   return (
@@ -120,7 +124,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
             <>
           <div className="text-sm font-medium">Metode pembayaran</div>
           <div className="grid grid-cols-2 gap-2">
-            {METHODS.map((m) => (
+            {methods.map((m) => (
               <button
                 key={m.id}
                 type="button"
@@ -160,7 +164,13 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
                 <img src="/api/qris" alt="QRIS klinik" className="size-48 rounded-lg border object-contain" />
               )}
               {method === "QRIS" && !hasQris && <p className="text-sm text-warning">Gambar QRIS belum diunggah di Pengaturan.</p>}
-              {method !== "QRIS" && (
+              {method === "WALLET" && wallet && (
+                <p className={`rounded-lg border p-3 text-sm ${wallet.balance < total ? "border-[#E9CFA6] text-warning" : "bg-muted/50"}`}>
+                  Saldo {wallet.owner}: <b className="tabular-nums">{formatRupiah(wallet.balance)}</b>
+                  {wallet.balance < total && ` (kurang ${formatRupiah(total - wallet.balance)} dari tagihan)`}
+                </p>
+              )}
+              {method !== "QRIS" && method !== "WALLET" && (
                 <input value={reference} onChange={(e) => setReference(e.target.value)} aria-label="Referensi pembayaran" placeholder={method === "KARTU" ? "4 digit terakhir / no. approval (opsional)" : "Referensi (opsional)"} className="h-11 w-full rounded-lg border border-input bg-card px-3 text-sm" />
               )}
             </div>
@@ -200,7 +210,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={pending || !(Number(dpAmount) > 0)}
+                    disabled={pending || !(Number(dpAmount) > 0) || (method === "WALLET" && Number(dpAmount) > (wallet?.balance ?? 0))}
                     onClick={() =>
                       run(async () => {
                         const r = await depositAction(invoiceId, { amount: Number(dpAmount), method, cashReceived: method === "TUNAI" ? Number(dpCash ?? dpAmount) : null, reference });

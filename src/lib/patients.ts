@@ -67,7 +67,7 @@ function ownerWhere(query: string): Prisma.OwnerWhereInput {
   };
 }
 
-const OWNER_LIST = { id: true, name: true, whatsapp: true, address: true, patients: { where: { deletedAt: null }, select: { name: true } } } satisfies Prisma.OwnerSelect;
+const OWNER_LIST = { id: true, name: true, whatsapp: true, address: true, walletBalance: true, patients: { where: { deletedAt: null }, select: { name: true } } } satisfies Prisma.OwnerSelect;
 
 const withPets = <T extends { patients: { name: string }[] }>({ patients, ...owner }: T) => ({ ...owner, pets: patients.map((p) => p.name) });
 

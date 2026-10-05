@@ -1,3 +1,4 @@
+import { METHOD_LABEL } from "@/lib/payment-method";
 import Link from "next/link";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { formatDate, formatRupiah, formatTime } from "@/lib/format";
 import { listPayments } from "@/lib/invoices";
 import { requireCapability } from "@/lib/require-role";
 
-const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const METHOD = METHOD_LABEL;
 const KIND = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Lunas" };
 
 export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {

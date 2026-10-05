@@ -31,6 +31,13 @@ enum ExaminationType {
   RADIOLOGI
 }
 
+enum WalletTxType {
+  TOPUP
+  PAYMENT
+  RETURN
+  ADJUST
+}
+
 enum VisitStatus {
   DILAYANI
   MENUNGGU_BAYAR
@@ -97,6 +104,7 @@ enum PaymentMethod {
   QRIS
   TRANSFER
   KARTU
+  WALLET
 }
 
 // ---------- Auth & User ----------
@@ -112,20 +120,21 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  visitsAsDoctor       Visit[]          @relation("VisitDoctor")
-  visitsCreated        Visit[]          @relation("VisitCreatedBy")
+  visitsAsDoctor       Visit[]             @relation("VisitDoctor")
+  visitsCreated        Visit[]             @relation("VisitCreatedBy")
   recordAddenda        RecordAddendum[]
   stockMovements       StockMovement[]
   stockOpnames         StockOpname[]
   admissionLogs        AdmissionLog[]
-  invoicesCreated      Invoice[]        @relation("InvoiceCreatedBy")
-  invoicesVoided       Invoice[]        @relation("InvoiceVoidedBy")
+  invoicesCreated      Invoice[]           @relation("InvoiceCreatedBy")
+  invoicesVoided       Invoice[]           @relation("InvoiceVoidedBy")
   paymentsReceived     Payment[]
   auditLogs            AuditLog[]
   cashClosings         CashClosing[]
+  walletTransactions   WalletTransaction[]
   examinationsCreated  Examination[]
-  appointmentsAsDoctor Appointment[]    @relation("AppointmentDoctor")
-  appointmentsCreated  Appointment[]    @relation("AppointmentCreatedBy")
+  appointmentsAsDoctor Appointment[]       @relation("AppointmentDoctor")
+  appointmentsCreated  Appointment[]       @relation("AppointmentCreatedBy")
 
   @@map("user")
 }
@@ -133,18 +142,20 @@ model User {
 // ---------- Owner & Pasien ----------
 
 model Owner {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String
-  whatsapp  String
-  address   String
-  notes     String?
-  deletedAt DateTime? @map("deleted_at")
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  whatsapp      String
+  address       String
+  notes         String?
+  deletedAt     DateTime? @map("deleted_at")
+  walletBalance Int       @default(0) @map("wallet_balance")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  patients Patient[]
-  invoices Invoice[]
+  patients           Patient[]
+  invoices           Invoice[]
+  walletTransactions WalletTransaction[]
 
   @@index([whatsapp])
   @@map("owner")
@@ -481,13 +492,14 @@ model Invoice {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  visit     Visit?        @relation(fields: [visitId], references: [id])
-  admission Admission?    @relation(fields: [admissionId], references: [id])
-  owner     Owner?        @relation(fields: [ownerId], references: [id])
-  createdBy User          @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
-  voidedBy  User?         @relation("InvoiceVoidedBy", fields: [voidedById], references: [id])
-  items     InvoiceItem[]
-  payments  Payment[]
+  visit              Visit?              @relation(fields: [visitId], references: [id])
+  admission          Admission?          @relation(fields: [admissionId], references: [id])
+  owner              Owner?              @relation(fields: [ownerId], references: [id])
+  createdBy          User                @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  voidedBy           User?               @relation("InvoiceVoidedBy", fields: [voidedById], references: [id])
+  items              InvoiceItem[]
+  payments           Payment[]
+  walletTransactions WalletTransaction[]
 
   @@map("invoice")
 }
@@ -577,6 +589,29 @@ model Examination {
   @@index([type, performedAt])
   @@index([patientId])
   @@map("examination")
+}
+
+model WalletTransaction {
+  id           String         @id @default(uuid()) @db.Uuid
+  ownerId      String         @map("owner_id") @db.Uuid
+  type         WalletTxType
+  amount       Int
+  balanceAfter Int            @map("balance_after")
+  method       PaymentMethod?
+  invoiceId    String?        @map("invoice_id") @db.Uuid
+  paymentId    String?        @map("payment_id") @db.Uuid
+  note         String?
+  createdById  String         @map("created_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  owner     Owner    @relation(fields: [ownerId], references: [id])
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  createdBy User     @relation(fields: [createdById], references: [id])
+
+  @@index([ownerId, createdAt])
+  @@index([createdAt])
+  @@map("wallet_transaction")
 }
 
 model CashClosing {

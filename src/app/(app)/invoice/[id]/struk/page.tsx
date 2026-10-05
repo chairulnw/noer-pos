@@ -1,3 +1,4 @@
+import { METHOD_LABEL } from "@/lib/payment-method";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { getInvoice, lineView } from "@/lib/invoices";
@@ -5,7 +6,7 @@ import { requireCapability } from "@/lib/require-role";
 import { getSettings } from "@/lib/settings";
 import { Receipt } from "./receipt";
 
-const METHOD = { TUNAI: "Tunai", QRIS: "QRIS", TRANSFER: "Transfer", KARTU: "Kartu" };
+const METHOD = METHOD_LABEL;
 const PREFIX = { DP: "DP", PELUNASAN: "Pelunasan", LUNAS: "Bayar" };
 
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
