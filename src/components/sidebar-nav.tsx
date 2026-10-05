@@ -28,7 +28,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/rekam-medis", label: "Rekam Medis", icon: Stethoscope, capability: "view_medical_record" },
       { href: "/rawat-inap", label: "Rawat Inap", icon: BedDouble, capability: "manage_admission" },
       { href: "/pet-hotel", label: "Pet Hotel", icon: Hotel, capability: "manage_admission" },
-      { href: "/jatuh-tempo", label: "Vaksin", icon: Syringe, capability: "view_medical_record" },
+      { href: "/vaksin", label: "Vaksin", icon: Syringe, capability: "view_medical_record" },
       { href: "/hasil-lab", label: "Hasil Lab", icon: FileText, capability: "view_medical_record", soon: true },
       { href: "/radiologi", label: "Radiologi", icon: ImageIcon, capability: "view_medical_record", soon: true },
       { href: "/operasi", label: "Operasi", icon: HeartPulse, capability: "view_medical_record", soon: true },

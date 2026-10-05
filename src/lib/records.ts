@@ -255,3 +255,32 @@ export function listRecords({ q, status, doctorId, from, to }: RecordListFilter)
     take: 100,
   });
 }
+
+export function listVaccinations({ q, from, to }: { q?: string; from?: string; to?: string }) {
+  const term = q?.trim();
+  const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
+  return prisma.vaccination.findMany({
+    where: {
+      record: { visit: { patient: { deletedAt: null, owner: { deletedAt: null } } } },
+      ...((from || to) && { givenAt: { ...(from && { gte: day(from) }), ...(to && { lte: day(to) }) } }),
+      ...(term && {
+        OR: [
+          { item: { name: { contains: term, mode: "insensitive" } } },
+          { batchNo: { contains: term, mode: "insensitive" } },
+          { record: { visit: { patient: { name: { contains: term, mode: "insensitive" } } } } },
+          { record: { visit: { patient: { owner: { name: { contains: term, mode: "insensitive" } } } } } },
+        ],
+      }),
+    },
+    select: {
+      id: true,
+      givenAt: true,
+      nextDue: true,
+      batchNo: true,
+      item: { select: { name: true } },
+      record: { select: { visit: { select: { id: true, patient: { select: { id: true, name: true, species: true, rmNo: true, owner: { select: { name: true } } } } } } } },
+    },
+    orderBy: [{ givenAt: "desc" }, { id: "asc" }],
+    take: 100,
+  });
+}
