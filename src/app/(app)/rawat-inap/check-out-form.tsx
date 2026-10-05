@@ -9,9 +9,9 @@ import { formatRupiah } from "@/lib/format";
 import { keepValuesOnError } from "@/lib/form";
 import { checkOutAction, type AdmissionFormState } from "./actions";
 
-type Props = { admissionId: string; checkInIso: string; defaultCheckOut: string; rateName: string; ratePrice: number | null };
+type Props = { admissionId: string; checkInIso: string; defaultCheckOut: string; rateName: string; ratePrice: number | null; cancelHref: string };
 
-export function CheckOutForm({ admissionId, checkInIso, defaultCheckOut, rateName, ratePrice }: Props) {
+export function CheckOutForm({ admissionId, checkInIso, defaultCheckOut, rateName, ratePrice, cancelHref }: Props) {
   const [state, formAction, pending] = useActionState<AdmissionFormState, FormData>(checkOutAction.bind(null, admissionId), {});
   const [checkOut, setCheckOut] = useState(defaultCheckOut);
   const out = jakartaLocalToDate(checkOut);
@@ -43,7 +43,7 @@ export function CheckOutForm({ admissionId, checkInIso, defaultCheckOut, rateNam
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending || days === null}>{pending ? "Memproses…" : "Check-out & buka invoice"}</Button>
         <Button variant="outline" asChild>
-          <Link href="/rawat-inap">Batal</Link>
+          <Link href={cancelHref}>Batal</Link>
         </Button>
         {state.message && <p role="status" className="text-sm text-destructive">{state.message}</p>}
       </div>

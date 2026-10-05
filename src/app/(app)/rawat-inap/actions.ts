@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkInSchema, checkOutSchema, logSchema } from "@/lib/admission-schema";
+import { admissionBase } from "@/lib/admission-paths";
+import { prisma } from "@/lib/db";
 import { addAdmissionLog, checkOutAdmission, createAdmission } from "@/lib/admissions";
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
@@ -33,8 +35,9 @@ export async function checkInAction(_prev: AdmissionFormState, formData: FormDat
   if ("error" in result) return { message: result.error };
 
   revalidatePath("/rawat-inap");
+  revalidatePath("/pet-hotel");
   await flash("Check-in dicatat");
-  redirect("/rawat-inap");
+  redirect(admissionBase(parsed.data.type));
 }
 
 export async function addLogAction(admissionId: string, _prev: AdmissionFormState, formData: FormData): Promise<AdmissionFormState> {
@@ -67,8 +70,10 @@ export async function checkOutAction(admissionId: string, _prev: AdmissionFormSt
   const result = await checkOutAdmission(user.id, admissionId, parsed.data.checkOut);
   if ("error" in result) return { message: result.error };
 
+  const admission = await prisma.admission.findUnique({ where: { id: admissionId }, select: { type: true } });
   revalidatePath("/rawat-inap");
+  revalidatePath("/pet-hotel");
   revalidatePath("/invoice");
   await flash("Check-out selesai");
-  redirect(can(user.role, "manage_invoice_payment") ? `/invoice/${result.invoiceId}` : "/rawat-inap");
+  redirect(can(user.role, "manage_invoice_payment") ? `/invoice/${result.invoiceId}` : admissionBase(admission?.type ?? "RAWAT_INAP"));
 }

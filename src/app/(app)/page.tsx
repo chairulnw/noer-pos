@@ -88,7 +88,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         {summary.revenue && <Stat label="Omzet hari ini (tanpa PPN)" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final`} />}
         <Stat label="Kunjungan hari ini" value={String(summary.visits)} href={can(user.role, "create_visit") ? "/kunjungan" : undefined} />
         <Stat label="Rawat inap aktif" value={String(summary.rawatInap)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
-        <Stat label="Hotel aktif" value={String(summary.hotel)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
+        <Stat label="Hotel aktif" value={String(summary.hotel)} href={can(user.role, "monitor_admission") ? "/pet-hotel" : undefined} />
       </div>
 
       {doctorQueue && (

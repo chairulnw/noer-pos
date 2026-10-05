@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, BedDouble, Boxes, Building2, CalendarDays, ClipboardCheck, CreditCard, DoorOpen, LayoutDashboard, Package, PawPrint, Receipt, ScrollText, ShoppingCart, Syringe, UserRound, Users, Wallet, type LucideIcon } from "lucide-react";
+import { BarChart3, BedDouble, Boxes, Building2, CalendarDays, ClipboardCheck, CreditCard, DoorOpen, Hotel, LayoutDashboard, Package, PawPrint, Receipt, ScrollText, ShoppingCart, Syringe, UserRound, Users, Wallet, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,8 @@ const GROUPS: { title?: string; items: NavItem[] }[] = [
     title: "Operasional Klinik",
     items: [
       { href: "/kunjungan", label: "Kunjungan", icon: CalendarDays, capability: "create_visit", roleLabel: { DOKTER: "Pasien Hari Ini" } },
-      { href: "/rawat-inap", label: "Rawat Inap & Hotel", icon: BedDouble, capability: "manage_admission" },
+      { href: "/rawat-inap", label: "Rawat Inap", icon: BedDouble, capability: "manage_admission" },
+      { href: "/pet-hotel", label: "Pet Hotel", icon: Hotel, capability: "manage_admission" },
       { href: "/jatuh-tempo", label: "Vaksin Jatuh Tempo", icon: Syringe, capability: "view_medical_record" },
     ],
   },

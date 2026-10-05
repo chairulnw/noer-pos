@@ -17,11 +17,13 @@ type Props = {
   rooms: { id: string; name: string; type: Type }[];
   rates: { id: string; name: string; type: Type }[];
   visits: { id: string; label: string }[];
+  lockedType?: Type;
+  cancelHref?: string;
 };
 
-export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rates, visits }: Props) {
+export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rates, visits, lockedType, cancelHref = "/rawat-inap" }: Props) {
   const [state, formAction, pending] = useActionState<AdmissionFormState, FormData>(checkInAction, {});
-  const [type, setType] = useState<Type>("RAWAT_INAP");
+  const [type, setType] = useState<Type>(lockedType ?? "RAWAT_INAP");
   const err = (key: string) => state.errors?.[key];
   const roomOptions = rooms.filter((r) => r.type === type);
   const rateOptions = rates.filter((r) => r.type === type);
@@ -30,12 +32,16 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <input type="hidden" name="patientId" value={patientId} />
       <Section title={`Check-in ${patientName}`}>
-        <Field label="Jenis" name="type" errors={err("type")}>
-          <select id="type" name="type" value={type} onChange={(e) => setType(e.target.value as Type)} className={selectClass}>
-            <option value="RAWAT_INAP">Rawat inap</option>
-            <option value="HOTEL">Pet hotel</option>
-          </select>
-        </Field>
+        {lockedType ? (
+          <input type="hidden" name="type" value={lockedType} />
+        ) : (
+          <Field label="Jenis" name="type" errors={err("type")}>
+            <select id="type" name="type" value={type} onChange={(e) => setType(e.target.value as Type)} className={selectClass}>
+              <option value="RAWAT_INAP">Rawat inap</option>
+              <option value="HOTEL">Pet hotel</option>
+            </select>
+          </Field>
+        )}
         <Field label="Waktu masuk" name="checkIn" errors={err("checkIn")}>
           <Input id="checkIn" name="checkIn" type="datetime-local" defaultValue={defaultCheckIn} required />
         </Field>
@@ -72,7 +78,7 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>{pending ? "Menyimpan…" : "Check-in"}</Button>
         <Button variant="outline" asChild>
-          <Link href="/rawat-inap">Batal</Link>
+          <Link href={cancelHref}>Batal</Link>
         </Button>
         {state.message && <p role="status" className="text-sm text-destructive">{state.message}</p>}
       </div>

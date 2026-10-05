@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
 import { dateToJakartaLocal } from "@/lib/admission-calc";
+import { admissionBase } from "@/lib/admission-paths";
 import { getAdmission } from "@/lib/admissions";
 import { formatDate, formatTime } from "@/lib/format";
 import { prisma } from "@/lib/db";
@@ -16,7 +17,7 @@ export default async function CheckOutPage({ params }: { params: Promise<{ id: s
   if (!z.guid().safeParse(id).success) notFound();
   const admission = await getAdmission(id);
   if (!admission) notFound();
-  if (admission.status !== "AKTIF") redirect("/rawat-inap");
+  if (admission.status !== "AKTIF") redirect(admissionBase(admission.type));
 
   const rate = can(user.role, "view_service_price")
     ? await prisma.admission.findUniqueOrThrow({ where: { id }, select: { rateItem: { select: { sellPrice: true } } } })
@@ -39,6 +40,7 @@ export default async function CheckOutPage({ params }: { params: Promise<{ id: s
       </div>
       <CheckOutForm
         admissionId={admission.id}
+        cancelHref={admissionBase(admission.type)}
         checkInIso={admission.checkIn.toISOString()}
         defaultCheckOut={dateToJakartaLocal(new Date())}
         rateName={admission.rateItem.name}

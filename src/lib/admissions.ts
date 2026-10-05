@@ -55,9 +55,9 @@ export async function createAdmission(userId: string, input: CheckInInput) {
   }
 }
 
-export const listActiveAdmissions = () =>
+export const listActiveAdmissions = (type?: "RAWAT_INAP" | "HOTEL") =>
   prisma.admission.findMany({
-    where: { status: "AKTIF" },
+    where: { status: "AKTIF", ...(type && { type }) },
     select: {
       id: true,
       type: true,

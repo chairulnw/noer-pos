@@ -4,6 +4,7 @@ import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
 import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { dateToJakartaLocal, stayDay } from "@/lib/admission-calc";
+import { admissionBase, admissionLabel } from "@/lib/admission-paths";
 import { getAdmission, listAdmissionLogs } from "@/lib/admissions";
 import { formatDate, formatTime } from "@/lib/format";
 import { requireCapability } from "@/lib/require-role";
@@ -22,7 +23,7 @@ export default async function AdmissionPage({ params }: { params: Promise<{ id: 
   return (
     <div className="space-y-5">
       <PageHeader
-        back={{ href: "/rawat-inap", label: "Rawat Inap & Hotel" }}
+        back={{ href: admissionBase(admission.type), label: admissionLabel(admission.type) }}
         title={<>{patient.name} <span className="text-sm font-normal text-muted-foreground tabular-nums">{patient.rmNo}</span></>}
         status={<><StatusChip tone={active ? "warning" : "neutral"}>{active ? "Menginap" : "Selesai"}</StatusChip><ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} /></>}
         meta={
