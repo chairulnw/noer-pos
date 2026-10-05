@@ -173,8 +173,9 @@ async function main() {
   await prisma.invoice.update({ where: { id: walletInvoice }, data: { ownerId: walletOwner.id } });
   assert.deepEqual(await addInvoiceItem(walletInvoice, konsul.id, 1), {});
   assert.ok("ok" in (await payInvoice(kasir.id, walletInvoice, { method: "WALLET", cashReceived: null, reference: "" })));
-  assert.equal((await prisma.owner.findUniqueOrThrow({ where: { id: walletOwner.id } })).walletBalance, 100_000 - 50_000);
-  ok("deposit: top-up Rp 100.000, bayar dengan saldo Rp 50.000, sisa saldo Rp 50.000");
+  const walletTotal = (await prisma.invoice.findUniqueOrThrow({ where: { id: walletInvoice } })).grandTotal;
+  assert.equal((await prisma.owner.findUniqueOrThrow({ where: { id: walletOwner.id } })).walletBalance, 100_000 - walletTotal);
+  ok(`deposit: top-up Rp 100.000, bayar dengan saldo Rp ${walletTotal.toLocaleString("id-ID")} (termasuk PPN), sisa saldo benar`);
 
   const apptDay = jakartaYmd(new Date(Date.now() + 86_400_000));
   const appt = await createAppointment(kasir.id, patient.id, { doctorId: dokter.id, scheduledAt: `${apptDay}T09:00`, purpose: "Kontrol E2E", notes: "" }, false);
