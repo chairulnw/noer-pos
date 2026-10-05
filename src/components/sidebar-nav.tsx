@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Banknote, BarChart3, BedDouble, Bell, Boxes, Building2, CalendarClock, CalendarDays, Cat, ChevronDown, ClipboardCheck, CreditCard, Dog, DoorOpen, FileText, HeartPulse, History, Hotel, ImageIcon, LayoutDashboard, Package, PawPrint, Printer, Receipt, Scale, Scissors, ScrollText, ShoppingCart, Stethoscope, Syringe, UserCog, UserRound, Users, Wallet, WalletCards, type LucideIcon } from "lucide-react";
+import { Banknote, BarChart3, BedDouble, Bell, Building2, Cat, ChevronDown, ClipboardCheck, CreditCard, Dog, FileText, HeartPulse, History, Hotel, ImageIcon, LayoutDashboard, Package, PawPrint, Printer, Receipt, Scale, Scissors, ShoppingCart, Stethoscope, Syringe, UserCog, UserRound, Users, WalletCards, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -17,20 +17,17 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/kasir", label: "Kasir (POS)", icon: ShoppingCart, capability: "manage_invoice_payment" },
       { href: "/pembayaran", label: "Transaksi (Lunas)", icon: CreditCard, capability: "manage_invoice_payment" },
       { href: "/invoice", label: "Tagihan / Invoice", icon: Receipt, capability: "manage_invoice_payment" },
-      { href: "/tutup-kas", label: "Tutup Kas", icon: Wallet, capability: "close_cash" },
     ],
   },
   {
     title: "Operasional Klinik",
     items: [
-      { href: "/janji-temu", label: "Janji Temu", icon: CalendarClock, capability: "create_visit" },
-      { href: "/kunjungan", label: "Kunjungan", icon: CalendarDays, capability: "create_visit", roleLabel: { DOKTER: "Pasien Hari Ini" } },
       { href: "/rekam-medis", label: "Rekam Medis", icon: Stethoscope, capability: "view_medical_record" },
       { href: "/rawat-inap", label: "Rawat Inap", icon: BedDouble, capability: "manage_admission" },
       { href: "/pet-hotel", label: "Pet Hotel", icon: Hotel, capability: "manage_admission" },
       { href: "/vaksin", label: "Vaksin", icon: Syringe, capability: "view_medical_record" },
-      { href: "/hasil-lab", label: "Hasil Lab", icon: FileText, capability: "view_medical_record", soon: true },
-      { href: "/radiologi", label: "Radiologi", icon: ImageIcon, capability: "view_medical_record", soon: true },
+      { href: "/hasil-lab", label: "Hasil Lab", icon: FileText, capability: "view_medical_record" },
+      { href: "/radiologi", label: "Radiologi", icon: ImageIcon, capability: "view_medical_record" },
       { href: "/operasi", label: "Operasi", icon: HeartPulse, capability: "view_medical_record", soon: true },
       { href: "/grooming", label: "Grooming", icon: Scissors, capability: "create_visit", soon: true },
     ],
@@ -47,7 +44,6 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Inventaris & Ritel",
     items: [
       { href: "/master-data/item", label: "Produk", icon: Package, capability: "manage_service_price" },
-      { href: "/inventaris", label: "Stok", icon: Boxes, capability: "manage_stock" },
       { href: "/riwayat-stok", label: "Riwayat Stok", icon: History, capability: "manage_stock", soon: true },
       { href: "/inventaris/opname", label: "Stok Opname", icon: ClipboardCheck, capability: "manage_stock" },
       { href: "/biaya-operasional", label: "Biaya Operasional", icon: Banknote, capability: "view_revenue_reports", soon: true },
@@ -58,16 +54,14 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/laporan", label: "Laporan Penjualan", icon: BarChart3, capability: "view_revenue_reports" },
       { href: "/laba-rugi", label: "Laba Rugi", icon: Scale, capability: "view_revenue_reports", soon: true },
-      { href: "/audit", label: "Audit Log", icon: ScrollText, capability: "view_audit_log" },
     ],
   },
   {
     title: "Data Master",
     items: [
       { href: "/pengaturan", label: "Klinik", icon: Building2, capability: "manage_users_settings" },
-      { href: "/master-data/jenis-hewan", label: "Jenis Hewan", icon: Cat, capability: "manage_users_settings", soon: true },
-      { href: "/master-data/ras-hewan", label: "Ras Hewan", icon: Dog, capability: "manage_users_settings", soon: true },
-      { href: "/master-data/kandang", label: "Kandang", icon: DoorOpen, capability: "manage_rooms" },
+      { href: "/master/jenis-hewan", label: "Jenis Hewan", icon: Cat, capability: "manage_users_settings", soon: true },
+      { href: "/master/ras-hewan", label: "Ras Hewan", icon: Dog, capability: "manage_users_settings", soon: true },
       { href: "/pengguna", label: "Pengguna", icon: Users, capability: "manage_users_settings" },
       { href: "/pengaturan/printer", label: "Pengaturan Printer", icon: Printer, capability: "manage_users_settings", soon: true },
       { href: "/notifikasi", label: "Notifikasi", icon: Bell, soon: true },

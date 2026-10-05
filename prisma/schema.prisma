@@ -26,6 +26,11 @@ enum AppointmentStatus {
   BATAL
 }
 
+enum ExaminationType {
+  LAB
+  RADIOLOGI
+}
+
 enum VisitStatus {
   DILAYANI
   MENUNGGU_BAYAR
@@ -118,6 +123,7 @@ model User {
   paymentsReceived     Payment[]
   auditLogs            AuditLog[]
   cashClosings         CashClosing[]
+  examinationsCreated  Examination[]
   appointmentsAsDoctor Appointment[]    @relation("AppointmentDoctor")
   appointmentsCreated  Appointment[]    @relation("AppointmentCreatedBy")
 
@@ -169,6 +175,7 @@ model Patient {
   owner        Owner         @relation(fields: [ownerId], references: [id])
   visits       Visit[]
   appointments Appointment[]
+  examinations Examination[]
   admissions   Admission[]
 
   @@index([microchip])
@@ -221,6 +228,7 @@ model MedicalRecord {
   visit             Visit              @relation(fields: [visitId], references: [id])
   addenda           RecordAddendum[]
   attachments       Attachment[]
+  examinations      Examination[]
   prescriptionItems PrescriptionItem[]
   vaccinations      Vaccination[]
 
@@ -269,16 +277,18 @@ model Vaccination {
 }
 
 model Attachment {
-  id       String @id @default(uuid()) @db.Uuid
-  recordId String @map("record_id") @db.Uuid
-  filePath String @map("file_path")
-  fileName String @map("file_name")
-  mime     String
-  size     Int
+  id            String  @id @default(uuid()) @db.Uuid
+  recordId      String? @map("record_id") @db.Uuid
+  examinationId String? @map("examination_id") @db.Uuid
+  filePath      String  @map("file_path")
+  fileName      String  @map("file_name")
+  mime          String
+  size          Int
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  record MedicalRecord @relation(fields: [recordId], references: [id])
+  record      MedicalRecord? @relation(fields: [recordId], references: [id], onDelete: Restrict)
+  examination Examination?   @relation(fields: [examinationId], references: [id], onDelete: Restrict)
 
   @@map("attachment")
 }
@@ -542,6 +552,31 @@ model Appointment {
 
   @@index([scheduledAt])
   @@map("appointment")
+}
+
+model Examination {
+  id          String          @id @default(uuid()) @db.Uuid
+  type        ExaminationType
+  patientId   String          @map("patient_id") @db.Uuid
+  recordId    String?         @map("record_id") @db.Uuid
+  name        String
+  performedAt DateTime        @map("performed_at") @db.Date
+  findings    String?
+  notes       String?
+  createdById String          @map("created_by") @db.Uuid
+  deletedAt   DateTime?       @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient     Patient        @relation(fields: [patientId], references: [id])
+  record      MedicalRecord? @relation(fields: [recordId], references: [id])
+  createdBy   User           @relation(fields: [createdById], references: [id])
+  attachments Attachment[]
+
+  @@index([type, performedAt])
+  @@index([patientId])
+  @@map("examination")
 }
 
 model CashClosing {

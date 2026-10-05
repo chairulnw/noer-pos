@@ -6,6 +6,7 @@ import { formatDate, formatTime } from "@/lib/format";
 import { StatusChip } from "@/components/status-chip";
 import type { getPatient, getPatientHistory } from "@/lib/patients";
 import type { latestRawatInapLogs, listPatientAdmissions } from "@/lib/admissions";
+import { EXAM } from "@/lib/examination-schema";
 import { formatAge, formatWhatsapp } from "@/lib/patient-schema";
 
 type Patient = NonNullable<Awaited<ReturnType<typeof getPatient>>>;
@@ -128,6 +129,20 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
                   {v.medicalRecord?.diagnosis && <div className="truncate text-[13.5px] text-muted-foreground">{v.complaint}</div>}
                 </div>
                 <StatusChip tone={v.medicalRecord?.finalized ? "info" : "neutral"}>{v.medicalRecord?.finalized ? "Final" : "Draft"}</StatusChip>
+              </Link>
+            ))}
+          </div>
+          <div className="overflow-hidden rounded-[10px] border bg-card">
+            <h3 className="border-b px-5 py-3 text-base font-semibold">Hasil lab & radiologi</h3>
+            {history.examinations.length === 0 && <p className="p-5 text-sm text-muted-foreground">Belum ada hasil lab atau radiologi.</p>}
+            {history.examinations.map((e) => (
+              <Link key={e.id} href={`${EXAM[e.type].path}/${e.id}`} className="grid grid-cols-[116px_minmax(0,1fr)_auto] items-center gap-4 border-b px-5 py-3.5 last:border-0">
+                <div className="text-[14.5px] font-medium">{formatDate(e.performedAt)}</div>
+                <div className="min-w-0">
+                  <div className="truncate text-[14.5px] font-medium">{e.name}</div>
+                  {e.findings && <div className="truncate text-[13.5px] text-muted-foreground">{e.findings}</div>}
+                </div>
+                <StatusChip tone="info">{e.type === "LAB" ? "Lab" : "Radiologi"}</StatusChip>
               </Link>
             ))}
           </div>

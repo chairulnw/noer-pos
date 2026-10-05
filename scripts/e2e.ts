@@ -103,7 +103,7 @@ async function main() {
   assert.ok("error" in (await payInvoice(kasir.id, invoice.id, { method: "TUNAI", cashReceived: 9_999_999, reference: "" })));
   const due = await R.listDueVaccinations(400);
   assert.equal(due.length, 1);
-  assert.equal((await R.listVaccinations({ q: "E2E-V" })).length, 1);
+  assert.equal((await R.listVaccinations({ q: "E2E-V" })).total, 1);
   ok("tidak bisa dibayar dua kali; vaksin muncul di daftar jatuh tempo");
 
   const amoxLine = invoice.items.find((i) => i.itemId === amox.id)!;

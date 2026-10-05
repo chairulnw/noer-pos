@@ -222,11 +222,10 @@ export const listCatalog = () =>
 
 export type RecordListFilter = { q?: string; status?: "BELUM" | "DRAFT" | "FINAL"; doctorId?: string; from?: string; to?: string };
 
-export function listRecords({ q, status, doctorId, from, to }: RecordListFilter) {
+export async function listRecords({ q, status, doctorId, from, to }: RecordListFilter, skip = 0, take = 50) {
   const term = q?.trim();
   const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
-  return prisma.visit.findMany({
-    where: {
+  const where: Prisma.VisitWhereInput = {
       status: { not: "BATAL" },
       ...(doctorId && { doctorId }),
       ...((from || to) && { visitDate: { ...(from && { gte: day(from) }), ...(to && { lte: day(to) }) } }),
@@ -242,45 +241,58 @@ export function listRecords({ q, status, doctorId, from, to }: RecordListFilter)
           { medicalRecord: { is: { diagnosis: { contains: term, mode: "insensitive" } } } },
         ],
       }),
-    },
-    select: {
-      id: true,
-      visitDate: true,
-      complaint: true,
-      patient: { select: { id: true, name: true, species: true, rmNo: true, allergyNote: true, aggressive: true, owner: { select: { name: true } } } },
-      doctor: { select: { name: true } },
-      medicalRecord: { select: { diagnosis: true, finalized: true } },
-    },
-    orderBy: [{ visitDate: "desc" }, { createdAt: "desc" }],
-    take: 100,
-  });
+  };
+  const [rows, total] = await Promise.all([
+    prisma.visit.findMany({
+      where,
+      select: {
+        id: true,
+        visitDate: true,
+        complaint: true,
+        patient: { select: { id: true, name: true, species: true, rmNo: true, allergyNote: true, aggressive: true, owner: { select: { name: true } } } },
+        doctor: { select: { name: true } },
+        medicalRecord: { select: { diagnosis: true, finalized: true } },
+      },
+      orderBy: [{ visitDate: "desc" }, { createdAt: "desc" }],
+      skip,
+      take,
+    }),
+    prisma.visit.count({ where }),
+  ]);
+  return { rows, total };
 }
 
-export function listVaccinations({ q, from, to }: { q?: string; from?: string; to?: string }) {
+export async function listVaccinations({ q, from, to }: { q?: string; from?: string; to?: string }, skip = 0, take = 50) {
   const term = q?.trim();
   const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
-  return prisma.vaccination.findMany({
-    where: {
-      record: { visit: { patient: { deletedAt: null, owner: { deletedAt: null } } } },
-      ...((from || to) && { givenAt: { ...(from && { gte: day(from) }), ...(to && { lte: day(to) }) } }),
-      ...(term && {
-        OR: [
-          { item: { name: { contains: term, mode: "insensitive" } } },
-          { batchNo: { contains: term, mode: "insensitive" } },
-          { record: { visit: { patient: { name: { contains: term, mode: "insensitive" } } } } },
-          { record: { visit: { patient: { owner: { name: { contains: term, mode: "insensitive" } } } } } },
-        ],
-      }),
-    },
-    select: {
-      id: true,
-      givenAt: true,
-      nextDue: true,
-      batchNo: true,
-      item: { select: { name: true } },
-      record: { select: { visit: { select: { id: true, patient: { select: { id: true, name: true, species: true, rmNo: true, owner: { select: { name: true } } } } } } } },
-    },
-    orderBy: [{ givenAt: "desc" }, { id: "asc" }],
-    take: 100,
-  });
+  const where: Prisma.VaccinationWhereInput = {
+    record: { visit: { patient: { deletedAt: null, owner: { deletedAt: null } } } },
+    ...((from || to) && { givenAt: { ...(from && { gte: day(from) }), ...(to && { lte: day(to) }) } }),
+    ...(term && {
+      OR: [
+        { item: { name: { contains: term, mode: "insensitive" } } },
+        { batchNo: { contains: term, mode: "insensitive" } },
+        { record: { visit: { patient: { name: { contains: term, mode: "insensitive" } } } } },
+        { record: { visit: { patient: { owner: { name: { contains: term, mode: "insensitive" } } } } } },
+      ],
+    }),
+  };
+  const [rows, total] = await Promise.all([
+    prisma.vaccination.findMany({
+      where,
+      select: {
+        id: true,
+        givenAt: true,
+        nextDue: true,
+        batchNo: true,
+        item: { select: { name: true } },
+        record: { select: { visit: { select: { id: true, patient: { select: { id: true, name: true, species: true, rmNo: true, owner: { select: { name: true } } } } } } } },
+      },
+      orderBy: [{ givenAt: "desc" }, { id: "asc" }],
+      skip,
+      take,
+    }),
+    prisma.vaccination.count({ where }),
+  ]);
+  return { rows, total };
 }

@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { todayJakarta } from "@/lib/date";
+import { listPatientExaminations } from "@/lib/examinations";
 import { nextRmNo, normalizePatient, type OwnerInput, type PatientInput } from "@/lib/patient-schema";
 
 const LIST_SELECT = {
@@ -51,25 +52,37 @@ export async function searchPatients(query: string) {
   return { patients, ownersWithoutPets };
 }
 
-export async function listOwners(query: string) {
+function ownerWhere(query: string): Prisma.OwnerWhereInput {
   const term = query.trim();
   const phone = term.replace(/\D/g, "").replace(/^0/, "");
-  const rows = await prisma.owner.findMany({
-    where: {
-      deletedAt: null,
-      ...(term && {
-        OR: [
-          { name: { contains: term, mode: "insensitive" } },
-          { address: { contains: term, mode: "insensitive" } },
-          ...(phone.length >= 3 ? [{ whatsapp: { contains: phone } }] : []),
-        ],
-      }),
-    },
-    select: { id: true, name: true, whatsapp: true, address: true, patients: { where: { deletedAt: null }, select: { name: true } } },
-    orderBy: term ? { name: "asc" } : { createdAt: "desc" },
-    take: 100,
-  });
-  return rows.map(({ patients, ...owner }) => ({ ...owner, pets: patients.map((p) => p.name) }));
+  return {
+    deletedAt: null,
+    ...(term && {
+      OR: [
+        { name: { contains: term, mode: "insensitive" as const } },
+        { address: { contains: term, mode: "insensitive" as const } },
+        ...(phone.length >= 3 ? [{ whatsapp: { contains: phone } }] : []),
+      ],
+    }),
+  };
+}
+
+const OWNER_LIST = { id: true, name: true, whatsapp: true, address: true, patients: { where: { deletedAt: null }, select: { name: true } } } satisfies Prisma.OwnerSelect;
+
+const withPets = <T extends { patients: { name: string }[] }>({ patients, ...owner }: T) => ({ ...owner, pets: patients.map((p) => p.name) });
+
+export async function listOwners(query: string) {
+  const rows = await prisma.owner.findMany({ where: ownerWhere(query), select: OWNER_LIST, orderBy: query.trim() ? { name: "asc" } : { createdAt: "desc" }, take: 100 });
+  return rows.map(withPets);
+}
+
+export async function pageOwners(query: string, skip: number, take: number) {
+  const where = ownerWhere(query);
+  const [rows, total] = await Promise.all([
+    prisma.owner.findMany({ where, select: OWNER_LIST, orderBy: query.trim() ? { name: "asc" } : { createdAt: "desc" }, skip, take }),
+    prisma.owner.count({ where }),
+  ]);
+  return { rows: rows.map(withPets), total };
 }
 
 export async function getPatient(id: string) {
@@ -147,7 +160,7 @@ export async function deleteOwner(id: string) {
 }
 
 export async function getPatientHistory(patientId: string) {
-  const [visits, vaccinations] = await Promise.all([
+  const [visits, vaccinations, examinations] = await Promise.all([
     prisma.visit.findMany({
       where: { patientId, status: { not: "BATAL" } },
       select: {
@@ -166,6 +179,7 @@ export async function getPatientHistory(patientId: string) {
       orderBy: { givenAt: "desc" },
       take: 30,
     }),
+    listPatientExaminations(patientId),
   ]);
-  return { visits, vaccinations };
+  return { visits, vaccinations, examinations };
 }

@@ -26,9 +26,12 @@ export async function AdmissionsList({ type }: { type: AdmissionType }) {
           <h1 className="text-[22px] font-semibold leading-11">{title}</h1>
           <p className="text-sm text-muted-foreground">{admissions.length} hewan {type === "HOTEL" ? "dititipkan" : "dirawat"} saat ini</p>
         </div>
-        <Button asChild>
-          <Link href={`${base}/check-in`}>+ Check-in</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {type === "HOTEL" && can(user.role, "manage_rooms") && <Button asChild variant="outline"><Link href="/master-data/kandang">Master Kandang</Link></Button>}
+          <Button asChild>
+            <Link href={`${base}/check-in`}>+ Check-in</Link>
+          </Button>
+        </div>
       </header>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">

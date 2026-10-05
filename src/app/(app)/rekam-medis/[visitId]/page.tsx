@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
@@ -9,6 +10,8 @@ import { formatDate } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { formatAge } from "@/lib/patient-schema";
 import { ensureRecord, getRecordView, listCatalog, listDiagnoses, listVaccines } from "@/lib/records";
+import { EXAM } from "@/lib/examination-schema";
+import { listRecordExaminations } from "@/lib/examinations";
 import { parsePicks } from "@/lib/quick-picks";
 import { requireCapability } from "@/lib/require-role";
 import { getSettings } from "@/lib/settings";
@@ -50,6 +53,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
   const vitals = { ...EMPTY_VITALS, ...(record.vitals as Partial<Vitals> | null) };
   const today = todayJakarta();
 
+  const examinations = await listRecordExaminations(record.id);
   const [diagnoses, vaccines, catalog, settings] = final || !canEdit ? [[], [], [], await getSettings()] : await Promise.all([listDiagnoses(), listVaccines(), listCatalog(), getSettings()]);
 
   return (
@@ -146,6 +150,24 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
           </div>
         ))}
         {!final && canEdit && <VaccinationForm visitId={visit.id} recordId={record.id} vaccines={vaccines} today={today.toISOString().slice(0, 10)} />}
+      </Card>
+
+      <Card
+        title="Hasil lab & radiologi"
+        aside={canEdit && (
+          <span className="flex gap-3 text-sm font-medium text-primary">
+            <Link href={`/hasil-lab/baru?patient=${patient.id}`}>+ Hasil lab</Link>
+            <Link href={`/radiologi/baru?patient=${patient.id}`}>+ Radiologi</Link>
+          </span>
+        )}
+      >
+        {examinations.length === 0 && <p className="text-sm text-muted-foreground">Belum ada hasil lab atau radiologi yang dikaitkan ke rekam medis ini.</p>}
+        {examinations.map((e) => (
+          <Link key={e.id} href={`${EXAM[e.type].path}/${e.id}`} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 font-medium text-primary last:border-0 last:pb-0">
+            {e.name}
+            <span className="text-[13px] font-normal text-muted-foreground">{e.type === "LAB" ? "Lab" : "Radiologi"} · {formatDate(e.performedAt)}</span>
+          </Link>
+        ))}
       </Card>
 
       <Card title="Lampiran hasil lab / rontgen" aside={<span className="text-[13px] text-muted-foreground">PDF, JPG, PNG, maks 10 MB</span>}>
