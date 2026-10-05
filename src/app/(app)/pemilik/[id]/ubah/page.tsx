@@ -3,8 +3,8 @@ import { z } from "zod";
 import { ConfirmButton } from "@/components/confirm-button";
 import { getOwner } from "@/lib/patients";
 import { requireCapability } from "@/lib/require-role";
-import { deleteOwnerAction } from "../../../actions";
-import { OwnerForm } from "../../../owner-form";
+import { deleteOwnerAction } from "../../../pasien/actions";
+import { OwnerForm } from "../../../pasien/owner-form";
 
 export default async function EditOwnerPage({
   params,

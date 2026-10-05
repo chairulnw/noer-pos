@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, BedDouble, Boxes, Building2, CalendarDays, ClipboardCheck, CreditCard, DoorOpen, LayoutDashboard, Package, PawPrint, Receipt, ScrollText, ShoppingCart, Syringe, Users, Wallet, type LucideIcon } from "lucide-react";
+import { BarChart3, BedDouble, Boxes, Building2, CalendarDays, ClipboardCheck, CreditCard, DoorOpen, LayoutDashboard, Package, PawPrint, Receipt, ScrollText, ShoppingCart, Syringe, UserRound, Users, Wallet, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +29,10 @@ const GROUPS: { title?: string; items: NavItem[] }[] = [
   },
   {
     title: "Pelanggan",
-    items: [{ href: "/pasien", label: "Hewan & Pemilik", icon: PawPrint, capability: "manage_patients" }],
+    items: [
+      { href: "/pasien", label: "Hewan Peliharaan", icon: PawPrint, capability: "manage_patients" },
+      { href: "/pemilik", label: "Pemilik Hewan", icon: UserRound, capability: "manage_patients" },
+    ],
   },
   {
     title: "Inventaris & Ritel",

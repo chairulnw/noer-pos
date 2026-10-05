@@ -1,5 +1,5 @@
 import { requireCapability } from "@/lib/require-role";
-import { OwnerForm } from "../../owner-form";
+import { OwnerForm } from "../../pasien/owner-form";
 
 export default async function NewOwnerPage() {
   await requireCapability("manage_patients");

@@ -51,7 +51,7 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
           {pending ? "Menyimpan…" : "Simpan"}
         </Button>
         <Button variant="outline" asChild>
-          <Link href={owner ? `/pasien/owner/${owner.id}` : "/pasien"}>Batal</Link>
+          <Link href={owner ? `/pemilik/` : "/pemilik"}>Batal</Link>
         </Button>
         {state.message && <p role="status" className="text-sm text-destructive">{state.message}</p>}
       </div>

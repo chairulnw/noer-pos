@@ -19,8 +19,8 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <Link href="/pasien" className="text-[13px] font-medium text-primary">
-            ← Pasien & Owner
+          <Link href="/pemilik" className="text-[13px] font-medium text-primary">
+            ← Pemilik Hewan
           </Link>
           <h1 className="text-[22px] font-semibold leading-11">{owner.name}</h1>
           <p className="text-sm text-muted-foreground">WA {formatWhatsapp(owner.whatsapp)}</p>
@@ -29,7 +29,7 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href={`/pasien/owner/${owner.id}/ubah`}>Ubah owner</Link>
+            <Link href={`/pemilik/${owner.id}/ubah`}>Ubah owner</Link>
           </Button>
           <Button asChild>
             <Link href={`/pasien/baru?owner=${owner.id}`}>+ Hewan baru</Link>

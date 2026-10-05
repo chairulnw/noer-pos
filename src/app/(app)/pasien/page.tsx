@@ -28,9 +28,9 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[22px] font-semibold leading-11">Pasien & Owner</h1>
+        <h1 className="text-[22px] font-semibold leading-11">Hewan Peliharaan</h1>
         <Button asChild>
-          <Link href="/pasien/owner/baru">+ Owner baru</Link>
+          <Link href="/pemilik/baru">+ Owner baru</Link>
         </Button>
       </header>
 
@@ -41,7 +41,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
             name="q"
             data-search
             defaultValue={q}
-            aria-label="Cari pasien atau owner"
+            aria-label="Cari hewan atau pemilik"
             placeholder="Nama owner/hewan, no. WA, no. RM, microchip"
             className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
           />
@@ -51,7 +51,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
 
       <div className="flex flex-wrap items-start gap-5">
         <section aria-label="Hasil pencarian" className="min-w-0 flex-1 basis-72 overflow-hidden rounded-[10px] border bg-card md:max-w-sm">
-          {total === 0 && <EmptyState action={<Button asChild variant="outline"><Link href="/pasien/owner/baru">+ Owner baru</Link></Button>}>Tidak ada pasien ditemukan.</EmptyState>}
+          {total === 0 && <EmptyState action={<Button asChild variant="outline"><Link href="/pemilik/baru">+ Owner baru</Link></Button>}>Tidak ada pasien ditemukan.</EmptyState>}
           {patients.map((p) => (
             <Link
               key={p.id}
@@ -71,7 +71,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
             </Link>
           ))}
           {ownersWithoutPets.map((o) => (
-            <Link key={o.id} href={`/pasien/owner/${o.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
+            <Link key={o.id} href={`/pemilik/${o.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
               <span className="text-[15px] font-semibold">{o.name}</span>
               <span className="text-[13.5px] text-muted-foreground">Owner, belum ada hewan · {formatWhatsapp(o.whatsapp)}</span>
             </Link>

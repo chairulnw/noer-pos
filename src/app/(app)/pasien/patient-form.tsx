@@ -98,7 +98,7 @@ export function PatientForm({ ownerId, ownerName, patient }: { ownerId: string; 
           {pending ? "Menyimpan…" : "Simpan"}
         </Button>
         <Button variant="outline" asChild>
-          <Link href={patient ? `/pasien?id=${patient.id}` : `/pasien/owner/${ownerId}`}>Batal</Link>
+          <Link href={patient ? `/pasien?id=${patient.id}` : `/pemilik/${ownerId}`}>Batal</Link>
         </Button>
         {state.message && <p role="status" className="text-sm text-destructive">{state.message}</p>}
       </div>

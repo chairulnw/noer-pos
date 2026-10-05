@@ -51,7 +51,7 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
             <div className="text-[14.5px] text-muted-foreground">{details.join(" · ")}</div>
             <div className="text-[14.5px] text-muted-foreground">
               Owner{" "}
-              <Link href={`/pasien/owner/${patient.owner.id}`} className="font-medium text-primary">
+              <Link href={`/pemilik/${patient.owner.id}`} className="font-medium text-primary">
                 {patient.owner.name}
               </Link>{" "}
               · WA {formatWhatsapp(patient.owner.whatsapp)}

@@ -40,8 +40,9 @@ export async function saveOwnerAction(id: string | null, _prev: PatientFormState
   if (result.id === undefined) return { message: result.error };
 
   revalidatePath("/pasien");
+  revalidatePath("/pemilik");
   await flash("Owner tersimpan");
-  redirect(`/pasien/owner/${result.id}`);
+  redirect(`/pemilik/${result.id}`);
 }
 
 export async function savePatientAction(
@@ -89,8 +90,9 @@ export async function deletePatientAction(id: string) {
 export async function deleteOwnerAction(id: string) {
   await requireCapability("manage_patients");
   const result = await deleteOwner(id);
-  if (result.error) redirect(`/pasien/owner/${id}/ubah?error=${encodeURIComponent(result.error)}`);
+  if (result.error) redirect(`/pemilik/${id}/ubah?error=${encodeURIComponent(result.error)}`);
   revalidatePath("/pasien");
+  revalidatePath("/pemilik");
   await flash("Owner dihapus");
-  redirect("/pasien");
+  redirect("/pemilik");
 }

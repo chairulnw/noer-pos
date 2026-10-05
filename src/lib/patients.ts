@@ -51,6 +51,27 @@ export async function searchPatients(query: string) {
   return { patients, ownersWithoutPets };
 }
 
+export async function listOwners(query: string) {
+  const term = query.trim();
+  const phone = term.replace(/\D/g, "").replace(/^0/, "");
+  const rows = await prisma.owner.findMany({
+    where: {
+      deletedAt: null,
+      ...(term && {
+        OR: [
+          { name: { contains: term, mode: "insensitive" } },
+          { address: { contains: term, mode: "insensitive" } },
+          ...(phone.length >= 3 ? [{ whatsapp: { contains: phone } }] : []),
+        ],
+      }),
+    },
+    select: { id: true, name: true, whatsapp: true, address: true, patients: { where: { deletedAt: null }, select: { name: true } } },
+    orderBy: term ? { name: "asc" } : { createdAt: "desc" },
+    take: 100,
+  });
+  return rows.map(({ patients, ...owner }) => ({ ...owner, pets: patients.map((p) => p.name) }));
+}
+
 export async function getPatient(id: string) {
   const row = await prisma.patient.findFirst({
     where: { id, deletedAt: null, owner: { deletedAt: null } },
