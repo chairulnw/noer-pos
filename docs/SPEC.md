@@ -52,7 +52,7 @@
 
 ## 4. Di Luar Scope (jangan dibangun)
 
-Antrean/nomor antrean, booking, refund, bundling/paket, cicilan, supplier & PO, WhatsApp (API maupun `wa.me`), kartu vaksin & surat sehat, QRIS dinamis/payment gateway, PIN kasir, multi-cabang/tenant, mode offline, portal pemilik, integrasi akuntansi, komisi dokter, obat racikan/dosis per berat, multi-gudang.
+Antrean/nomor antrean, booking online oleh pemilik, refund (saldo deposit tidak bisa ditarik tunai), bundling/paket, cicilan, supplier & PO, WhatsApp (API maupun `wa.me`), kartu vaksin & surat sehat, QRIS dinamis/payment gateway, PIN kasir, multi-cabang/tenant, mode offline, portal pemilik, integrasi akuntansi, komisi dokter, obat racikan/dosis per berat, multi-gudang.
 
 ---
 
@@ -552,6 +552,29 @@ flowchart LR
 | 2.3 | Export PDF dan Excel |
 | 2.4 | Dashboard lanjut (grafik tren) |
 | 2.5 | Tutup kas harian (jika klien setuju) |
+
+### Fase 3 (rincian: `docs/PRD-fase3.md`)
+| # | Task |
+|---|---|
+| 3A.1 | Sidebar mengikuti grup VetCloud: Ikhtisar, Penjualan, Operasional Klinik, Pelanggan, Inventaris & Ritel, Laporan, Data Master (hanya menu yang sudah ada) |
+| 3A.2 | Pisah Hewan Peliharaan dan Pemilik Hewan (daftar tabel masing-masing) |
+| 3A.3 | Pisah Rawat Inap dan Pet Hotel |
+| 3A.4 | Kasir (POS) satu layar: katalog + keranjang + bayar, memakai invoice DRAFT yang sama; pilih pelanggan; buka tagihan lain di layar yang sama |
+| 3B.1 | Janji Temu (model, daftar harian, kalender bulanan, jadikan kunjungan) |
+| 3B.2 | Rekam Medis: daftar semua + pilih cepat SOAP |
+| 3B.3 | Vaksin: daftar riwayat (jatuh tempo digabung) |
+| 3B.4 | Hasil Lab dan Radiologi (catatan + lampiran, tampil di riwayat pasien) |
+| 3C.1 | Operasi (jadwal, status, catatan terkunci setelah selesai, tertagih) |
+| 3C.2 | Grooming (kalender, status, tertagih) |
+| 3C.3 | Pet Hotel: grid kandang, status kebersihan, tarif per kandang, pakan |
+| 3D.1 | Deposit/Wallet: top-up, mutasi, koreksi Admin, bayar dengan saldo (BR-9 tetap maks. 2 pembayaran) |
+| 3D.2 | Biaya Operasional |
+| 3D.3 | Laba Rugi + rincian tunai/non-tunai |
+| 3E.1 | Master Jenis dan Ras Hewan + migrasi data lama |
+| 3E.2 | Notifikasi dalam aplikasi |
+| 3E.3 | Pencarian global, Pengaturan Printer, aksi cepat dasbor |
+
+**Aturan bisnis Fase 3:** (1) Saldo deposit tidak bisa ditarik tunai. (2) Top-up deposit bukan pendapatan; pendapatan diakui saat invoice FINAL. (3) Void invoice yang dibayar saldo mengembalikan saldo. (4) Top-up tunai masuk hitungan Tutup Kas. (5) Pembelian stok tidak dicatat sebagai biaya operasional (sudah di HPP). (6) Tetap 3 peran. (7) Tanpa WhatsApp, push notification, atau email.
 
 ---
 

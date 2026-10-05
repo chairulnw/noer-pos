@@ -8,6 +8,8 @@
 | **Dokumen terkait** | `docs/SPEC.md` (spesifikasi teknis, ERD, task breakdown, prompt agent) |
 | **Catatan** | PRD ini menjawab **apa** dan **kenapa**. Detail **bagaimana** ada di spec teknis. Jika konflik: PRD menang untuk scope dan prioritas, spec menang untuk detail teknis. Angka target adalah usulan dan perlu divalidasi dengan klien |
 
+**Fase 3 (6 Okt 2026):** scope diperluas, rincian di `docs/PRD-fase3.md`. Janji temu, deposit/saldo pelanggan, dan biaya operasional/laba bersih **keluar dari Non-Tujuan** di bawah. Selain itu tetap berlaku.
+
 **Perubahan dari v1:** 3 fase menjadi 2 fase. Rawat inap, pet hotel, DP, dan e-invoice masuk MVP. Antrean, refund, bundling, cicilan, supplier/PO, WhatsApp, kartu vaksin, QRIS dinamis, dan PIN kasir dihapus dari scope.
 
 ---
@@ -50,7 +52,7 @@ Klinik hewan butuh satu sistem yang menyatukan **rekam medis pasien (PMS)** dan 
 | Item | Alasan |
 |---|---|
 | Antrean / nomor antrean | Walk-in diinput kasir lalu langsung dilayani |
-| Booking/appointment | Tidak diminta |
+| Booking online oleh pemilik hewan | Janji temu dicatat staf (Fase 3). Booking mandiri tetap di luar scope |
 | Refund | Tidak ada kebijakan refund. (Void untuk koreksi salah input tetap ada, bukan refund) |
 | Paket bundling, cicilan | Tidak diminta. DP hanya 1x lalu pelunasan |
 | Supplier & purchase order | Semua stok masuk diinput manual |

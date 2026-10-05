@@ -8,8 +8,8 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 
 | | |
 |---|---|
-| Fase / milestone aktif | Fase 2, dimulai atas permintaan user. Urutan: 2.2, 2.4, 2.5. Task 2.1 (import) dan 2.3 (export) ditunda sampai user minta |
-| Task berikutnya | Tidak ada. 2.1 (import) dan 2.3 (export) ditunda sampai user minta |
+| Fase / milestone aktif | Fase 3 (`docs/PRD-fase3.md`, disetujui 6 Okt 2026), tahap 3A. 2.1 (import) dan 2.3 (export) tetap ditunda |
+| Task berikutnya | 3A.1 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -66,6 +66,39 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 - [ ] **2.3** Export PDF dan Excel
 - [x] **2.4** Dashboard lanjut
 - [x] **2.5** Tutup kas harian (jika klien setuju)
+
+---
+
+## Fase 3 (PRD: `docs/PRD-fase3.md`, task: `docs/SPEC.md` bagian 11)
+
+Menu mengikuti VetCloud, gaya NOER tetap. Kehadiran tidak dibuat. Satu tahap = beberapa task, tiap task di-commit.
+
+**3A (navigasi + kasir)**
+- [ ] **3A.1** Sidebar grup VetCloud
+- [ ] **3A.2** Pisah Hewan Peliharaan / Pemilik Hewan
+- [ ] **3A.3** Pisah Rawat Inap / Pet Hotel
+- [ ] **3A.4** Kasir (POS) satu layar
+
+**3B (klinis 1)**
+- [ ] **3B.1** Janji Temu
+- [ ] **3B.2** Rekam Medis: daftar + pilih cepat
+- [ ] **3B.3** Vaksin
+- [ ] **3B.4** Hasil Lab dan Radiologi
+
+**3C (klinis 2)**
+- [ ] **3C.1** Operasi
+- [ ] **3C.2** Grooming
+- [ ] **3C.3** Pet Hotel lengkap
+
+**3D (keuangan)**
+- [ ] **3D.1** Deposit / Wallet
+- [ ] **3D.2** Biaya Operasional
+- [ ] **3D.3** Laba Rugi
+
+**3E (pelengkap)**
+- [ ] **3E.1** Jenis dan Ras Hewan
+- [ ] **3E.2** Notifikasi
+- [ ] **3E.3** Pencarian global, Pengaturan Printer, aksi cepat dasbor
 
 ---
 
