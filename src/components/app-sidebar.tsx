@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth";
 import type { Role } from "@/lib/permissions";
+import { unreadCount } from "@/lib/notifications";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { SidebarShell } from "@/components/sidebar-shell";
 import { SidebarSearch } from "@/components/sidebar-search";
@@ -22,11 +23,19 @@ function initials(name: string) {
     .join("");
 }
 
-export function AppSidebar({ user, logo }: { user: { name?: string | null; role: Role }; logo: string }) {
+export async function AppSidebar({ user, logo }: { user: { id: string; name?: string | null; role: Role }; logo: string }) {
   const name = user.name ?? "";
+  const unread = await unreadCount(user.id, user.role);
 
   return (
-    <SidebarShell logo={<Image src={logo} alt="NOER Petshop & Vet Clinic" width={80} height={36} unoptimized priority style={{ width: "auto" }} className="h-9" />}>
+    <SidebarShell
+      bell={
+        <Link href="/notifikasi" aria-label={unread > 0 ? `Notifikasi, ${unread} belum dibaca` : "Notifikasi"} title="Notifikasi" className="relative flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted">
+          <Bell className="size-[18px]" />
+          {unread > 0 && <span className="absolute top-1.5 right-1 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] leading-4 font-semibold text-white">{unread > 99 ? "99+" : unread}</span>}
+        </Link>
+      }
+      logo={<Image src={logo} alt="NOER Petshop & Vet Clinic" width={80} height={36} unoptimized priority style={{ width: "auto" }} className="h-9" />}>
       <SidebarSearch />
       <div className="min-h-0 md:flex-1 md:overflow-y-auto">
         <SidebarNav role={user.role} />

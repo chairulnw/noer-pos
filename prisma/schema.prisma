@@ -131,6 +131,7 @@ model User {
   paymentsReceived     Payment[]
   auditLogs            AuditLog[]
   cashClosings         CashClosing[]
+  notificationReads    NotificationRead[]
   operationalCosts     OperationalCost[]
   walletTransactions   WalletTransaction[]
   examinationsCreated  Examination[]
@@ -658,6 +659,17 @@ model AnimalBreed {
 
   @@unique([speciesId, name])
   @@map("animal_breed")
+}
+
+model NotificationRead {
+  userId String   @map("user_id") @db.Uuid
+  key    String
+  readAt DateTime @default(now()) @map("read_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId, key])
+  @@map("notification_read")
 }
 
 model CashClosing {

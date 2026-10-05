@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 3 (`docs/PRD-fase3.md`, disetujui 6 Okt 2026), tahap 3A. 2.1 (import) dan 2.3 (export) tetap ditunda |
-| Task berikutnya | 3E.2 Pengaturan Printer dan Notifikasi, 3A.8 (sisa daftar ke pola tabel baru), lalu Operasi dan Grooming. Pengujian ditunda atas permintaan user |
+| Task berikutnya | 3A.8 (sisa daftar ke pola tabel baru: Transaksi, Tagihan, Rawat Inap, Pet Hotel, Pengguna, Stok Opname), 3E.3, lalu Operasi dan Grooming. Pengujian ditunda atas permintaan user |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -97,8 +97,8 @@ Menu mengikuti VetCloud, gaya NOER tetap. Kehadiran tidak dibuat. Satu tahap = b
 
 **3E (pelengkap)**
 - [x] **3E.1** Jenis dan Ras Hewan
-- [ ] **3E.2** Notifikasi
-- [ ] **3E.3** Pencarian global, Pengaturan Printer, aksi cepat dasbor
+- [x] **3E.2** Notifikasi
+- [ ] **3E.3** Pencarian global dan aksi cepat dasbor (Pengaturan Printer sudah selesai di 3E.2)
 
 ---
 
@@ -263,6 +263,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-06 | 3D.2 | Selesai | **Biaya Operasional** (`/biaya-operasional`, Admin): tabel `operational_cost` (CHECK nominal > 0, soft delete). Daftar bergaya VetCloud dengan total pengeluaran, cari, filter tanggal, paginasi; catat, ubah (audit sebelum/sesudah), hapus (konfirmasi, soft delete, audit). Kategori tetap (Q11): Gaji, Sewa, Listrik & Air, Internet, Perawatan Alat, Lainnya. Pembelian stok sengaja tidak ada (Q13: sudah di HPP). Diuji skrip data: total, filter, grup per hari/kategori, audit, soft delete, CHECK |
 | 2026-10-06 | 3D.3 | Selesai | **Laba Rugi** (`/laba-rugi`, Admin) bergaya VetCloud: filter Bulan Ini, Bulan Lalu, 3 Bulan Terakhir, Tahun Ini, Semua Periode, atau rentang tanggal (maks. 366 hari); kartu hijau/merah Laba Bersih dengan margin; Pendapatan (tanpa PPN, invoice FINAL), HPP, Laba Kotor, Pengeluaran; grafik laba harian (bulanan bila > 62 hari) dengan batang positif/negatif; rincian beban per kategori. Laba bersih = penjualan − HPP − biaya operasional (pembelian stok tidak dihitung dua kali, Q13). **Laporan Penjualan** ditambah rincian pembayaran tunai, non-tunai (QRIS/transfer/kartu), dan saldo deposit (US-69). Logika di `lib/report` (preset baru, `profitSeries`) diuji, plus asersi laba bersih di `pnpm e2e` |
 | 2026-10-06 | 3E.1 | Selesai | **Jenis Hewan** (`/master/jenis-hewan`) dan **Ras Hewan** (`/master/ras-hewan`, filter per jenis), Admin: tabel `animal_species` dan `animal_breed` (nama unik tanpa beda huruf, aktif/nonaktif). Migrasi mengisi otomatis 6 jenis umum, 16 ras umum, dan semua jenis/ras yang sudah dipakai pasien, lalu menyamakan penulisan data lama bila namanya cocok (US-72); kolom teks `patient.species/breed` tetap dipakai, jadi data lama yang tidak ada di master tetap tampil apa adanya. Form pasien: Jenis dipilih dari master (nilai lama yang tidak ada di master tetap muncul sebagai opsi), Ras berupa saran sesuai jenis tetapi tetap bisa diketik. Mengganti nama jenis/ras ikut memperbarui pasien terkait (satu transaksi); ras tidak bisa dipindah jenis. Diuji skrip data (duplikat, rename berantai, nonaktif) |
+| 2026-10-06 | 3E.2 | Selesai | **Notifikasi** (`/notifikasi`, semua peran) dan lonceng dengan jumlah belum dibaca di header sidebar. Notifikasi dihitung sesuai hak akses peran, bukan disimpan: stok habis/menipis dan batch expired/hampir expired (Admin), vaksin jatuh tempo 7 hari (Admin/Dokter), janji temu hari ini yang masih terjadwal (semua). "Tandai Dibaca" menyimpan kunci per pengguna di `notification_read` (yang sudah dibaca tetap tampil sebagai riwayat, kondisi baru dengan kunci baru muncul lagi). Tanpa push/email/WhatsApp. **Pengaturan Printer** (`/pengaturan/printer`): ukuran kertas 58/80 mm dipindah dari Pengaturan Klinik, panduan cetak lewat dialog cetak browser (printer thermal terpasang di sistem), pratinjau struk dan "Cetak halaman uji" sesuai lebar terpilih. Bluetooth/USB langsung tidak didukung (keputusan: semua lewat cetak sistem). Diuji skrip data notifikasi |
 | 2026-10-04 | UI/UX | Selesai | 14 catatan review UI/UX. Sidebar dikelompokkan (Pelayanan/Kasir/Stok/Admin), tetap di tempat dengan scroll sendiri, ikon saja di layar tablet; kolom cari global + pintasan `/`. Beranda Dokter (pasien belum diperiksa) dan Kasir (menunggu bayar, draft retail, pengingat tutup kas). Input uang berpemisah ribuan (`MoneyInput`, server tetap menerima integer). Void invoice dipindah ke menu "Lainnya"; semua konfirmasi memakai dialog yang sama (`ConfirmButton`, termasuk Tutup Kas dan finalisasi opname). Toast setelah simpan (cookie `flash` untuk aksi server, `toast()` untuk aksi klien). `PageHeader` seragam di Rekam Medis, Rawat Inap, Invoice, Opname; aksi tabel = satu tombol + menu; empty state dengan tombol aksi; grafik tren dengan skala dan ketuk-untuk-nilai; fokus otomatis ke kolom scan, Enter untuk bayar; lebar minimum tabel diturunkan untuk tablet. Butir 13 (form login) tidak direproduksi di kode: isian hilang hanya saat mengetik sebelum halaman siap di alat otomasi, perlu dicoba manual |
 
 ## Perintah Proyek

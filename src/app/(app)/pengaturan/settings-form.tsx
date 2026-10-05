@@ -39,12 +39,6 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         <Field label="Footer struk" name="receiptFooter" errors={err("receiptFooter")} full>
           <Input id="receiptFooter" name="receiptFooter" defaultValue={settings.receiptFooter} />
         </Field>
-        <Field label="Lebar kertas struk" name="paperWidth" errors={err("paperWidth")}>
-          <select id="paperWidth" name="paperWidth" defaultValue={settings.paperWidth} className={selectClass}>
-            <option value="80">80 mm</option>
-            <option value="58">58 mm</option>
-          </select>
-        </Field>
         <Field label="Gambar QRIS statis (PNG/JPG/WebP, maks 1 MB)" name="qrisFile" errors={err("qris")}>
           <Input id="qrisFile" name="qrisFile" type="file" accept="image/png,image/jpeg,image/webp" />
           {/* eslint-disable-next-line @next/next/no-img-element */}

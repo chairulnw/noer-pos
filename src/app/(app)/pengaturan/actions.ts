@@ -38,7 +38,7 @@ export async function updateSettings(_prev: SettingsState, formData: FormData): 
     taxEnabled: formData.get("taxEnabled") === "on",
     taxRate: Number(text(formData, "taxRate")),
     taxMode: text(formData, "taxMode"),
-    paperWidth: Number(text(formData, "paperWidth")),
+    paperWidth: formData.has("paperWidth") ? Number(text(formData, "paperWidth")) : current.paperWidth,
     expiryWarningDays: Number(text(formData, "expiryWarningDays")),
     quickSubjective: text(formData, "quickSubjective"),
     quickObjective: text(formData, "quickObjective"),

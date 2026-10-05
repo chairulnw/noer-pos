@@ -16,7 +16,7 @@ const read = () => {
   }
 };
 
-export function SidebarShell({ logo, children }: { logo: React.ReactNode; children: React.ReactNode }) {
+export function SidebarShell({ logo, bell, children }: { logo: React.ReactNode; bell?: React.ReactNode; children: React.ReactNode }) {
   const collapsed = useSyncExternalStore(subscribe, read, () => false);
   const toggle = () => {
     try {
@@ -33,6 +33,8 @@ export function SidebarShell({ logo, children }: { logo: React.ReactNode; childr
     >
       <div className="flex items-center justify-between pb-4 pl-2.5 md:group-data-[collapsed=true]/side:justify-center md:group-data-[collapsed=true]/side:pl-0">
         <div className="md:group-data-[collapsed=true]/side:hidden">{logo}</div>
+        <div className="flex items-center md:group-data-[collapsed=true]/side:flex-col">
+        {bell}
         <button
           type="button"
           onClick={toggle}
@@ -43,6 +45,7 @@ export function SidebarShell({ logo, children }: { logo: React.ReactNode; childr
         >
           <Icon className="size-[18px]" />
         </button>
+        </div>
       </div>
       {children}
     </aside>
