@@ -160,7 +160,7 @@ Saldo tidak bisa ditarik tunai. Top-up tunai ikut dihitung di Tutup Kas.
 ### 4.10 Biaya Operasional
 | ID | Sebagai | Saya ingin | Acceptance Criteria | P |
 |---|---|---|---|:-:|
-| US-67 | Admin | Mencatat pengeluaran | Nama, nominal, kategori, tanggal, keterangan. Kategori dari master (mis. Gaji, Sewa, Listrik & Air, Pembelian Stok, Lainnya) | M |
+| US-67 | Admin | Mencatat pengeluaran | Nama, nominal, kategori, tanggal, keterangan. Kategori dari master (mis. Gaji, Sewa, Listrik & Air, Lainnya). Pembelian stok **tidak** dicatat di sini karena sudah masuk HPP | M |
 | US-68 | Admin | Melihat dan mengoreksi | Daftar dengan total periode. Ubah/hapus tercatat audit (hapus = soft delete) | M |
 
 ### 4.11 Laporan
@@ -202,7 +202,7 @@ Tidak ada push notification, email, atau WhatsApp.
 | Biaya operasional, laba rugi | ✅ | ❌ | ❌ |
 | Master jenis/ras hewan | ✅ | ❌ | ❌ |
 
-Peran **Paramedis** (ada di referensi) belum dimasukkan, lihat Q12.
+Peran **Paramedis** tidak dibuat (Q12).
 
 ## 6. Dampak ke Aturan Bisnis (diperinci di SPEC setelah disetujui)
 
@@ -222,9 +222,9 @@ Peran **Paramedis** (ada di referensi) belum dimasukkan, lihat Q12.
 | Q8 | Janji temu boleh tumpang tindih untuk dokter yang sama di jam yang sama? | Boleh, hanya diberi peringatan |
 | Q9 | Grooming dikerjakan siapa? Perlu mencatat groomer? | Tidak mencatat groomer |
 | Q10 | Deposit: ada batas maksimal saldo atau masa berlaku? | Tanpa batas dan tanpa masa berlaku |
-| Q11 | Kategori biaya operasional apa saja? | Gaji, Sewa, Listrik & Air, Internet, Pembelian Stok, Perawatan Alat, Lainnya |
-| Q12 | Perlu peran Paramedis (mis. boleh isi monitoring rawat inap tapi tidak finalisasi rekam medis)? | Belum, pakai 3 peran yang ada |
-| Q13 | Pembelian stok dicatat sebagai biaya operasional, atau cukup lewat HPP? | Tidak, agar tidak dihitung dua kali (HPP sudah masuk laba kotor) |
+| Q11 | Kategori biaya operasional apa saja? | Gaji, Sewa, Listrik & Air, Internet, Perawatan Alat, Lainnya |
+| Q12 | Perlu peran Paramedis? | **Diputuskan (6 Okt 2026): tidak.** Tetap 3 peran: Admin, Dokter, Kasir |
+| Q13 | Pembelian stok dicatat sebagai biaya operasional? | **Diputuskan (6 Okt 2026): tidak.** Cukup lewat HPP agar tidak dihitung dua kali. Kategori "Pembelian Stok" tidak disediakan |
 | Q14 | Hasil lab perlu nilai per parameter (mis. tabel hematologi) atau cukup ringkasan teks + lampiran? | Ringkasan teks + lampiran |
 
 ## 8. Rencana Rilis
