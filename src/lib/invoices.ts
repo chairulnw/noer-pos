@@ -136,7 +136,7 @@ export const getInvoice = (id: string) =>
 export const listSellableItems = () =>
   prisma.item.findMany({
     where: { active: true, deletedAt: null },
-    select: { id: true, name: true, type: true, sellPrice: true, baseUnit: true, sku: true, barcode: true },
+    select: { id: true, name: true, type: true, category: true, sellPrice: true, baseUnit: true, sku: true, barcode: true },
     orderBy: [{ type: "asc" }, { name: "asc" }],
   });
 
@@ -178,3 +178,20 @@ export const listPayments = (q?: string) =>
 
 export const activeInvoiceForVisit = (visitId: string) =>
   prisma.invoice.findFirst({ where: { visitId, status: { not: "VOID" } }, select: { id: true } });
+
+export const listOpenDrafts = () =>
+  prisma.invoice.findMany({
+    where: { status: "DRAFT" },
+    select: {
+      id: true,
+      invoiceNo: true,
+      customerName: true,
+      grandTotal: true,
+      createdAt: true,
+      visit: { select: { patient: { select: { name: true } } } },
+      admission: { select: { patient: { select: { name: true } } } },
+      _count: { select: { items: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 15,
+  });

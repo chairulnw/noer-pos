@@ -175,3 +175,13 @@ export async function getStockAlerts() {
   expiring.sort((a, b) => a.expiry.getTime() - b.expiry.getTime());
   return { low, expiring, warnDays: settings.expiryWarningDays };
 }
+
+export async function getUsableStock() {
+  const today = todayJakarta();
+  const rows = await prisma.stockBatch.groupBy({
+    by: ["itemId"],
+    where: { qtyOnHand: { gt: 0 }, OR: [{ expiryDate: null }, { expiryDate: { gte: today } }] },
+    _sum: { qtyOnHand: true },
+  });
+  return Object.fromEntries(rows.map((r) => [r.itemId, Number(r._sum.qtyOnHand ?? 0)])) as Record<string, number>;
+}

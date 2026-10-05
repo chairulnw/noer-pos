@@ -90,6 +90,16 @@ export const setInvoiceDiscount = (userId: string, invoiceId: string, discount: 
     return {};
   });
 
+export const setInvoiceCustomer = (invoiceId: string, ownerId: string | null) =>
+  editDraft(invoiceId, async (tx) => {
+    const invoice = await tx.invoice.findUniqueOrThrow({ where: { id: invoiceId }, select: { visitId: true, admissionId: true } });
+    if (invoice.visitId || invoice.admissionId) return { error: "Pelanggan tagihan klinik tidak bisa diganti." };
+    const owner = ownerId ? await tx.owner.findFirst({ where: { id: ownerId, deletedAt: null }, select: { id: true, name: true } }) : null;
+    if (ownerId && !owner) return { error: "Pemilik tidak ditemukan." };
+    await tx.invoice.update({ where: { id: invoiceId }, data: { ownerId: owner?.id ?? null, customerName: owner?.name ?? null } });
+    return {};
+  });
+
 export async function createRetailInvoice(userId: string, customerName: string) {
   for (let attempt = 1; ; attempt++) {
     try {

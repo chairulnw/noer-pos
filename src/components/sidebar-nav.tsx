@@ -13,7 +13,7 @@ const GROUPS: { title?: string; items: NavItem[] }[] = [
   {
     title: "Penjualan",
     items: [
-      { href: "/retail", label: "Kasir (POS)", icon: ShoppingCart, capability: "manage_invoice_payment" },
+      { href: "/kasir", label: "Kasir (POS)", icon: ShoppingCart, capability: "manage_invoice_payment" },
       { href: "/pembayaran", label: "Transaksi (Lunas)", icon: CreditCard, capability: "manage_invoice_payment" },
       { href: "/invoice", label: "Tagihan / Invoice", icon: Receipt, capability: "manage_invoice_payment" },
       { href: "/tutup-kas", label: "Tutup Kas", icon: Wallet, capability: "close_cash" },

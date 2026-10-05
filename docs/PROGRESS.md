@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 3 (`docs/PRD-fase3.md`, disetujui 6 Okt 2026), tahap 3A. 2.1 (import) dan 2.3 (export) tetap ditunda |
-| Task berikutnya | 3A.4 |
+| Task berikutnya | Sidebar disamakan penuh dengan VetCloud (menu fitur yang belum ada tampil "Segera"), lalu 3B.1 |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -77,7 +77,7 @@ Menu mengikuti VetCloud, gaya NOER tetap. Kehadiran tidak dibuat. Satu tahap = b
 - [x] **3A.1** Sidebar grup VetCloud
 - [x] **3A.2** Pisah Hewan Peliharaan / Pemilik Hewan
 - [x] **3A.3** Pisah Rawat Inap / Pet Hotel
-- [ ] **3A.4** Kasir (POS) satu layar
+- [x] **3A.4** Kasir (POS) satu layar
 
 **3B (klinis 1)**
 - [ ] **3B.1** Janji Temu
@@ -251,6 +251,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-06 | 3A.1 | Selesai | Sidebar mengikuti grup VetCloud: Ikhtisar, Penjualan (Kasir/POS, Transaksi Lunas, Tagihan/Invoice, Tutup Kas), Operasional Klinik, Pelanggan, Inventaris & Ritel (Produk & Layanan, Stok, Stok Opname), Laporan, Data Master (Klinik, Kandang, Pengguna). Grup dan menu hanya tampil bila fiturnya ada dan peran berhak. Menu aktif memakai kecocokan terpanjang (Stok Opname tidak ikut menyalakan Stok). "Kasir (POS)" sementara menuju /retail sampai 3A.4. Kehadiran tidak dibuat. Diuji per peran lewat HTTP. Catatan: Docker Desktop sempat mati sehingga login 500; dinyalakan ulang, data utuh |
 | 2026-10-06 | 3A.2 | Selesai | Menu Pelanggan dipisah: **Hewan Peliharaan** (`/pasien`, tampilan daftar + profil seperti sebelumnya) dan **Pemilik Hewan** (`/pemilik`, tabel: nama, WhatsApp, hewan, alamat; cari nama/WA/alamat; "+ Pemilik baru"). Halaman pemilik (detail, ubah, baru) dipindah dari `/pasien/owner/*` ke `/pemilik/*` agar menu aktif tepat; alamat lama dialihkan permanen (308). Perayap link semua peran: tidak ada link rusak |
 | 2026-10-06 | 3A.3 | Selesai | Menu **Pet Hotel** (`/pet-hotel`) dipisah dari **Rawat Inap** (`/rawat-inap`): masing-masing daftar hanya menampilkan jenisnya (komponen daftar bersama `AdmissionsList`). Check-in per jenis (`/rawat-inap/check-in`, `/pet-hotel/check-in`) dengan jenis terkunci; tombol Check-in di profil hewan tetap memberi pilihan jenis. Detail dan check-out bisa dibuka dari kedua rute, dan link kembali/redirect mengikuti jenis admission (helper `admission-paths`). Dasbor: kartu Hotel menuju /pet-hotel. Diuji dengan satu rawat inap dan satu hotel aktif, perayap link semua peran |
+| 2026-10-06 | 3A.4 | Selesai | **Kasir (POS)** satu layar di `/kasir`: kiri katalog layanan dan produk (grid kartu, cari nama/SKU/barcode + Enter untuk scan, chip kategori, stok produk dari batch tidak expired, produk habis tidak bisa dipilih); kanan keranjang (jumlah, diskon per item, hapus), pemilihan pelanggan (cari pemilik, opsional; tagihan dari kunjungan/rawat inap terkunci) dan panel bayar yang sama dengan halaman invoice (tunai/QRIS/transfer/kartu, DP, diskon invoice). Draft dibuat saat item pertama ditambahkan (tanpa isi nama dulu), memakai invoice DRAFT yang sama sehingga semua aturan (FEFO, atomik, audit) tidak berubah. "Tagihan menunggu" membuka draft lain di layar yang sama. Setelah lunas: layar sukses (kembalian, cetak struk, e-invoice, transaksi baru). `/retail` dialihkan ke `/kasir`. Diuji di browser: tambah item, ubah jumlah, hapus, pilih pelanggan, bayar tunai (stok 100 → 97, audit lengkap), Kasir tidak menerima harga beli, Dokter ditolak. Catatan alat uji: klik koordinat di Chrome otomasi kadang tidak memicu handler; klik via JavaScript berhasil |
 | 2026-10-04 | UI/UX | Selesai | 14 catatan review UI/UX. Sidebar dikelompokkan (Pelayanan/Kasir/Stok/Admin), tetap di tempat dengan scroll sendiri, ikon saja di layar tablet; kolom cari global + pintasan `/`. Beranda Dokter (pasien belum diperiksa) dan Kasir (menunggu bayar, draft retail, pengingat tutup kas). Input uang berpemisah ribuan (`MoneyInput`, server tetap menerima integer). Void invoice dipindah ke menu "Lainnya"; semua konfirmasi memakai dialog yang sama (`ConfirmButton`, termasuk Tutup Kas dan finalisasi opname). Toast setelah simpan (cookie `flash` untuk aksi server, `toast()` untuk aksi klien). `PageHeader` seragam di Rekam Medis, Rawat Inap, Invoice, Opname; aksi tabel = satu tombol + menu; empty state dengan tombol aksi; grafik tren dengan skala dan ketuk-untuk-nilai; fokus otomatis ke kolom scan, Enter untuk bayar; lebar minimum tabel diturunkan untuk tablet. Butir 13 (form login) tidak direproduksi di kode: isian hilang hanya saat mengetik sebelum halaman siap di alat otomasi, perlu dicoba manual |
 
 ## Perintah Proyek
