@@ -53,7 +53,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Laporan",
     items: [
       { href: "/laporan", label: "Laporan Penjualan", icon: BarChart3, capability: "view_revenue_reports" },
-      { href: "/laba-rugi", label: "Laba Rugi", icon: Scale, capability: "view_revenue_reports", soon: true },
+      { href: "/laba-rugi", label: "Laba Rugi", icon: Scale, capability: "view_revenue_reports" },
     ],
   },
   {

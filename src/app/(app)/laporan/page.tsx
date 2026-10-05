@@ -4,7 +4,7 @@ import { getStockAlerts } from "@/lib/inventory";
 import { todayJakarta } from "@/lib/date";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { fillDays, groupMonthly, marginPercent, PRESETS, profit, resolveRange, sumRows, type DayRow } from "@/lib/report";
-import { getSalesByDay, getTopItems, getVisitStats, type TopItem } from "@/lib/reports";
+import { getPaymentSplit, getSalesByDay, getTopItems, getVisitStats, type TopItem } from "@/lib/reports";
 import { listDueVaccinations } from "@/lib/records";
 import { requireCapability } from "@/lib/require-role";
 import { cn } from "@/lib/utils";
@@ -112,8 +112,9 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
 
 async function Section({ tab, range, per, query }: { tab: string; range: Exclude<ReturnType<typeof resolveRange>, { error: string }>; per: "hari" | "bulan"; query: (p: Params) => string }) {
   if (tab === "omzet") {
-    const daily = await getSalesByDay(range);
+    const [daily, split] = await Promise.all([getSalesByDay(range), getPaymentSplit(range)]);
     const total = sumRows(daily);
+    const pct = (n: number) => `${split.total ? Math.round((n / split.total) * 100) : 0}% dari pembayaran`;
     const rows: DayRow[] = per === "bulan" ? groupMonthly(daily) : fillDays(daily, range.from, range.to).reverse();
     return (
       <div className="space-y-4">
@@ -122,6 +123,11 @@ async function Section({ tab, range, per, query }: { tab: string; range: Exclude
           <Stat label="HPP" value={formatRupiah(total.cost)} />
           <Stat label="Laba kotor" value={formatRupiah(profit(total))} hint={`Margin ${marginPercent(total).toLocaleString("id-ID")}%`} />
           <Stat label="Rata-rata per invoice" value={formatRupiah(total.invoices ? Math.round(total.sales / total.invoices) : 0)} />
+        </div>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
+          <Stat label="Pembayaran tunai" value={formatRupiah(split.cash)} hint={pct(split.cash)} />
+          <Stat label="Pembayaran non-tunai" value={formatRupiah(split.digital)} hint={`QRIS, transfer, kartu · ${pct(split.digital)}`} />
+          <Stat label="Dibayar dengan saldo deposit" value={formatRupiah(split.wallet)} hint={pct(split.wallet)} />
         </div>
         <div className="flex gap-1.5">
           {(["hari", "bulan"] as const).map((p) => (

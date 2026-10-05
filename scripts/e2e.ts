@@ -11,8 +11,9 @@ import { createAppointment, startVisitFromAppointment } from "../src/lib/appoint
 import { jakartaYmd } from "../src/lib/appointment-calc";
 import { closeCash } from "../src/lib/cash";
 import { topUp } from "../src/lib/wallet";
+import { createCost, getCostsByDay } from "../src/lib/costs";
 import { getSettings, saveSettings } from "../src/lib/settings";
-import { resolveRange, sumRows } from "../src/lib/report";
+import { profitSeries, resolveRange, sumRows, sumProfit } from "../src/lib/report";
 import { getSalesByDay } from "../src/lib/reports";
 import { saveOwner, savePatient } from "../src/lib/patients";
 import * as R from "../src/lib/records";
@@ -24,6 +25,7 @@ const stock = async (itemId: string) =>
 const ok = (label: string) => console.log(`  ok  ${label}`);
 
 async function wipe() {
+  await prisma.operationalCost.deleteMany();
   await prisma.walletTransaction.deleteMany();
   await prisma.owner.updateMany({ data: { walletBalance: 0 } });
   await prisma.cashClosing.deleteMany(); await prisma.appointment.deleteMany();
@@ -97,6 +99,11 @@ async function main() {
   if ("error" in todayRange) throw new Error(todayRange.error);
   assert.deepEqual(sumRows(await getSalesByDay(todayRange)), { invoices: 1, sales: 360_000, cost: 30 * 1_200 + 150_000 });
   ok("laporan: penjualan tanpa PPN Rp 360.000, HPP dari snapshot");
+
+  assert.ok("id" in (await createCost(admin.id, { name: "Listrik E2E", amount: 10_000, category: "Listrik & Air", costDate: todayRange.to, notes: "" })));
+  const pl = profitSeries(await getSalesByDay(todayRange), await getCostsByDay(todayRange.from, todayRange.to), todayRange.from, todayRange.to);
+  assert.equal(sumProfit(pl.points).net, 360_000 - (30 * 1_200 + 150_000) - 10_000);
+  ok("laba rugi: penjualan 360.000 - HPP 186.000 - biaya 10.000 = laba bersih 164.000");
 
   assert.ok("id" in (await closeCash(kasir.id, { openingCash: 100_000, countedCash: 499_600, note: "" })));
   const closing = await prisma.cashClosing.findFirstOrThrow();

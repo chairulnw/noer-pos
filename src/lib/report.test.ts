@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barHeights, daysBetween, fillDays, trendRange, groupMonthly, marginPercent, profit, resolveRange, sumRows } from "./report";
+import { profitSeries, sumProfit, barHeights, daysBetween, fillDays, trendRange, groupMonthly, marginPercent, profit, resolveRange, sumRows } from "./report";
 
 const today = new Date("2026-10-04T00:00:00Z");
 
@@ -71,5 +71,32 @@ describe("tren", () => {
     expect(barHeights([0, 50, 100])).toEqual([0, 0.5, 1]);
     expect(barHeights([0, 0])).toEqual([0, 0]);
     expect(barHeights([1, 1000])[0]).toBe(0.02);
+  });
+});
+
+describe("laba rugi", () => {
+  it("preset 3 bulan terakhir, tahun ini, dan semua periode", () => {
+    expect(resolveRange({ preset: "3-bulan" }, today)).toMatchObject({ from: "2026-08-01", to: "2026-10-04" });
+    expect(resolveRange({ preset: "tahun-ini" }, today)).toMatchObject({ from: "2026-01-01", to: "2026-10-04" });
+    expect(resolveRange({ preset: "semua" }, today, "2025-03-15")).toMatchObject({ from: "2025-03-15", to: "2026-10-04", preset: "semua" });
+    expect(resolveRange({ preset: "semua" }, today, null)).toMatchObject({ from: "2026-10-04", to: "2026-10-04" });
+    expect(resolveRange({ preset: "3-bulan" }, new Date("2026-02-10T00:00:00Z"))).toMatchObject({ from: "2025-12-01" });
+  });
+
+  it("deret harian: laba = penjualan - HPP - biaya, hari kosong tetap ada", () => {
+    const rows = [{ day: "2026-10-02", invoices: 2, sales: 300_000, cost: 100_000 }];
+    const { points, monthly } = profitSeries(rows, { "2026-10-02": 50_000, "2026-10-03": 80_000 }, "2026-10-01", "2026-10-03");
+    expect(monthly).toBe(false);
+    expect(points.map((p) => [p.key, p.net])).toEqual([["2026-10-01", 0], ["2026-10-02", 150_000], ["2026-10-03", -80_000]]);
+    expect(sumProfit(points)).toEqual({ sales: 300_000, cost: 100_000, opex: 130_000, net: 70_000 });
+  });
+
+  it("rentang panjang dikelompokkan per bulan WIB", () => {
+    const rows = [{ day: "2026-08-31", invoices: 1, sales: 100, cost: 0 }, { day: "2026-09-01", invoices: 1, sales: 200, cost: 50 }];
+    const { points, monthly } = profitSeries(rows, { "2026-09-15": 30 }, "2026-07-01", "2026-10-04");
+    expect(monthly).toBe(true);
+    expect(points.map((p) => p.key)).toEqual(["2026-07", "2026-08", "2026-09", "2026-10"]);
+    expect(points.find((p) => p.key === "2026-09")).toMatchObject({ sales: 200, cost: 50, opex: 30, net: 120 });
+    expect(points.find((p) => p.key === "2026-08")!.net).toBe(100);
   });
 });

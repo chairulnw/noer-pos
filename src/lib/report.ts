@@ -11,12 +11,20 @@ export const PRESETS = [
   { id: "bulan-lalu", label: "Bulan lalu" },
 ] as const;
 
+export const PL_PRESETS = [
+  { id: "bulan-ini", label: "Bulan Ini" },
+  { id: "bulan-lalu", label: "Bulan Lalu" },
+  { id: "3-bulan", label: "3 Bulan Terakhir" },
+  { id: "tahun-ini", label: "Tahun Ini" },
+  { id: "semua", label: "Semua Periode" },
+] as const;
+
 export type RangeParams = { preset?: string; from?: string; to?: string };
 
 const ymd = (date: Date) => date.toISOString().slice(0, 10);
 const utcDay = (y: number, m: number, d: number) => new Date(Date.UTC(y, m, d));
 
-export function resolveRange({ preset, from, to }: RangeParams, today: Date) {
+export function resolveRange({ preset, from, to }: RangeParams, today: Date, earliest?: string | null) {
   const y = today.getUTCFullYear();
   const m = today.getUTCMonth();
   let start = utcDay(y, m, 1);
@@ -27,6 +35,11 @@ export function resolveRange({ preset, from, to }: RangeParams, today: Date) {
   else if (preset === "bulan-lalu") {
     start = utcDay(y, m - 1, 1);
     end = utcDay(y, m, 0);
+  } else if (preset === "3-bulan") start = utcDay(y, m - 2, 1);
+  else if (preset === "tahun-ini") start = utcDay(y, 0, 1);
+  else if (preset === "semua") {
+    const first = earliest && DATE.test(earliest) ? new Date(`${earliest}T00:00:00Z`) : today;
+    start = first < today ? first : today;
   } else if (from && to && DATE.test(from) && DATE.test(to)) {
     start = new Date(`${from}T00:00:00Z`);
     end = new Date(`${to}T00:00:00Z`);
@@ -40,7 +53,7 @@ export function resolveRange({ preset, from, to }: RangeParams, today: Date) {
   return {
     from: fromYmd,
     to: toYmd,
-    preset: preset && PRESETS.some((p) => p.id === preset) ? preset : from && to ? "kustom" : "bulan-ini",
+    preset: preset && [...PRESETS, ...PL_PRESETS].some((p) => p.id === preset) ? preset : from && to ? "kustom" : "bulan-ini",
     start: new Date(`${fromYmd}T00:00:00+07:00`),
     endExclusive: new Date(new Date(`${toYmd}T00:00:00+07:00`).getTime() + DAY_MS),
   } as const;
@@ -89,3 +102,26 @@ export function barHeights(values: number[]) {
   const max = Math.max(0, ...values);
   return values.map((v) => (max === 0 || v <= 0 ? 0 : Math.max(v / max, 0.02)));
 }
+
+export type ProfitPoint = { key: string; sales: number; cost: number; opex: number; net: number };
+
+export function profitSeries(rows: DayRow[], opex: Record<string, number>, from: string, to: string) {
+  const sales = new Map(rows.map((r) => [r.day, r]));
+  const days = daysBetween(from, to);
+  const monthly = days.length > 62;
+  const buckets = new Map<string, ProfitPoint>();
+  for (const day of days) {
+    const key = monthly ? day.slice(0, 7) : day;
+    const row = sales.get(day);
+    const point = buckets.get(key) ?? { key, sales: 0, cost: 0, opex: 0, net: 0 };
+    point.sales += row?.sales ?? 0;
+    point.cost += row?.cost ?? 0;
+    point.opex += opex[day] ?? 0;
+    point.net = point.sales - point.cost - point.opex;
+    buckets.set(key, point);
+  }
+  return { points: [...buckets.values()], monthly };
+}
+
+export const sumProfit = (points: ProfitPoint[]) =>
+  points.reduce((t, p) => ({ sales: t.sales + p.sales, cost: t.cost + p.cost, opex: t.opex + p.opex, net: t.net + p.net }), { sales: 0, cost: 0, opex: 0, net: 0 });

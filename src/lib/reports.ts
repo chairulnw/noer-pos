@@ -54,3 +54,12 @@ export async function getVisitStats({ start, endExclusive }: Range) {
     admissions: Object.fromEntries(admissions.map((a) => [a.type, a._count])) as Partial<Record<"RAWAT_INAP" | "HOTEL", number>>,
   };
 }
+
+export async function getPaymentSplit({ start, endExclusive }: Range) {
+  const rows = await prisma.payment.groupBy({ by: ["method"], where: { voided: false, paidAt: { gte: start, lt: endExclusive } }, _sum: { amount: true } });
+  const by = Object.fromEntries(rows.map((r) => [r.method, r._sum.amount ?? 0])) as Partial<Record<"TUNAI" | "QRIS" | "TRANSFER" | "KARTU" | "WALLET", number>>;
+  const cash = by.TUNAI ?? 0;
+  const digital = (by.QRIS ?? 0) + (by.TRANSFER ?? 0) + (by.KARTU ?? 0);
+  const wallet = by.WALLET ?? 0;
+  return { cash, digital, wallet, total: cash + digital + wallet };
+}
