@@ -19,6 +19,8 @@ export async function saveRoomAction(id: string | null, _prev: RoomFormState, fo
     name: String(formData.get("name") ?? ""),
     type: String(formData.get("type") ?? ""),
     active: formData.get("active") === "on",
+    defaultRateId: String(formData.get("defaultRateId") ?? ""),
+    suitableFor: String(formData.get("suitableFor") ?? ""),
   });
   if (!parsed.success) {
     return { message: "Periksa kembali isian yang ditandai.", errors: z.flattenError(parsed.error).fieldErrors };

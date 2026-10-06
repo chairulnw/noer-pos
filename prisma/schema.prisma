@@ -357,6 +357,7 @@ model Item {
   vaccinations      Vaccination[]
   admissions        Admission[]
   groomings         Grooming[]
+  rooms             Room[]             @relation("RoomDefaultRate")
 
   @@map("item")
 }
@@ -441,7 +442,12 @@ model Room {
   type   RoomType
   active Boolean  @default(true)
 
-  admissions Admission[]
+  needsCleaning Boolean @default(false) @map("needs_cleaning")
+  defaultRateId String? @map("default_rate_id") @db.Uuid
+  suitableFor   String? @map("suitable_for")
+
+  defaultRate Item?       @relation("RoomDefaultRate", fields: [defaultRateId], references: [id])
+  admissions  Admission[]
 
   @@map("room")
 }

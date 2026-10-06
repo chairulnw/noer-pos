@@ -8,9 +8,9 @@ import { CheckField, Field, Section, selectClass } from "@/components/form-field
 import { keepValuesOnError } from "@/lib/form";
 import { saveRoomAction, type RoomFormState } from "./actions";
 
-type Room = { id: string; name: string; type: "RAWAT_INAP" | "HOTEL"; active: boolean };
+type Room = { id: string; name: string; type: "RAWAT_INAP" | "HOTEL"; active: boolean; defaultRateId: string | null; suitableFor: string | null };
 
-export function RoomForm({ room }: { room: Room | null }) {
+export function RoomForm({ room, rates }: { room: Room | null; rates: { id: string; name: string }[] }) {
   const [state, formAction, pending] = useActionState<RoomFormState, FormData>(
     saveRoomAction.bind(null, room?.id ?? null),
     {},
@@ -28,6 +28,15 @@ export function RoomForm({ room }: { room: Room | null }) {
             <option value="RAWAT_INAP">Rawat inap</option>
             <option value="HOTEL">Hotel</option>
           </select>
+        </Field>
+        <Field label="Tarif harian bawaan" name="defaultRateId" errors={err("defaultRateId")} hint="Terpilih otomatis saat check-in di kandang ini.">
+          <select id="defaultRateId" name="defaultRateId" defaultValue={room?.defaultRateId ?? ""} className={selectClass}>
+            <option value="">Tanpa tarif bawaan</option>
+            {rates.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Peruntukan (opsional)" name="suitableFor" errors={err("suitableFor")}>
+          <Input id="suitableFor" name="suitableFor" defaultValue={room?.suitableFor ?? ""} maxLength={80} placeholder="mis. kucing, anjing kecil" />
         </Field>
         <CheckField name="active" label="Aktif (bisa dipakai untuk check-in)" defaultChecked={room?.active ?? true} />
       </Section>

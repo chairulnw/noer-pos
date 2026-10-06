@@ -8,6 +8,7 @@ import { admissionBase } from "@/lib/admission-paths";
 import { prisma } from "@/lib/db";
 import { addAdmissionLog, checkOutAdmission, createAdmission } from "@/lib/admissions";
 import { can } from "@/lib/permissions";
+import { markRoomClean } from "@/lib/rooms";
 import { requireCapability } from "@/lib/require-role";
 import { flash } from "@/components/flash";
 
@@ -76,4 +77,10 @@ export async function checkOutAction(admissionId: string, _prev: AdmissionFormSt
   revalidatePath("/invoice");
   await flash("Check-out selesai");
   redirect(can(user.role, "manage_invoice_payment") ? `/invoice/${result.invoiceId}` : admissionBase(admission?.type ?? "RAWAT_INAP"));
+}
+
+export async function markCleanAction(roomId: string) {
+  await requireCapability("manage_admission");
+  if (z.guid().safeParse(roomId).success && (await markRoomClean(roomId))) await flash("Kandang ditandai bersih");
+  revalidatePath("/pet-hotel");
 }

@@ -14,7 +14,7 @@ type Props = {
   patientId: string;
   patientName: string;
   defaultCheckIn: string;
-  rooms: { id: string; name: string; type: Type }[];
+  rooms: { id: string; name: string; type: Type; defaultRateId: string | null; suitableFor: string | null }[];
   rates: { id: string; name: string; type: Type }[];
   visits: { id: string; label: string }[];
   lockedType?: Type;
@@ -24,6 +24,8 @@ type Props = {
 export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rates, visits, lockedType, cancelHref = "/rawat-inap" }: Props) {
   const [state, formAction, pending] = useActionState<AdmissionFormState, FormData>(checkInAction, {});
   const [type, setType] = useState<Type>(lockedType ?? "RAWAT_INAP");
+  const [roomId, setRoomId] = useState("");
+  const [rateId, setRateId] = useState("");
   const err = (key: string) => state.errors?.[key];
   const roomOptions = rooms.filter((r) => r.type === type);
   const rateOptions = rates.filter((r) => r.type === type);
@@ -36,7 +38,7 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
           <input type="hidden" name="type" value={lockedType} />
         ) : (
           <Field label="Jenis" name="type" errors={err("type")}>
-            <select id="type" name="type" value={type} onChange={(e) => setType(e.target.value as Type)} className={selectClass}>
+            <select id="type" name="type" value={type} onChange={(e) => { setType(e.target.value as Type); setRoomId(""); setRateId(""); }} className={selectClass}>
               <option value="RAWAT_INAP">Rawat inap</option>
               <option value="HOTEL">Pet hotel</option>
             </select>
@@ -46,15 +48,15 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
           <Input id="checkIn" name="checkIn" type="datetime-local" defaultValue={defaultCheckIn} required />
         </Field>
         <Field label="Kandang / ruangan" name="roomId" errors={err("roomId")} hint={roomOptions.length === 0 ? "Tidak ada kandang kosong untuk jenis ini." : undefined}>
-          <select id="roomId" name="roomId" defaultValue="" key={`room-${type}`} className={selectClass} required>
+          <select id="roomId" name="roomId" value={roomId} onChange={(e) => { const room = roomOptions.find((r) => r.id === e.target.value); setRoomId(e.target.value); if (room?.defaultRateId && rateOptions.some((r) => r.id === room.defaultRateId)) setRateId(room.defaultRateId); }} className={selectClass} required>
             <option value="" disabled>Pilih kandang</option>
             {roomOptions.map((r) => (
-              <option key={r.id} value={r.id}>{r.name}</option>
+              <option key={r.id} value={r.id}>{r.name}{r.suitableFor ? ` (${r.suitableFor})` : ""}</option>
             ))}
           </select>
         </Field>
         <Field label="Tarif harian" name="rateItemId" errors={err("rateItemId")} hint={rateOptions.length === 0 ? "Belum ada layanan tarif per hari untuk jenis ini (Master Data)." : undefined}>
-          <select id="rateItemId" name="rateItemId" defaultValue="" key={`rate-${type}`} className={selectClass} required>
+          <select id="rateItemId" name="rateItemId" value={rateId} onChange={(e) => setRateId(e.target.value)} className={selectClass} required>
             <option value="" disabled>Pilih tarif</option>
             {rateOptions.map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>

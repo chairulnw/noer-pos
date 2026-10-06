@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { stayDay } from "@/lib/admission-calc";
 import { admissionBase, type AdmissionType } from "@/lib/admission-paths";
 import { listActiveAdmissions } from "@/lib/admissions";
+import { listHotelBoard } from "@/lib/rooms";
+import { RoomBoard } from "./room-board";
 import { formatDate, formatTime } from "@/lib/format";
 import { parsePaging, type PagingParams } from "@/lib/paging";
 import { can } from "@/lib/permissions";
@@ -18,7 +20,7 @@ export async function AdmissionsList({ type, searchParams }: { type: AdmissionTy
   const params = await searchParams;
   const canMonitor = can(user.role, "monitor_admission");
   const canInvoice = can(user.role, "manage_invoice_payment");
-  const admissions = await listActiveAdmissions(type);
+  const [admissions, board] = await Promise.all([listActiveAdmissions(type), type === "HOTEL" ? listHotelBoard() : []]);
   const base = admissionBase(type);
   const now = new Date();
   const { page, size, skip, take } = parsePaging(params);
@@ -33,6 +35,7 @@ export async function AdmissionsList({ type, searchParams }: { type: AdmissionTy
         subtitle={type === "HOTEL" ? "Penitipan hewan, nomor kandang, instruksi pakan, dan check-out" : "Monitoring pasien opname, nomor kandang, dan kepulangan"}
         actions={<>{type === "HOTEL" && can(user.role, "manage_rooms") && <Button asChild variant="outline"><Link href="/master-data/kandang">Master Kandang</Link></Button>}{checkIn}</>}
       />
+      {type === "HOTEL" && <RoomBoard rooms={board} />}
       <TableCard
         columns={[{ label: "Nomor kandang" }, { label: "Pasien & pemilik" }, { label: "Tgl masuk" }, { label: "Lama" }, { label: "Aksi", align: "right" }]}
         total={admissions.length}

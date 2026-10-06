@@ -13,7 +13,7 @@ export async function createAdmission(userId: string, input: CheckInInput) {
 
   const [patient, room, rate, visit, busy] = await Promise.all([
     prisma.patient.findFirst({ where: { id: input.patientId, deletedAt: null, owner: { deletedAt: null } }, select: { ownerId: true } }),
-    prisma.room.findFirst({ where: { id: input.roomId, active: true, type: input.type }, select: { id: true } }),
+    prisma.room.findFirst({ where: { id: input.roomId, active: true, type: input.type }, select: { id: true, needsCleaning: true, name: true } }),
     prisma.item.findFirst({
       where: { id: input.rateItemId, type: "SERVICE", billingUnit: "PER_DAY", category: RATE_CATEGORY[input.type], active: true, deletedAt: null },
       select: { id: true },
@@ -26,6 +26,7 @@ export async function createAdmission(userId: string, input: CheckInInput) {
   if (!patient) return { error: "Pasien tidak ditemukan." };
   if (busy) return { error: `Pasien ini masih tercatat menginap di ${busy.room.name}.` };
   if (!room) return { error: "Kandang tidak ditemukan, nonaktif, atau tidak sesuai jenis." };
+  if (room.needsCleaning) return { error: `${room.name} perlu dibersihkan. Tandai bersih di Pet Hotel sebelum check-in.` };
   if (!rate) return { error: "Tarif harian tidak valid untuk jenis ini." };
   if (input.visitId && !visit) return { error: "Kunjungan tidak valid." };
 
@@ -72,7 +73,7 @@ export const listActiveAdmissions = (type?: "RAWAT_INAP" | "HOTEL") =>
 
 export async function getCheckInOptions() {
   const [rooms, rates, occupied] = await Promise.all([
-    prisma.room.findMany({ where: { active: true }, select: { id: true, name: true, type: true }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
+    prisma.room.findMany({ where: { active: true, needsCleaning: false }, select: { id: true, name: true, type: true, defaultRateId: true, suitableFor: true }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
     prisma.item.findMany({
       where: { type: "SERVICE", billingUnit: "PER_DAY", active: true, deletedAt: null, category: { in: ["rawat inap", "hotel"] } },
       select: { id: true, name: true, category: true },
@@ -161,7 +162,7 @@ export async function checkOutAdmission(userId: string, admissionId: string, che
     const admission = await tx.admission.findUnique({
       where: { id: admissionId },
       select: {
-        status: true, checkIn: true, patient: { select: { ownerId: true } },
+        status: true, checkIn: true, roomId: true, type: true, patient: { select: { ownerId: true } },
         rateItem: { select: { id: true, name: true, sellPrice: true, buyPrice: true } },
       },
     });
@@ -175,6 +176,8 @@ export async function checkOutAdmission(userId: string, admissionId: string, che
       data: { status: "SELESAI", checkOut, billedDays: days },
     });
     if (count === 0) return { error: "Pasien ini sudah check-out." };
+
+    if (admission.type === "HOTEL") await tx.room.update({ where: { id: admission.roomId }, data: { needsCleaning: true } });
 
     let invoice = await tx.invoice.findFirst({ where: { admissionId, status: { not: "VOID" } }, select: { id: true, status: true } });
     if (invoice && invoice.status !== "DRAFT") throw new CheckOutBlocked("Invoice rawat inap sudah final. Void invoice tersebut terlebih dahulu, lalu ulangi check-out.");
