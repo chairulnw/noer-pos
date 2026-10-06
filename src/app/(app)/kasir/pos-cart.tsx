@@ -137,7 +137,7 @@ function Customer({ invoiceId, name, locked, editable, run }: { invoiceId: strin
   );
 }
 
-export function PosCart({ invoiceId, lines, editable, canDiscount, customerName, customerLocked, footer }: { footer: React.ReactNode; invoiceId: string | null; lines: CartLine[]; editable: boolean; canDiscount: boolean; customerName: string | null; customerLocked: boolean }) {
+export function PosCart({ invoiceId, lines, editable, canDiscount, customerName, customerLocked, footer, invoiceNo }: { footer: React.ReactNode; invoiceNo: string | null; invoiceId: string | null; lines: CartLine[]; editable: boolean; canDiscount: boolean; customerName: string | null; customerLocked: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -154,7 +154,7 @@ export function PosCart({ invoiceId, lines, editable, canDiscount, customerName,
         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><ShoppingCart className="size-5" /></span>
         <div>
           <h2 className="text-base leading-tight font-semibold">Keranjang</h2>
-          <p className="text-[13px] text-muted-foreground">{lines.length} item</p>
+          <p className="text-[13px] text-muted-foreground tabular-nums">{invoiceNo ? `${invoiceNo} · ` : ""}{lines.length} item</p>
         </div>
       </div>
       <Customer invoiceId={invoiceId} name={customerName} locked={customerLocked} editable={editable} run={run} />

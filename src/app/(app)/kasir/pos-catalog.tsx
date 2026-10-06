@@ -22,7 +22,7 @@ export type PosItem = {
 
 const groupOf = (category: string) => ITEM_GROUPS.find((g) => g.value && (g.categories as readonly string[]).includes(category))?.value ?? "";
 
-export function PosCatalog({ items, invoiceId, editable, clinicName }: { items: PosItem[]; invoiceId: string | null; editable: boolean; clinicName: string }) {
+export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: { items: PosItem[]; invoiceId: string | null; editable: boolean; clinicName: string; actions?: React.ReactNode }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("");
@@ -63,6 +63,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName }: { items: 
           <h2 className="truncate text-base leading-tight font-semibold">{clinicName}</h2>
           <p className="text-[13px] text-muted-foreground">Katalog Produk & Kasir (POS)</p>
         </div>
+        {actions}
         <div className="flex gap-1 rounded-xl bg-muted/70 p-1">
           {toggle("grid", LayoutGrid, "Tampilan kotak")}
           {toggle("list", List, "Tampilan daftar")}

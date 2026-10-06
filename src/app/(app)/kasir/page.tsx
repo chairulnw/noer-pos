@@ -32,17 +32,8 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
   const openDrafts = drafts.filter((d) => d._count.items > 0 && d.id !== invoice?.id);
   const lastPayment = invoice?.payments.filter((p) => !p.voided).at(-1);
 
-  return (
-    <div className="flex flex-col gap-5 md:h-[calc(100dvh-3.5rem)]">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[22px] font-semibold leading-11">Kasir (POS)</h1>
-          <p className="text-sm text-muted-foreground">
-            {invoice ? <span className="tabular-nums">{invoice.invoiceNo}</span> : "Pilih produk atau layanan untuk memulai transaksi."}
-            {invoice && invoice.status === "FINAL" && !done && " · Menunggu pelunasan"}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+  const actions = (
+    <>
           {openDrafts.length > 0 && (
             <details className="relative">
               <summary className="flex h-11 cursor-pointer list-none items-center rounded-lg border bg-card px-4 text-sm font-medium">Tagihan menunggu ({openDrafts.length})</summary>
@@ -64,8 +55,11 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
               <Link href="/kasir">Transaksi baru</Link>
             </Button>
           )}
-        </div>
-      </header>
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-5 md:h-[calc(100dvh-3.5rem)]">
 
       {voided && <p role="alert" className="rounded-lg border border-[#E9CFA6] p-3 text-sm text-warning">Tagihan {found?.invoiceNo} sudah di-void. Mulai transaksi baru di bawah.</p>}
 
@@ -88,7 +82,7 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
       ) : (
         <div className="flex flex-wrap items-stretch gap-5 md:min-h-0 md:flex-1 md:flex-nowrap">
           <div className="flex min-w-0 flex-[999] basis-[460px] flex-col md:min-h-0">
-            <PosCatalog items={items} invoiceId={invoice?.id ?? null} editable={editable} clinicName={settings.clinicName} />
+            <PosCatalog items={items} invoiceId={invoice?.id ?? null} editable={editable} clinicName={settings.clinicName} actions={actions} />
           </div>
           <div className="flex min-w-0 flex-1 basis-[360px] flex-col md:min-h-0 lg:max-w-md">
             <PosCart
@@ -97,6 +91,7 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
               canDiscount={can(user.role, "apply_discount")}
               customerName={customerName}
               customerLocked={Boolean(invoice?.visitId || invoice?.admissionId)}
+              invoiceNo={invoice ? `${invoice.invoiceNo}${invoice.status === "FINAL" && !done ? " · Menunggu pelunasan" : ""}` : null}
               lines={(invoice?.items ?? []).map((item) => ({
                 id: item.id,
                 name: item.nameSnapshot,
