@@ -50,7 +50,7 @@ docker compose up -d --build app caddy
 
 Buka `https://<DOMAIN>`, login dengan Admin tadi. Lalu, di aplikasi:
 
-1. **Pengguna**: tambah akun Dokter dan Kasir (user bisa ganti password sendiri di menu nama di kiri bawah).
+1. **Pengguna**: tambah akun Dokter dan Kasir. Password hanya bisa diganti Admin lewat Pengguna. Perangkat yang sedang login bisa dilihat dan dikeluarkan di **Pengguna → Sesi Login**.
 2. **Pengaturan**: nama klinik, alamat, logo, QRIS, PPN, lebar printer, hari peringatan expired.
 3. **Master Data**: layanan, produk, kandang. **Inventaris**: stok awal lewat Stok Masuk.
 

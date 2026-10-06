@@ -137,6 +137,7 @@ model User {
   visitsAsDoctor       Visit[]             @relation("VisitDoctor")
   visitsCreated        Visit[]             @relation("VisitCreatedBy")
   recordAddenda        RecordAddendum[]
+  sessions             UserSession[]
   stockMovements       StockMovement[]
   stockOpnames         StockOpname[]
   admissionLogs        AdmissionLog[]
@@ -770,6 +771,21 @@ model Grooming {
 
   @@index([groomingDate])
   @@map("grooming")
+}
+
+model UserSession {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  userAgent  String?   @map("user_agent")
+  ip         String?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at")
+  revokedAt  DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("user_session")
 }
 
 model CashClosing {

@@ -21,7 +21,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
 
   return (
     <ListPage>
-      <ListHeader icon={UserCog} title="Manajemen Staf & Dokter" subtitle="Akun pengguna staf, dokter hewan, dan kasir beserta hak akses aplikasi" actions={add} />
+      <ListHeader icon={UserCog} title="Manajemen Staf & Dokter" subtitle="Akun pengguna staf, dokter hewan, dan kasir beserta hak akses aplikasi" actions={<><Button asChild variant="outline"><Link href="/pengguna/sesi">Sesi Login</Link></Button>{add}</>} />
       <ListToolbar base="/pengguna" params={keep} placeholder="Cari nama atau username…" total={total} />
       <TableCard
         columns={[{ label: "Nama staf", sort: "nama" }, { label: "Username login", sort: "username" }, { label: "Peran / jabatan", sort: "peran" }, { label: "Status", sort: "status" }, { label: "Aksi", align: "right" }]}

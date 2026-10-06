@@ -20,8 +20,17 @@ function isRateLimited(key: string) {
   return entry.count > MAX_ATTEMPTS;
 }
 
+const SEEN_EVERY_MS = 5 * 60 * 1000;
+const clientIp = (request?: Request) => request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim().slice(0, 64) || request?.headers.get("x-real-ip") || null;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  events: {
+    async signOut(message) {
+      const sid = "token" in message ? (message.token?.sid as string | undefined) : undefined;
+      if (sid) await prisma.userSession.updateMany({ where: { id: sid, revokedAt: null }, data: { revokedAt: new Date() } });
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
     // sesi JWT dicek ke DB agar akun nonaktif / role berubah langsung berlaku
@@ -29,18 +38,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.sid = user.sid;
         return token;
       }
-      const row = await prisma.user.findUnique({ where: { id: token.id as string }, select: { active: true, role: true } });
-      if (!row?.active) return null;
-      token.role = row.role;
+      const sid = token.sid as string | undefined;
+      const session = sid ? await prisma.userSession.findUnique({ where: { id: sid }, select: { revokedAt: true, lastSeenAt: true, user: { select: { id: true, active: true, role: true } } } }) : null;
+      if (!session || session.revokedAt || session.user.id !== token.id || !session.user.active) return null;
+      if (Date.now() - session.lastSeenAt.getTime() > SEEN_EVERY_MS) await prisma.userSession.update({ where: { id: sid }, data: { lastSeenAt: new Date() } });
+      token.role = session.user.role;
       return token;
     },
   },
   providers: [
     Credentials({
       credentials: { username: {}, password: {} },
-      authorize: async (credentials) => {
+      authorize: async (credentials, request) => {
         const rawUsername = credentials?.username;
         const password = credentials?.password;
         if (typeof rawUsername !== "string" || typeof password !== "string") return null;
@@ -57,7 +69,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, role: user.role };
+        const session = await prisma.userSession.create({
+          data: { userId: user.id, userAgent: request?.headers.get("user-agent")?.slice(0, 300) ?? null, ip: clientIp(request) },
+          select: { id: true },
+        });
+        return { id: user.id, name: user.name, role: user.role, sid: session.id };
       },
     }),
   ],
