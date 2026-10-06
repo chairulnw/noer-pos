@@ -14,7 +14,7 @@ type Props = {
   patientId: string;
   patientName: string;
   defaultCheckIn: string;
-  rooms: { id: string; name: string; type: Type; defaultRateId: string | null; suitableFor: string | null }[];
+  rooms: { id: string; name: string; type: Type; defaultRateId: string | null; suitableFor: string | null; free: number }[];
   rates: { id: string; name: string; type: Type }[];
   visits: { id: string; label: string }[];
   lockedType?: Type;
@@ -51,7 +51,7 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
           <select id="roomId" name="roomId" value={roomId} onChange={(e) => { const room = roomOptions.find((r) => r.id === e.target.value); setRoomId(e.target.value); if (room?.defaultRateId && rateOptions.some((r) => r.id === room.defaultRateId)) setRateId(room.defaultRateId); }} className={selectClass} required>
             <option value="" disabled>Pilih kandang</option>
             {roomOptions.map((r) => (
-              <option key={r.id} value={r.id}>{r.name}{r.suitableFor ? ` (${r.suitableFor})` : ""}</option>
+              <option key={r.id} value={r.id}>{r.name}{r.suitableFor ? ` (${r.suitableFor})` : ""}{r.free > 1 ? ` · sisa ${r.free}` : ""}</option>
             ))}
           </select>
         </Field>

@@ -13,20 +13,21 @@ export type RoomFormState = {
 };
 
 export async function saveRoomAction(id: string | null, _prev: RoomFormState, formData: FormData): Promise<RoomFormState> {
-  await requireCapability("manage_rooms");
+  const user = await requireCapability("manage_rooms");
 
   const parsed = roomSchema.safeParse({
     name: String(formData.get("name") ?? ""),
     type: String(formData.get("type") ?? ""),
     active: formData.get("active") === "on",
-    defaultRateId: String(formData.get("defaultRateId") ?? ""),
+    capacity: Number(formData.get("capacity") || 0),
+    dailyRate: Number(formData.get("dailyRate") || 0),
     suitableFor: String(formData.get("suitableFor") ?? ""),
   });
   if (!parsed.success) {
     return { message: "Periksa kembali isian yang ditandai.", errors: z.flattenError(parsed.error).fieldErrors };
   }
 
-  const result = await saveRoom(id, parsed.data);
+  const result = await saveRoom(user.id, id, parsed.data);
   if (result.error) return { message: result.error };
 
   revalidatePath("/master-data/kandang");

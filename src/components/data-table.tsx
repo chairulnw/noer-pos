@@ -85,18 +85,15 @@ export function TableCard({ columns, children, empty, total, page, size, base, p
   return (
     <section className="flex min-h-96 flex-1 flex-col overflow-hidden rounded-[10px] border bg-card md:min-h-0">
       <div className="min-h-0 flex-1 overflow-auto">
-        {total === 0 && empty ? (
-          <div className="flex h-full min-h-72 items-center justify-center">{empty}</div>
-        ) : (
-          <table className="w-full text-[14.5px]" style={{ minWidth }}>
-            <thead className="sticky top-0 z-10 bg-card">
-              <tr className="border-b text-left text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">
-                {columns.map((c) => <th key={c.label} className={cn("px-4 py-3", c.align === "right" && "text-right", c.align === "center" && "text-center", c.className)}>{c.label}</th>)}
-              </tr>
-            </thead>
-            <tbody>{children}</tbody>
-          </table>
-        )}
+        <table className="w-full text-[14.5px]" style={{ minWidth }}>
+          <thead className="sticky top-0 z-10 bg-card">
+            <tr className="border-b text-left text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">
+              {columns.map((c) => <th key={c.label} className={cn("px-4 py-3", c.align === "right" && "text-right", c.align === "center" && "text-center", c.className)}>{c.label}</th>)}
+            </tr>
+          </thead>
+          <tbody>{total === 0 && empty ? null : children}</tbody>
+        </table>
+        {total === 0 && empty && <div className="flex min-h-64 items-center justify-center">{empty}</div>}
       </div>
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 text-sm text-muted-foreground">
         <span>Menampilkan <b className="text-foreground tabular-nums">{from}</b> - <b className="text-foreground tabular-nums">{to}</b> dari <b className="text-foreground tabular-nums">{total}</b> data</span>

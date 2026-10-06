@@ -13,7 +13,7 @@ export async function createAdmission(userId: string, input: CheckInInput) {
 
   const [patient, room, rate, visit, busy] = await Promise.all([
     prisma.patient.findFirst({ where: { id: input.patientId, deletedAt: null, owner: { deletedAt: null } }, select: { ownerId: true } }),
-    prisma.room.findFirst({ where: { id: input.roomId, active: true, type: input.type }, select: { id: true, needsCleaning: true, name: true } }),
+    prisma.room.findFirst({ where: { id: input.roomId, active: true, type: input.type }, select: { id: true, needsCleaning: true, name: true, capacity: true } }),
     prisma.item.findFirst({
       where: { id: input.rateItemId, type: "SERVICE", billingUnit: "PER_DAY", category: RATE_CATEGORY[input.type], active: true, deletedAt: null },
       select: { id: true },
@@ -33,6 +33,8 @@ export async function createAdmission(userId: string, input: CheckInInput) {
   for (let attempt = 1; ; attempt++) {
     try {
       return await prisma.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM room WHERE id = ${room.id}::uuid FOR UPDATE`;
+        if ((await tx.admission.count({ where: { roomId: room.id, status: "AKTIF" } })) >= room.capacity) return { error: `${room.name} sudah penuh.` };
         const admission = await tx.admission.create({
           data: {
             patientId: input.patientId, roomId: room.id, rateItemId: rate.id, visitId: visit?.id ?? null,
@@ -49,8 +51,6 @@ export async function createAdmission(userId: string, input: CheckInInput) {
       });
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
-      const taken = await prisma.admission.findFirst({ where: { roomId: room.id, status: "AKTIF" }, select: { id: true } });
-      if (taken) return { error: "Kandang ini sudah terisi." };
       if (attempt >= 3) throw error;
     }
   }
@@ -73,17 +73,17 @@ export const listActiveAdmissions = (type?: "RAWAT_INAP" | "HOTEL") =>
 
 export async function getCheckInOptions() {
   const [rooms, rates, occupied] = await Promise.all([
-    prisma.room.findMany({ where: { active: true, needsCleaning: false }, select: { id: true, name: true, type: true, defaultRateId: true, suitableFor: true }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
+    prisma.room.findMany({ where: { active: true, needsCleaning: false }, select: { id: true, name: true, type: true, capacity: true, defaultRateId: true, suitableFor: true }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
     prisma.item.findMany({
       where: { type: "SERVICE", billingUnit: "PER_DAY", active: true, deletedAt: null, category: { in: ["rawat inap", "hotel"] } },
       select: { id: true, name: true, category: true },
       orderBy: { name: "asc" },
     }),
-    prisma.admission.findMany({ where: { status: "AKTIF" }, select: { roomId: true } }),
+    prisma.admission.groupBy({ by: ["roomId"], where: { status: "AKTIF" }, _count: true }),
   ]);
-  const busy = new Set(occupied.map((o) => o.roomId));
+  const used = new Map(occupied.map((o) => [o.roomId, o._count]));
   return {
-    rooms: rooms.filter((r) => !busy.has(r.id)),
+    rooms: rooms.filter((r) => (used.get(r.id) ?? 0) < r.capacity).map(({ capacity, ...r }) => ({ ...r, free: capacity - (used.get(r.id) ?? 0) })),
     rates: rates.map((r) => ({ id: r.id, name: r.name, type: (r.category === "hotel" ? "HOTEL" : "RAWAT_INAP") as "HOTEL" | "RAWAT_INAP" })),
   };
 }
@@ -177,7 +177,7 @@ export async function checkOutAdmission(userId: string, admissionId: string, che
     });
     if (count === 0) return { error: "Pasien ini sudah check-out." };
 
-    if (admission.type === "HOTEL") await tx.room.update({ where: { id: admission.roomId }, data: { needsCleaning: true } });
+    if (admission.type === "HOTEL" && (await tx.admission.count({ where: { roomId: admission.roomId, status: "AKTIF" } })) === 0) await tx.room.update({ where: { id: admission.roomId }, data: { needsCleaning: true } });
 
     let invoice = await tx.invoice.findFirst({ where: { admissionId, status: { not: "VOID" } }, select: { id: true, status: true } });
     if (invoice && invoice.status !== "DRAFT") throw new CheckOutBlocked("Invoice rawat inap sudah final. Batalkan invoice tersebut terlebih dahulu, lalu ulangi check-out.");
