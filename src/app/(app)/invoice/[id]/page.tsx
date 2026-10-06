@@ -104,6 +104,12 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
 
       <div className="flex flex-wrap items-start gap-5">
         <div className="min-w-0 flex-[999] basis-[520px] space-y-4">
+          {editable && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border bg-accent/50 px-4 py-3 text-sm">
+              <span>Tagihan masih draft, produk dan layanan masih bisa ditambah.</span>
+              <Button asChild variant="outline"><Link href={`/kasir?inv=${invoice.id}`}>Lihat katalog di Kasir</Link></Button>
+            </div>
+          )}
           <InvoiceEditor
             invoiceId={invoice.id}
             editable={editable}

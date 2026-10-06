@@ -1,5 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
+import { detectAttachment } from "@/lib/record-schema";
+import { readStoredFile, storeFile } from "@/lib/uploads";
 import { todayJakarta } from "@/lib/date";
 import { listPatientExaminations } from "@/lib/examinations";
 import { nextRmNo, normalizePatient, type OwnerInput, type PatientInput } from "@/lib/patient-schema";
@@ -103,7 +105,7 @@ export async function pagePatients(query: string, skip: number, take: number) {
   const [rows, total] = await Promise.all([
     prisma.patient.findMany({
       where,
-      select: { id: true, rmNo: true, name: true, species: true, breed: true, sex: true, lastWeightKg: true, allergyNote: true, aggressive: true, owner: { select: { id: true, name: true, whatsapp: true } } },
+      select: { id: true, rmNo: true, name: true, species: true, breed: true, sex: true, lastWeightKg: true, allergyNote: true, aggressive: true, photoPath: true, owner: { select: { id: true, name: true, whatsapp: true } } },
       orderBy: term ? { name: "asc" } : { createdAt: "desc" },
       skip,
       take,
@@ -210,4 +212,21 @@ export async function getPatientHistory(patientId: string) {
     listPatientExaminations(patientId),
   ]);
   return { visits, vaccinations, examinations };
+}
+
+export function checkPhoto(head: Uint8Array, size: number): { error: string } | { ext: string } {
+  if (size > 5 * 1024 * 1024) return { error: "Foto maksimal 5 MB" };
+  const kind = detectAttachment(head, size);
+  if ("error" in kind || kind.mime === "application/pdf") return { error: "Foto harus JPG atau PNG" };
+  return { ext: kind.ext };
+}
+
+export async function setPatientPhoto(id: string, data: Buffer, ext: string) {
+  const photoPath = await storeFile(data, ext);
+  await prisma.patient.update({ where: { id }, data: { photoPath } });
+}
+
+export async function getPatientPhoto(id: string) {
+  const row = await prisma.patient.findFirst({ where: { id, deletedAt: null }, select: { photoPath: true } });
+  return row?.photoPath ? { data: await readStoredFile(row.photoPath), mime: row.photoPath.endsWith(".png") ? "image/png" : "image/jpeg" } : null;
 }

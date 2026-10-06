@@ -48,7 +48,7 @@ export async function AdmissionsList({ type, searchParams }: { type: AdmissionTy
             <td className="px-4 py-3 font-medium">{a.room.name}</td>
             <td className="px-4 py-3">
               <div className="flex flex-wrap items-center gap-1.5">
-                <Link href={`/pasien?id=${a.patient.id}`} className="font-medium">{a.patient.name}</Link>
+                <Link href={`/pasien/${a.patient.id}`} className="font-medium">{a.patient.name}</Link>
                 <ClinicalTags allergyNote={a.patient.allergyNote} aggressive={a.patient.aggressive} />
               </div>
               <div className="text-[12.5px] text-muted-foreground">{a.patient.species} · {a.rateItem.name}</div>

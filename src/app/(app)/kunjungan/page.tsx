@@ -58,7 +58,7 @@ export default async function VisitsPage() {
                 <td className="px-4 py-3 tabular-nums text-muted-foreground">{formatTime(v.createdAt)}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <Link href={`/pasien?id=${v.patient.id}`} className="font-medium">
+                    <Link href={`/pasien/${v.patient.id}`} className="font-medium">
                       {v.patient.name}
                     </Link>
                     <ClinicalTags allergyNote={v.patient.allergyNote} aggressive={v.patient.aggressive} />

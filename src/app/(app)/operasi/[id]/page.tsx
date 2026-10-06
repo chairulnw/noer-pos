@@ -34,7 +34,7 @@ export default async function SurgeryDetailPage({ params }: { params: Promise<{ 
 
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-2.5 p-4">
-          <Link href={`/pasien?id=${s.patient.id}`} className="text-lg font-semibold">{s.patient.name}</Link>
+          <Link href={`/pasien/${s.patient.id}`} className="text-lg font-semibold">{s.patient.name}</Link>
           <span className="text-sm text-muted-foreground tabular-nums">{s.patient.rmNo}</span>
           <ClinicalTags allergyNote={s.patient.allergyNote} aggressive={s.patient.aggressive} />
           <span className="text-sm text-muted-foreground">Owner {s.patient.owner.name}</span>

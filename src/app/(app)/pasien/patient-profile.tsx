@@ -38,9 +38,14 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
     <section aria-label="Profil pasien" className="flex min-w-0 flex-col gap-4">
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-4 p-5">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[20px] font-semibold leading-11 text-accent-foreground">
-            {patient.name[0]?.toUpperCase()}
-          </div>
+          {patient.photoPath ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={`/api/foto-hewan/${patient.id}`} alt={`Foto ${patient.name}`} className="size-20 shrink-0 rounded-2xl border object-cover" />
+          ) : (
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[20px] font-semibold leading-11 text-accent-foreground">
+              {patient.name[0]?.toUpperCase()}
+            </div>
+          )}
           <div className="flex min-w-60 flex-1 flex-col gap-1">
             <div className="flex flex-wrap items-baseline gap-2.5">
               <h2 className="text-xl font-semibold">{patient.name}</h2>

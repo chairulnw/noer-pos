@@ -40,7 +40,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       {empty && <EmptyState>Tidak ada hasil untuk “{q}”.</EmptyState>}
       <div className="space-y-4">
         <Group title="Pasien" more={`/pasien?q=${enc}`}>
-          {(r?.patients?.rows ?? []).map((p) => <Hit key={p.id} href={`/pasien?id=${p.id}`} title={p.name} detail={`${[p.species, p.breed].filter(Boolean).join(" · ")} · ${p.rmNo} · ${p.owner.name}`} />)}
+          {(r?.patients?.rows ?? []).map((p) => <Hit key={p.id} href={`/pasien/${p.id}`} title={p.name} detail={`${[p.species, p.breed].filter(Boolean).join(" · ")} · ${p.rmNo} · ${p.owner.name}`} />)}
         </Group>
         <Group title="Pemilik" more={`/pemilik?q=${enc}`}>
           {(r?.owners?.rows ?? []).map((o) => <Hit key={o.id} href={`/pemilik/${o.id}`} title={o.name} detail={o.pets.join(", ") || "Belum punya hewan"} />)}

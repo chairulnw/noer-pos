@@ -30,7 +30,7 @@ export default async function CheckOutPage({ params }: { params: Promise<{ id: s
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="space-y-1 p-4">
           <div className="flex flex-wrap items-center gap-2.5">
-            <Link href={`/pasien?id=${patient.id}`} className="text-lg font-semibold">{patient.name}</Link>
+            <Link href={`/pasien/${patient.id}`} className="text-lg font-semibold">{patient.name}</Link>
             <span className="text-sm text-muted-foreground tabular-nums">{patient.rmNo}</span>
             <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
           </div>

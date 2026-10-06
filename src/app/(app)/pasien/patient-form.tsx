@@ -93,12 +93,18 @@ export function PatientForm({ ownerId, ownerName, patient, options }: { ownerId:
         </Field>
       </Section>
 
+      <Section title="Foto (opsional)">
+        <Field label="Foto hewan (JPG/PNG, maks 5 MB)" name="photo" errors={err("photo")} full>
+          <Input id="photo" name="photo" type="file" accept="image/png,image/jpeg" />
+        </Field>
+      </Section>
+
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : "Simpan"}
         </Button>
         <Button variant="outline" asChild>
-          <Link href={patient ? `/pasien?id=${patient.id}` : `/pemilik/${ownerId}`}>Batal</Link>
+          <Link href={patient ? `/pasien/${patient.id}` : `/pemilik/${ownerId}`}>Batal</Link>
         </Button>
         {state.message && <p role="status" className="text-sm text-destructive">{state.message}</p>}
       </div>

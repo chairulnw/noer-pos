@@ -41,7 +41,7 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
         <h2 className="border-b px-4 py-3 text-base font-semibold">Hewan ({owner.patients.length})</h2>
         {owner.patients.length === 0 && <EmptyState action={<Button asChild><Link href={`/pasien/baru?owner=${owner.id}`}>+ Hewan baru</Link></Button>}>Belum ada hewan terdaftar.</EmptyState>}
         {owner.patients.map((p) => (
-          <Link key={p.id} href={`/pasien?id=${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
+          <Link key={p.id} href={`/pasien/${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[14px] font-semibold">{p.name}</span>
               <ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} />

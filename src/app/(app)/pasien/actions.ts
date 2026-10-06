@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { deleteOwner, deletePatient, saveOwner, savePatient } from "@/lib/patients";
+import { checkPhoto, deleteOwner, deletePatient, saveOwner, savePatient, setPatientPhoto } from "@/lib/patients";
 import { ownerSchema, patientSchema } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
 import { flash } from "@/components/flash";
@@ -71,12 +71,18 @@ export async function savePatientAction(
   });
   if (!parsed.success) return invalid(parsed.error);
 
+  const photo = formData.get("photo");
+  const photoData = photo instanceof File && photo.size > 0 ? Buffer.from(await photo.arrayBuffer()) : null;
+  const kind = photoData ? checkPhoto(photoData.subarray(0, 8), photoData.length) : null;
+  if (kind && "error" in kind) return { message: kind.error, errors: { photo: [kind.error] } };
+
   const result = await savePatient(ownerId, id, parsed.data);
   if (result.id === undefined) return { message: result.error };
+  if (photoData && kind && !("error" in kind)) await setPatientPhoto(result.id, photoData, kind.ext);
 
   revalidatePath("/pasien");
   await flash("Pasien tersimpan");
-  redirect(`/pasien?id=${result.id}`);
+  redirect(`/pasien/${result.id}`);
 }
 
 export async function deletePatientAction(id: string) {

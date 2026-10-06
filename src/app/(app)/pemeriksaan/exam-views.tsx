@@ -56,7 +56,7 @@ export async function ExamList({ type, searchParams }: { type: ExaminationType; 
           <tr key={e.id} className="border-b last:border-0">
             <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(e.performedAt)}</td>
             <td className="px-4 py-3">
-              <div className="flex flex-wrap items-center gap-1.5"><Link href={`/pasien?id=${e.patient.id}`} className="font-medium">{e.patient.name}</Link><ClinicalTags allergyNote={e.patient.allergyNote} aggressive={e.patient.aggressive} /></div>
+              <div className="flex flex-wrap items-center gap-1.5"><Link href={`/pasien/${e.patient.id}`} className="font-medium">{e.patient.name}</Link><ClinicalTags allergyNote={e.patient.allergyNote} aggressive={e.patient.aggressive} /></div>
               <div className="text-[12.5px] text-muted-foreground">{e.patient.rmNo} · {e.patient.owner.name}</div>
             </td>
             <td className="px-4 py-3 font-medium">{e.name}</td>
@@ -130,7 +130,7 @@ export async function ExamDetail({ type, id }: { type: ExaminationType; id: stri
       <PageHeader
         back={{ href: config.path, label: config.title }}
         title={exam.name}
-        meta={<p>{formatDate(exam.performedAt)} · <Link href={`/pasien?id=${exam.patient.id}`} className="font-medium text-foreground">{exam.patient.name}</Link> ({exam.patient.rmNo}) · Owner {exam.patient.owner.name} · dicatat {exam.createdBy.name}</p>}
+        meta={<p>{formatDate(exam.performedAt)} · <Link href={`/pasien/${exam.patient.id}`} className="font-medium text-foreground">{exam.patient.name}</Link> ({exam.patient.rmNo}) · Owner {exam.patient.owner.name} · dicatat {exam.createdBy.name}</p>}
         status={<ClinicalTags allergyNote={exam.patient.allergyNote} aggressive={exam.patient.aggressive} />}
         actions={canEdit && (
           <>

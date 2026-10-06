@@ -47,7 +47,7 @@ export function VisitForm({
           {pending ? "Menyimpan…" : "Buat kunjungan"}
         </Button>
         <Button variant="outline" asChild>
-          <Link href={`/pasien?id=${patientId}`}>Batal</Link>
+          <Link href={`/pasien/${patientId}`}>Batal</Link>
         </Button>
         {state.message && <p role="status" className="text-sm text-destructive">{state.message}</p>}
       </div>

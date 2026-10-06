@@ -52,7 +52,7 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
               <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(v.visitDate)}</td>
               <td className="px-4 py-3">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <Link href={`/pasien?id=${v.patient.id}`} className="font-medium">{v.patient.name}</Link>
+                  <Link href={`/pasien/${v.patient.id}`} className="font-medium">{v.patient.name}</Link>
                   <ClinicalTags allergyNote={v.patient.allergyNote} aggressive={v.patient.aggressive} />
                 </div>
                 <div className="text-[12.5px] text-muted-foreground">{v.patient.rmNo} · {v.patient.owner.name}</div>

@@ -27,7 +27,7 @@ export default async function GroomingDetailPage({ params }: { params: Promise<{
       </div>
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-2.5 p-4">
-          <Link href={`/pasien?id=${g.patient.id}`} className="text-lg font-semibold">{g.patient.name}</Link>
+          <Link href={`/pasien/${g.patient.id}`} className="text-lg font-semibold">{g.patient.name}</Link>
           <span className="text-sm text-muted-foreground tabular-nums">{g.patient.rmNo}</span>
           <ClinicalTags allergyNote={g.patient.allergyNote} aggressive={g.patient.aggressive} />
           <span className="text-sm text-muted-foreground">Owner {g.patient.owner.name}</span>
