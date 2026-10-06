@@ -78,16 +78,16 @@ export async function listOwners(query: string) {
   return rows.map(withPets);
 }
 
-export async function pageOwners(query: string, skip: number, take: number) {
+export async function pageOwners(query: string, skip: number, take: number, orderBy?: Prisma.OwnerOrderByWithRelationInput | Prisma.OwnerOrderByWithRelationInput[]) {
   const where = ownerWhere(query);
   const [rows, total] = await Promise.all([
-    prisma.owner.findMany({ where, select: OWNER_LIST, orderBy: query.trim() ? { name: "asc" } : { createdAt: "desc" }, skip, take }),
+    prisma.owner.findMany({ where, select: OWNER_LIST, orderBy: orderBy ?? (query.trim() ? { name: "asc" } : { createdAt: "desc" }), skip, take }),
     prisma.owner.count({ where }),
   ]);
   return { rows: rows.map(withPets), total };
 }
 
-export async function pagePatients(query: string, skip: number, take: number) {
+export async function pagePatients(query: string, skip: number, take: number, orderBy?: Prisma.PatientOrderByWithRelationInput | Prisma.PatientOrderByWithRelationInput[]) {
   const term = query.trim();
   const phone = term.replace(/\D/g, "").replace(/^0/, "");
   const where: Prisma.PatientWhereInput = {
@@ -106,7 +106,7 @@ export async function pagePatients(query: string, skip: number, take: number) {
     prisma.patient.findMany({
       where,
       select: { id: true, rmNo: true, name: true, species: true, breed: true, sex: true, lastWeightKg: true, allergyNote: true, aggressive: true, photoPath: true, owner: { select: { id: true, name: true, whatsapp: true } } },
-      orderBy: term ? { name: "asc" } : { createdAt: "desc" },
+      orderBy: orderBy ?? (term ? { name: "asc" } : { createdAt: "desc" }),
       skip,
       take,
     }),

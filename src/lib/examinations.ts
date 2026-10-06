@@ -22,7 +22,7 @@ export type ExaminationRow = Prisma.ExaminationGetPayload<{ select: typeof SELEC
 
 const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 
-export async function listExaminations(type: ExaminationType, { q, from, to }: { q?: string; from?: string; to?: string }, skip = 0, take = 50) {
+export async function listExaminations(type: ExaminationType, { q, from, to }: { q?: string; from?: string; to?: string }, skip = 0, take = 50, orderBy?: Prisma.ExaminationOrderByWithRelationInput | Prisma.ExaminationOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.ExaminationWhereInput = {
     type,
@@ -39,7 +39,7 @@ export async function listExaminations(type: ExaminationType, { q, from, to }: {
     }),
   };
   const [rows, total] = await Promise.all([
-    prisma.examination.findMany({ where, select: SELECT, orderBy: [{ performedAt: "desc" }, { createdAt: "desc" }], skip, take }),
+    prisma.examination.findMany({ where, select: SELECT, orderBy: orderBy ?? [{ performedAt: "desc" }, { createdAt: "desc" }], skip, take }),
     prisma.examination.count({ where }),
   ]);
   return { rows, total };

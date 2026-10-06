@@ -7,7 +7,7 @@ const SELECT = { id: true, name: true, amount: true, category: true, costDate: t
 
 const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 
-export async function pageCosts({ q, from, to }: { q?: string; from?: string; to?: string }, skip: number, take: number) {
+export async function pageCosts({ q, from, to }: { q?: string; from?: string; to?: string }, skip: number, take: number, orderBy?: Prisma.OperationalCostOrderByWithRelationInput | Prisma.OperationalCostOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.OperationalCostWhereInput = {
     deletedAt: null,
@@ -15,7 +15,7 @@ export async function pageCosts({ q, from, to }: { q?: string; from?: string; to
     ...(term && { OR: [{ name: { contains: term, mode: "insensitive" } }, { category: { contains: term, mode: "insensitive" } }, { notes: { contains: term, mode: "insensitive" } }] }),
   };
   const [rows, total, sum] = await Promise.all([
-    prisma.operationalCost.findMany({ where, select: SELECT, orderBy: [{ costDate: "desc" }, { createdAt: "desc" }], skip, take }),
+    prisma.operationalCost.findMany({ where, select: SELECT, orderBy: orderBy ?? [{ costDate: "desc" }, { createdAt: "desc" }], skip, take }),
     prisma.operationalCost.count({ where }),
     prisma.operationalCost.aggregate({ where, _sum: { amount: true } }),
   ]);

@@ -9,24 +9,25 @@ import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { formatDate, formatRupiah, formatTime } from "@/lib/format";
 import { METHOD_LABEL } from "@/lib/payment-method";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 import { pageWalletTransactions, walletSummary } from "@/lib/wallet";
 import { WALLET_TYPE } from "@/lib/wallet-schema";
 
-export default async function DepositPage({ searchParams }: { searchParams: Promise<{ q?: string; pemilik?: string } & PagingParams> }) {
+export default async function DepositPage({ searchParams }: { searchParams: Promise<{ q?: string; pemilik?: string } & PagingParams & SortParams> }) {
   const user = await requireCapability("manage_invoice_payment");
   const params = await searchParams;
   const ownerId = params.pemilik && z.guid().safeParse(params.pemilik).success ? params.pemilik : undefined;
   const { page, size, skip, take } = parsePaging(params);
+  const sort = parseSort(params, { waktu: (d) => ({ createdAt: d }), pemilik: (d) => ({ owner: { name: d } }), jenis: (d) => ({ type: d }), nominal: (d) => ({ amount: d }), saldo: (d) => ({ balanceAfter: d }), oleh: (d) => ({ createdBy: { name: d } }) });
   const [{ rows, total }, summary, owner, owners] = await Promise.all([
-    pageWalletTransactions({ ownerId, q: params.q }, skip, take),
+    pageWalletTransactions({ ownerId, q: params.q }, skip, take, sort.orderBy),
     walletSummary(),
     ownerId ? prisma.owner.findFirst({ where: { id: ownerId, deletedAt: null }, select: { name: true, walletBalance: true } }) : null,
     prisma.owner.findMany({ where: { deletedAt: null, walletTransactions: { some: {} } }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
-  const keep = { q: params.q, pemilik: ownerId, baris: params.baris };
+  const keep = { q: params.q, pemilik: ownerId, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
@@ -54,7 +55,7 @@ export default async function DepositPage({ searchParams }: { searchParams: Prom
         <FilterSelect name="pemilik" defaultValue={ownerId ?? ""} aria-label="Pemilik"><option value="">Semua pemilik</option>{owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Waktu" }, { label: "Pemilik" }, { label: "Jenis" }, { label: "Nominal", align: "right" }, { label: "Saldo sesudah", align: "right" }, { label: "Keterangan" }, { label: "Oleh" }]}
+        columns={[{ label: "Waktu", sort: "waktu" }, { label: "Pemilik", sort: "pemilik" }, { label: "Jenis", sort: "jenis" }, { label: "Nominal", sort: "nominal", align: "right" }, { label: "Saldo sesudah", sort: "saldo", align: "right" }, { label: "Keterangan" }, { label: "Oleh", sort: "oleh" }]}
         total={total}
         page={page}
         size={size}

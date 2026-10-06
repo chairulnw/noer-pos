@@ -5,24 +5,25 @@ import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { formatDate, formatTime } from "@/lib/format";
 import { pageStockMovements } from "@/lib/inventory";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
 const TYPE = { IN: "Stok masuk", OUT: "Penjualan", VOID_RETURN: "Retur (void invoice)", ADJUST: "Penyesuaian opname" } as const;
 
-export default async function StockHistoryPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams> }) {
+export default async function StockHistoryPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_stock");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageStockMovements(params.q, skip, take);
-  const keep = { q: params.q, baris: params.baris };
+  const sort = parseSort(params, { waktu: (d) => ({ createdAt: d }), produk: (d) => ({ batch: { item: { name: d } } }), perubahan: (d) => ({ qty: d }), jenis: (d) => ({ type: d }) });
+  const { rows, total } = await pageStockMovements(params.q, skip, take, sort.orderBy);
+  const keep = { q: params.q, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
       <ListHeader icon={History} title="Mutasi & Riwayat Stok" subtitle="Audit log stok masuk, stok keluar kasir, retur, dan penyesuaian opname inventori" />
       <ListToolbar base="/riwayat-stok" params={keep} placeholder="Cari produk, batch, atau catatan…" total={total} />
       <TableCard
-        columns={[{ label: "Waktu transaksi" }, { label: "Nama produk / item" }, { label: "Perubahan stok", align: "center" }, { label: "Jenis mutasi" }, { label: "Keterangan" }, { label: "Oleh" }]}
+        columns={[{ label: "Waktu transaksi", sort: "waktu" }, { label: "Nama produk / item", sort: "produk" }, { label: "Perubahan stok", sort: "perubahan", align: "center" }, { label: "Jenis mutasi", sort: "jenis" }, { label: "Keterangan" }, { label: "Oleh" }]}
         total={total}
         page={page}
         size={size}

@@ -6,17 +6,18 @@ import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { listAllSpecies, pageBreeds } from "@/lib/animals";
-import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
+import { buildHref, parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
-export default async function BreedsPage({ searchParams }: { searchParams: Promise<{ q?: string; jenis?: string } & PagingParams> }) {
+export default async function BreedsPage({ searchParams }: { searchParams: Promise<{ q?: string; jenis?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_users_settings");
   const params = await searchParams;
   const species = await listAllSpecies();
   const speciesId = params.jenis && z.guid().safeParse(params.jenis).success && species.some((s) => s.id === params.jenis) ? params.jenis : undefined;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageBreeds({ q: params.q, speciesId }, skip, take);
-  const keep = { q: params.q, jenis: speciesId, baris: params.baris };
+  const sort = parseSort(params, { nama: (d) => ({ name: d }), jenis: (d) => ({ species: { name: d } }), status: (d) => ({ active: d }) });
+  const { rows, total } = await pageBreeds({ q: params.q, speciesId }, skip, take, sort.orderBy);
+  const keep = { q: params.q, jenis: speciesId, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/master/ras-hewan/baru">+ Ras Baru</Link></Button>;
 
   return (
@@ -25,7 +26,7 @@ export default async function BreedsPage({ searchParams }: { searchParams: Promi
       <ListToolbar base="/master/ras-hewan" params={keep} placeholder="Cari ras hewan…" total={total} />
       <Chips items={[{ value: "", label: "Semua jenis" }, ...species.map((s) => ({ value: s.id, label: s.name }))]} active={speciesId ?? ""} hrefFor={(v) => buildHref("/master/ras-hewan", keep, { jenis: v || undefined, hal: undefined })} />
       <TableCard
-        columns={[{ label: "Nama ras (breed)" }, { label: "Jenis hewan terkait" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama ras (breed)", sort: "nama" }, { label: "Jenis hewan terkait", sort: "jenis" }, { label: "Status", sort: "status" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

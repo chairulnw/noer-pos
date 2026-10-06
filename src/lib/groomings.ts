@@ -18,14 +18,14 @@ const SELECT = {
 
 const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 
-export async function pageGroomings({ q, status }: { q?: string; status?: GroomingStatus }, skip: number, take: number) {
+export async function pageGroomings({ q, status }: { q?: string; status?: GroomingStatus }, skip: number, take: number, orderBy?: Prisma.GroomingOrderByWithRelationInput | Prisma.GroomingOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.GroomingWhereInput = {
     ...(status && { status }),
     ...(term && { OR: [{ patient: { name: { contains: term, mode: "insensitive" } } }, { patient: { owner: { name: { contains: term, mode: "insensitive" } } } }, { serviceItem: { name: { contains: term, mode: "insensitive" } } }] }),
   };
   const [rows, total] = await Promise.all([
-    prisma.grooming.findMany({ where, select: SELECT, orderBy: [{ groomingDate: "desc" }, { createdAt: "desc" }], skip, take }),
+    prisma.grooming.findMany({ where, select: SELECT, orderBy: orderBy ?? [{ groomingDate: "desc" }, { createdAt: "desc" }], skip, take }),
     prisma.grooming.count({ where }),
   ]);
   return { rows, total };

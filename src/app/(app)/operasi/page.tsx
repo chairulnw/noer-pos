@@ -7,20 +7,21 @@ import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 import { pageSurgeries } from "@/lib/surgeries";
 import { SURGERY_STATUS, type SurgeryStatus } from "@/lib/surgery-schema";
 
 const STATUSES = Object.keys(SURGERY_STATUS) as SurgeryStatus[];
 
-export default async function SurgeriesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams> }) {
+export default async function SurgeriesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams & SortParams> }) {
   await requireCapability("view_medical_record");
   const params = await searchParams;
   const active = STATUSES.find((s) => s === params.status);
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageSurgeries({ q: params.q, status: active }, skip, take);
-  const keep = { q: params.q, status: active, baris: params.baris };
+  const sort = parseSort(params, { tanggal: (d) => ({ surgeryDate: d }), pasien: (d) => ({ patient: { name: d } }), prosedur: (d) => ({ procedure: d }), dokter: (d) => ({ doctor: { name: d } }), status: (d) => ({ status: d }) });
+  const { rows, total } = await pageSurgeries({ q: params.q, status: active }, skip, take, sort.orderBy);
+  const keep = { q: params.q, status: active, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/operasi/baru">+ Jadwal Operasi</Link></Button>;
 
   return (
@@ -30,7 +31,7 @@ export default async function SurgeriesPage({ searchParams }: { searchParams: Pr
         <FilterSelect name="status" defaultValue={active ?? ""} aria-label="Status"><option value="">Semua status</option>{STATUSES.map((s) => <option key={s} value={s}>{SURGERY_STATUS[s].label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Tanggal" }, { label: "Pasien" }, { label: "Prosedur" }, { label: "Dokter operator" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tanggal", sort: "tanggal" }, { label: "Pasien", sort: "pasien" }, { label: "Prosedur", sort: "prosedur" }, { label: "Dokter operator", sort: "dokter" }, { label: "Status", sort: "status" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

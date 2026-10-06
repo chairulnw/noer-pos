@@ -4,18 +4,19 @@ import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 import { pageUsers } from "@/lib/users";
 
 const ROLE = { ADMIN: "Owner / Admin", DOKTER: "Dokter", KASIR: "Kasir" };
 
-export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams> }) {
+export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_users_settings");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageUsers(params.q, skip, take);
-  const keep = { q: params.q, baris: params.baris };
+  const sort = parseSort(params, { nama: (d) => ({ name: d }), username: (d) => ({ username: d }), peran: (d) => ({ role: d }), status: (d) => ({ active: d }) });
+  const { rows, total } = await pageUsers(params.q, skip, take, sort.orderBy);
+  const keep = { q: params.q, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/pengguna/baru">+ Staf Baru</Link></Button>;
 
   return (
@@ -23,7 +24,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
       <ListHeader icon={UserCog} title="Manajemen Staf & Dokter" subtitle="Akun pengguna staf, dokter hewan, dan kasir beserta hak akses aplikasi" actions={add} />
       <ListToolbar base="/pengguna" params={keep} placeholder="Cari nama atau username…" total={total} />
       <TableCard
-        columns={[{ label: "Nama staf" }, { label: "Username login" }, { label: "Peran / jabatan" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama staf", sort: "nama" }, { label: "Username login", sort: "username" }, { label: "Peran / jabatan", sort: "peran" }, { label: "Status", sort: "status" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

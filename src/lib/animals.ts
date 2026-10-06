@@ -12,19 +12,19 @@ export async function listActiveAnimalOptions() {
 
 export const listAllSpecies = () => prisma.animalSpecies.findMany({ select: { id: true, name: true, active: true }, orderBy: { name: "asc" } });
 
-export async function pageSpecies(q: string | undefined, skip: number, take: number) {
+export async function pageSpecies(q: string | undefined, skip: number, take: number, orderBy?: Prisma.AnimalSpeciesOrderByWithRelationInput | Prisma.AnimalSpeciesOrderByWithRelationInput[]) {
   const where: Prisma.AnimalSpeciesWhereInput = q?.trim() ? { name: { contains: q.trim(), mode: "insensitive" } } : {};
   const [rows, total] = await Promise.all([
-    prisma.animalSpecies.findMany({ where, select: { id: true, name: true, active: true, createdAt: true, _count: { select: { breeds: true } } }, orderBy: { name: "asc" }, skip, take }),
+    prisma.animalSpecies.findMany({ where, select: { id: true, name: true, active: true, createdAt: true, _count: { select: { breeds: true } } }, orderBy: orderBy ?? { name: "asc" }, skip, take }),
     prisma.animalSpecies.count({ where }),
   ]);
   return { rows, total };
 }
 
-export async function pageBreeds({ q, speciesId }: { q?: string; speciesId?: string }, skip: number, take: number) {
+export async function pageBreeds({ q, speciesId }: { q?: string; speciesId?: string }, skip: number, take: number, orderBy?: Prisma.AnimalBreedOrderByWithRelationInput | Prisma.AnimalBreedOrderByWithRelationInput[]) {
   const where: Prisma.AnimalBreedWhereInput = { ...(speciesId && { speciesId }), ...(q?.trim() && { name: { contains: q.trim(), mode: "insensitive" } }) };
   const [rows, total] = await Promise.all([
-    prisma.animalBreed.findMany({ where, select: { id: true, name: true, active: true, createdAt: true, species: { select: { id: true, name: true } } }, orderBy: [{ species: { name: "asc" } }, { name: "asc" }], skip, take }),
+    prisma.animalBreed.findMany({ where, select: { id: true, name: true, active: true, createdAt: true, species: { select: { id: true, name: true } } }, orderBy: orderBy ?? [{ species: { name: "asc" } }, { name: "asc" }], skip, take }),
     prisma.animalBreed.count({ where }),
   ]);
   return { rows, total };

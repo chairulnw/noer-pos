@@ -28,3 +28,18 @@ describe("buildHref", () => {
     expect(buildHref("/x", {})).toBe("/x");
   });
 });
+
+describe("sort", () => {
+  it("parseSort hanya menerima kunci yang diizinkan", async () => {
+    const { parseSort } = await import("./paging");
+    const sorts = { nama: (d: "asc" | "desc") => ({ name: d }) };
+    expect(parseSort({ urut: "nama", arah: "desc" }, sorts)).toMatchObject({ key: "nama", dir: "desc", orderBy: { name: "desc" } });
+    expect(parseSort({ urut: "constructor" }, sorts)).toMatchObject({ key: undefined, orderBy: undefined });
+  });
+  it("sortRows mengurutkan angka dan teks, null di akhir", async () => {
+    const { sortRows } = await import("./paging");
+    const rows = [{ n: 3, s: "b" }, { n: null, s: "a" }, { n: 1, s: "c" }];
+    expect(sortRows(rows, "n", "asc", { n: (r) => r.n }).map((r) => r.n)).toEqual([1, 3, null]);
+    expect(sortRows(rows, "s", "desc", { s: (r) => r.s }).map((r) => r.s)).toEqual(["c", "b", "a"]);
+  });
+});

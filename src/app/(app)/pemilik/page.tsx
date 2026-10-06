@@ -4,25 +4,26 @@ import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-
 import { EmptyState } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { pageOwners } from "@/lib/patients";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
 
 
-export default async function OwnersPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams> }) {
+export default async function OwnersPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_patients");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageOwners(params.q ?? "", skip, take);
-  const keep = { q: params.q, baris: params.baris };
+  const sort = parseSort(params, { nama: (d) => ({ name: d }), wa: (d) => ({ whatsapp: d }), saldo: (d) => ({ walletBalance: d }), alamat: (d) => ({ address: d }) });
+  const { rows, total } = await pageOwners(params.q ?? "", skip, take, sort.orderBy);
+  const keep = { q: params.q, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
       <ListHeader icon={UsersRound} title="Pemilik Hewan (Owners)" subtitle="Database identitas klien pemilik hewan, kontak WhatsApp, dan alamat domisili" actions={<Button asChild><Link href="/pemilik/baru">+ Pemilik Baru</Link></Button>} />
       <ListToolbar base="/pemilik" params={keep} placeholder="Cari nama, no. WhatsApp, atau alamat…" total={total} />
       <TableCard
-        columns={[{ label: "Nama pemilik" }, { label: "Kontak WhatsApp" }, { label: "Saldo deposit", align: "right" }, { label: "Hewan" }, { label: "Alamat domisili" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama pemilik", sort: "nama" }, { label: "Kontak WhatsApp", sort: "wa" }, { label: "Saldo deposit", sort: "saldo", align: "right" }, { label: "Hewan" }, { label: "Alamat domisili", sort: "alamat" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

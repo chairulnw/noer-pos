@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { periodToRange, PERIODS } from "@/lib/date";
 import { FilterSelect } from "@/components/filter-select";
 import { formatDate } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { listRecords } from "@/lib/records";
 import { requireCapability } from "@/lib/require-role";
 import { listDoctors } from "@/lib/visits";
 
-type Params = { q?: string; status?: string; dokter?: string; periode?: string } & PagingParams;
+type Params = { q?: string; status?: string; dokter?: string; periode?: string } & PagingParams & SortParams;
 
 export default async function RecordsPage({ searchParams }: { searchParams: Promise<Params> }) {
   await requireCapability("view_medical_record");
@@ -23,8 +23,9 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
   const doctorId = doctors.some((d) => d.id === params.dokter) ? params.dokter : undefined;
   const { period, from, to } = periodToRange(params.periode);
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await listRecords({ q: params.q, status, doctorId, from, to }, skip, take);
-  const keep = { q: params.q, status, dokter: doctorId, periode: period || undefined, baris: params.baris };
+  const sort = parseSort(params, { tanggal: (d) => ({ visitDate: d }), pasien: (d) => ({ patient: { name: d } }), dokter: (d) => ({ doctor: { name: d } }) });
+  const { rows, total } = await listRecords({ q: params.q, status, doctorId, from, to }, skip, take, sort.orderBy);
+  const keep = { q: params.q, status, dokter: doctorId, periode: period || undefined, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
@@ -35,7 +36,7 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
         <FilterSelect name="periode" defaultValue={period} aria-label="Periode">{PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Tanggal" }, { label: "Pasien & pemilik" }, { label: "Dokter" }, { label: "Keluhan & diagnosis" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tanggal", sort: "tanggal" }, { label: "Pasien & pemilik", sort: "pasien" }, { label: "Dokter", sort: "dokter" }, { label: "Keluhan & diagnosis" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

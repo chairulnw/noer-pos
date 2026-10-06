@@ -6,11 +6,11 @@ import type { UserCreateInput, UserUpdateInput } from "@/lib/user-schema";
 
 const PUBLIC = { id: true, username: true, name: true, role: true, active: true } satisfies Prisma.UserSelect;
 
-export async function pageUsers(q: string | undefined, skip: number, take: number) {
+export async function pageUsers(q: string | undefined, skip: number, take: number, orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.UserWhereInput = term ? { OR: [{ name: { contains: term, mode: "insensitive" } }, { username: { contains: term, mode: "insensitive" } }] } : {};
   const [rows, total] = await Promise.all([
-    prisma.user.findMany({ where, select: PUBLIC, orderBy: [{ active: "desc" }, { name: "asc" }], skip, take }),
+    prisma.user.findMany({ where, select: PUBLIC, orderBy: orderBy ?? [{ active: "desc" }, { name: "asc" }], skip, take }),
     prisma.user.count({ where }),
   ]);
   return { rows, total };

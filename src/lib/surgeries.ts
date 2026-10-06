@@ -25,7 +25,7 @@ export type SurgeryRow = Prisma.SurgeryGetPayload<{ select: typeof SELECT }>;
 
 const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 
-export async function pageSurgeries({ q, status, from, to }: { q?: string; status?: SurgeryStatus; from?: string; to?: string }, skip: number, take: number) {
+export async function pageSurgeries({ q, status, from, to }: { q?: string; status?: SurgeryStatus; from?: string; to?: string }, skip: number, take: number, orderBy?: Prisma.SurgeryOrderByWithRelationInput | Prisma.SurgeryOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.SurgeryWhereInput = {
     ...(status && { status }),
@@ -33,7 +33,7 @@ export async function pageSurgeries({ q, status, from, to }: { q?: string; statu
     ...(term && { OR: [{ procedure: { contains: term, mode: "insensitive" } }, { anesthesia: { contains: term, mode: "insensitive" } }, { patient: { name: { contains: term, mode: "insensitive" } } }, { patient: { owner: { name: { contains: term, mode: "insensitive" } } } }] }),
   };
   const [rows, total] = await Promise.all([
-    prisma.surgery.findMany({ where, select: SELECT, orderBy: [{ surgeryDate: "desc" }, { createdAt: "desc" }], skip, take }),
+    prisma.surgery.findMany({ where, select: SELECT, orderBy: orderBy ?? [{ surgeryDate: "desc" }, { createdAt: "desc" }], skip, take }),
     prisma.surgery.count({ where }),
   ]);
   return { rows, total };

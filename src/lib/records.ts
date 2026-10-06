@@ -222,7 +222,7 @@ export const listCatalog = () =>
 
 export type RecordListFilter = { q?: string; status?: "BELUM" | "DRAFT" | "FINAL"; doctorId?: string; from?: string; to?: string };
 
-export async function listRecords({ q, status, doctorId, from, to }: RecordListFilter, skip = 0, take = 50) {
+export async function listRecords({ q, status, doctorId, from, to }: RecordListFilter, skip = 0, take = 50, orderBy?: Prisma.VisitOrderByWithRelationInput | Prisma.VisitOrderByWithRelationInput[]) {
   const term = q?.trim();
   const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
   const where: Prisma.VisitWhereInput = {
@@ -253,7 +253,7 @@ export async function listRecords({ q, status, doctorId, from, to }: RecordListF
         doctor: { select: { name: true } },
         medicalRecord: { select: { diagnosis: true, finalized: true } },
       },
-      orderBy: [{ visitDate: "desc" }, { createdAt: "desc" }],
+      orderBy: orderBy ?? [{ visitDate: "desc" }, { createdAt: "desc" }],
       skip,
       take,
     }),
@@ -262,7 +262,7 @@ export async function listRecords({ q, status, doctorId, from, to }: RecordListF
   return { rows, total };
 }
 
-export async function listVaccinations({ q, from, to }: { q?: string; from?: string; to?: string }, skip = 0, take = 50) {
+export async function listVaccinations({ q, from, to }: { q?: string; from?: string; to?: string }, skip = 0, take = 50, orderBy?: Prisma.VaccinationOrderByWithRelationInput | Prisma.VaccinationOrderByWithRelationInput[]) {
   const term = q?.trim();
   const day = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
   const where: Prisma.VaccinationWhereInput = {
@@ -288,7 +288,7 @@ export async function listVaccinations({ q, from, to }: { q?: string; from?: str
         item: { select: { name: true } },
         record: { select: { visit: { select: { id: true, patient: { select: { id: true, name: true, species: true, rmNo: true, owner: { select: { name: true } } } } } } } },
       },
-      orderBy: [{ givenAt: "desc" }, { id: "asc" }],
+      orderBy: orderBy ?? [{ givenAt: "desc" }, { id: "asc" }],
       skip,
       take,
     }),

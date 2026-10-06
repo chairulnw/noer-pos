@@ -6,22 +6,23 @@ import { Button } from "@/components/ui/button";
 import { formatDate, formatRupiah, formatTime } from "@/lib/format";
 import { listPaidInvoices } from "@/lib/invoices";
 import { METHOD_LABEL } from "@/lib/payment-method";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
-export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams> }) {
+export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_invoice_payment");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await listPaidInvoices(params.q?.trim() || undefined, skip, take);
-  const keep = { q: params.q, baris: params.baris };
+  const sort = parseSort(params, { waktu: (d) => ({ finalizedAt: d }), nomor: (d) => ({ invoiceNo: d }), total: (d) => ({ grandTotal: d }) });
+  const { rows, total } = await listPaidInvoices(params.q?.trim() || undefined, skip, take, sort.orderBy);
+  const keep = { q: params.q, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
       <ListHeader icon={Receipt} title="Riwayat Transaksi (Lunas)" subtitle="Arsip seluruh pembayaran transaksi kasir yang telah lunas dan nota cetak" actions={<Button asChild><Link href="/kasir">Ke Kasir (POS)</Link></Button>} />
       <ListToolbar base="/pembayaran" params={keep} placeholder="Cari no. invoice, pasien, atau pelanggan…" total={total} />
       <TableCard
-        columns={[{ label: "Waktu lunas" }, { label: "No. transaksi / nota" }, { label: "Klien / pelanggan" }, { label: "Metode bayar" }, { label: "Total pembayaran", align: "right" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Waktu lunas", sort: "waktu" }, { label: "No. transaksi / nota", sort: "nomor" }, { label: "Klien / pelanggan" }, { label: "Metode bayar" }, { label: "Total pembayaran", sort: "total", align: "right" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

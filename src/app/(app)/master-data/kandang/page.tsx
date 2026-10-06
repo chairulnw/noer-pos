@@ -5,15 +5,16 @@ import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, sortRows, type PagingParams, type SortParams } from "@/lib/paging";
 import { listRooms } from "@/lib/rooms";
 import { requireCapability } from "@/lib/require-role";
 
-export default async function RoomsPage({ searchParams }: { searchParams: Promise<PagingParams> }) {
+export default async function RoomsPage({ searchParams }: { searchParams: Promise<PagingParams & SortParams> }) {
   await requireCapability("manage_rooms");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const all = await listRooms();
+  const dir = params.arah === "desc" ? "desc" : "asc";
+  const all = sortRows(await listRooms(), params.urut, dir, { nama: (r) => r.name, jenis: (r) => r.type, kapasitas: (r) => r.capacity, tarif: (r) => r.defaultRate?.sellPrice ?? null, peruntukan: (r) => r.suitableFor, status: (r) => (r.active ? 1 : 0) });
   const rooms = all.slice(skip, skip + take);
   const add = <Button asChild><Link href="/master-data/kandang/baru">+ Kandang Baru</Link></Button>;
 
@@ -21,12 +22,12 @@ export default async function RoomsPage({ searchParams }: { searchParams: Promis
     <ListPage>
       <ListHeader icon={DoorOpen} title="Master Kandang" subtitle="Daftar kandang rawat inap dan pet hotel" actions={<><Button asChild variant="outline"><Link href="/pet-hotel">Kembali ke Pet Hotel</Link></Button>{add}</>} />
       <TableCard
-        columns={[{ label: "Nama" }, { label: "Jenis" }, { label: "Kapasitas", align: "right" }, { label: "Tarif / hari", align: "right" }, { label: "Peruntukan" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama", sort: "nama" }, { label: "Jenis", sort: "jenis" }, { label: "Kapasitas", align: "right", sort: "kapasitas" }, { label: "Tarif / hari", align: "right", sort: "tarif" }, { label: "Peruntukan", sort: "peruntukan" }, { label: "Status", sort: "status" }, { label: "Aksi", align: "right" }]}
         total={all.length}
         page={page}
         size={size}
         base="/master-data/kandang"
-        params={{ baris: params.baris }}
+        params={{ baris: params.baris, urut: params.urut, arah: params.arah }}
         minWidth={760}
         empty={<EmptyState action={add}>Belum ada kandang.</EmptyState>}
       >

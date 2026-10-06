@@ -10,18 +10,19 @@ import { paymentStatus } from "@/lib/billing";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { INVOICE_STATUS } from "@/lib/invoice-status";
 import { listInvoices } from "@/lib/invoices";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
 const STATUSES = ["DRAFT", "VOID"] as const;
 
-export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams> }) {
+export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_invoice_payment");
   const params = await searchParams;
   const active = STATUSES.find((s) => s === params.status);
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await listInvoices({ q: params.q?.trim() || undefined, status: active }, skip, take);
-  const keep = { q: params.q, status: active, baris: params.baris };
+  const sort = parseSort(params, { nomor: (d) => ({ invoiceNo: d }), tanggal: (d) => ({ createdAt: d }), total: (d) => ({ grandTotal: d }), status: (d) => ({ status: d }) });
+  const { rows, total } = await listInvoices({ q: params.q?.trim() || undefined, status: active }, skip, take, sort.orderBy);
+  const keep = { q: params.q, status: active, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
@@ -30,7 +31,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
         <FilterSelect name="status" defaultValue={active ?? ""} aria-label="Status"><option value="">Semua status</option>{STATUSES.map((s) => <option key={s} value={s}>{INVOICE_STATUS[s].label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "No. invoice" }, { label: "Klien / pasien" }, { label: "Tanggal tagihan" }, { label: "Total", align: "right" }, { label: "Sisa tagihan", align: "right" }, { label: "Status" }]}
+        columns={[{ label: "No. invoice", sort: "nomor" }, { label: "Klien / pasien" }, { label: "Tanggal tagihan", sort: "tanggal" }, { label: "Total", sort: "total", align: "right" }, { label: "Sisa tagihan", align: "right" }, { label: "Status", sort: "status" }]}
         total={total}
         page={page}
         size={size}

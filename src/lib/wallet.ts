@@ -63,7 +63,7 @@ export async function walletSummary() {
   return { total: total._sum.walletBalance ?? 0, owners };
 }
 
-export async function pageWalletTransactions({ ownerId, q }: { ownerId?: string; q?: string }, skip: number, take: number) {
+export async function pageWalletTransactions({ ownerId, q }: { ownerId?: string; q?: string }, skip: number, take: number, orderBy?: Prisma.WalletTransactionOrderByWithRelationInput | Prisma.WalletTransactionOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.WalletTransactionWhereInput = {
     ...(ownerId && { ownerId }),
@@ -73,7 +73,7 @@ export async function pageWalletTransactions({ ownerId, q }: { ownerId?: string;
     prisma.walletTransaction.findMany({
       where,
       select: { id: true, type: true, amount: true, balanceAfter: true, method: true, note: true, createdAt: true, owner: { select: { id: true, name: true } }, invoice: { select: { id: true, invoiceNo: true } }, createdBy: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy: orderBy ?? { createdAt: "desc" },
       skip,
       take,
     }),

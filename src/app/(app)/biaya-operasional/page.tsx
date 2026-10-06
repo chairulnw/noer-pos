@@ -7,20 +7,21 @@ import { Button } from "@/components/ui/button";
 import { parseYmd } from "@/lib/date";
 import { pageCosts } from "@/lib/costs";
 import { formatDate, formatRupiah } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 import { deleteCostAction } from "./actions";
 
 const field = "h-11 rounded-lg border border-input bg-card px-3 text-sm";
 
-export default async function CostsPage({ searchParams }: { searchParams: Promise<{ q?: string; dari?: string; sampai?: string } & PagingParams> }) {
+export default async function CostsPage({ searchParams }: { searchParams: Promise<{ q?: string; dari?: string; sampai?: string } & PagingParams & SortParams> }) {
   await requireCapability("view_revenue_reports");
   const params = await searchParams;
   const from = parseYmd(params.dari) ?? undefined;
   const to = parseYmd(params.sampai) ?? undefined;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total, sum } = await pageCosts({ q: params.q, from, to }, skip, take);
-  const keep = { q: params.q, dari: from, sampai: to, baris: params.baris };
+  const sort = parseSort(params, { tanggal: (d) => ({ costDate: d }), nama: (d) => ({ name: d }), kategori: (d) => ({ category: d }), nominal: (d) => ({ amount: d }) });
+  const { rows, total, sum } = await pageCosts({ q: params.q, from, to }, skip, take, sort.orderBy);
+  const keep = { q: params.q, dari: from, sampai: to, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/biaya-operasional/baru">+ Catat Biaya Baru</Link></Button>;
 
   return (
@@ -32,7 +33,7 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
         <Button type="submit" variant="outline">Terapkan</Button>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Tanggal" }, { label: "Nama pengeluaran" }, { label: "Kategori biaya" }, { label: "Nominal biaya", align: "right" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tanggal", sort: "tanggal" }, { label: "Nama pengeluaran", sort: "nama" }, { label: "Kategori biaya", sort: "kategori" }, { label: "Nominal biaya", sort: "nominal", align: "right" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

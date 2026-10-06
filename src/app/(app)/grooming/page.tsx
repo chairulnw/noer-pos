@@ -9,18 +9,19 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { GROOMING_STATUS, type GroomingStatus } from "@/lib/grooming-schema";
 import { pageGroomings } from "@/lib/groomings";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
 const STATUSES = Object.keys(GROOMING_STATUS) as GroomingStatus[];
 
-export default async function GroomingPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams> }) {
+export default async function GroomingPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams & SortParams> }) {
   await requireCapability("create_visit");
   const params = await searchParams;
   const active = STATUSES.find((s) => s === params.status);
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageGroomings({ q: params.q, status: active }, skip, take);
-  const keep = { q: params.q, status: active, baris: params.baris };
+  const sort = parseSort(params, { tanggal: (d) => ({ groomingDate: d }), pasien: (d) => ({ patient: { name: d } }), layanan: (d) => ({ serviceItem: { name: d } }), status: (d) => ({ status: d }) });
+  const { rows, total } = await pageGroomings({ q: params.q, status: active }, skip, take, sort.orderBy);
+  const keep = { q: params.q, status: active, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/grooming/baru">+ Grooming Baru</Link></Button>;
 
   return (
@@ -30,7 +31,7 @@ export default async function GroomingPage({ searchParams }: { searchParams: Pro
         <FilterSelect name="status" defaultValue={active ?? ""} aria-label="Status"><option value="">Semua status</option>{STATUSES.map((s) => <option key={s} value={s}>{GROOMING_STATUS[s].label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Tanggal" }, { label: "Pasien" }, { label: "Layanan" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tanggal", sort: "tanggal" }, { label: "Pasien", sort: "pasien" }, { label: "Layanan", sort: "layanan" }, { label: "Status", sort: "status" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

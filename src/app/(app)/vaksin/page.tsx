@@ -8,12 +8,12 @@ import { periodToRange, PERIODS } from "@/lib/date";
 import { FilterSelect } from "@/components/filter-select";
 import { todayJakarta } from "@/lib/date";
 import { formatDate } from "@/lib/format";
-import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
+import { buildHref, parsePaging, parseSort, sortRows, type PagingParams, type SortParams } from "@/lib/paging";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { listDueVaccinations, listVaccinations } from "@/lib/records";
 import { requireCapability } from "@/lib/require-role";
 
-type Params = { tampilan?: string; hari?: string; q?: string; periode?: string } & PagingParams;
+type Params = { tampilan?: string; hari?: string; q?: string; periode?: string } & PagingParams & SortParams;
 
 const RANGES = [7, 14, 30];
 
@@ -28,17 +28,17 @@ export default async function VaccinesPage({ searchParams }: { searchParams: Pro
 
   if (due) {
     const days = RANGES.includes(Number(params.hari)) ? Number(params.hari) : 14;
-    const all = await listDueVaccinations(days);
+    const all = sortRows(await listDueVaccinations(days), params.urut, params.arah === "desc" ? "desc" : "asc", { pasien: (r) => r.record.visit.patient.name, pemilik: (r) => r.record.visit.patient.owner.name, vaksin: (r) => r.item.name, due: (r) => r.nextDue?.getTime() ?? null });
     const rows = all.slice(skip, skip + take);
     const today = todayJakarta().getTime();
-    const keep = { tampilan: "jatuh-tempo", hari: String(days), baris: params.baris };
+    const keep = { tampilan: "jatuh-tempo", hari: String(days), baris: params.baris, urut: params.urut, arah: params.arah };
     return (
       <ListPage>
         {header}
         {tabs$}
         <Chips items={RANGES.map((r) => ({ value: String(r), label: `${r} hari` }))} active={String(days)} hrefFor={(v) => buildHref("/vaksin", keep, { hari: v, hal: undefined })} />
         <TableCard
-          columns={[{ label: "Pasien" }, { label: "Pemilik" }, { label: "No. WhatsApp" }, { label: "Vaksin" }, { label: "Jatuh tempo" }]}
+          columns={[{ label: "Pasien", sort: "pasien" }, { label: "Pemilik", sort: "pemilik" }, { label: "No. WhatsApp" }, { label: "Vaksin", sort: "vaksin" }, { label: "Jatuh tempo", sort: "due" }]}
           total={all.length}
           page={page}
           size={size}
@@ -66,8 +66,10 @@ export default async function VaccinesPage({ searchParams }: { searchParams: Pro
   }
 
   const { period, from, to } = periodToRange(params.periode);
-  const { rows, total } = await listVaccinations({ q: params.q, from, to }, skip, take);
-  const keep = { q: params.q, periode: period || undefined, baris: params.baris };
+
+  const sort = parseSort(params, { tanggal: (d) => ({ givenAt: d }), vaksin: (d) => ({ item: { name: d } }), due: (d) => ({ nextDue: { sort: d, nulls: "last" as const } }), pasien: (d) => ({ record: { visit: { patient: { name: d } } } }) });
+  const { rows, total } = await listVaccinations({ q: params.q, from, to }, skip, take, sort.orderBy);
+  const keep = { q: params.q, periode: period || undefined, baris: params.baris, ...sort.keep };
 
   return (
     <ListPage>
@@ -77,7 +79,7 @@ export default async function VaccinesPage({ searchParams }: { searchParams: Pro
         <FilterSelect name="periode" defaultValue={period} aria-label="Periode">{PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Tgl diberikan" }, { label: "Pasien & pemilik" }, { label: "Nama vaksin & batch" }, { label: "Vaksin ulang (due)" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tgl diberikan", sort: "tanggal" }, { label: "Pasien & pemilik", sort: "pasien" }, { label: "Nama vaksin & batch", sort: "vaksin" }, { label: "Vaksin ulang (due)", sort: "due" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

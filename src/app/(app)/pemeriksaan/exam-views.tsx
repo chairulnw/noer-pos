@@ -15,7 +15,7 @@ import { todayJakarta } from "@/lib/date";
 import { EXAM, type ExaminationType } from "@/lib/examination-schema";
 import { getExamination, listExaminations, listRecordOptions } from "@/lib/examinations";
 import { formatDate } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { getPatient, searchPatients } from "@/lib/patients";
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
@@ -25,15 +25,16 @@ import { ExamForm } from "./exam-form";
 
 const today = () => todayJakarta().toISOString().slice(0, 10);
 
-export async function ExamList({ type, searchParams }: { type: ExaminationType; searchParams: Promise<{ q?: string; periode?: string } & PagingParams> }) {
+export async function ExamList({ type, searchParams }: { type: ExaminationType; searchParams: Promise<{ q?: string; periode?: string } & PagingParams & SortParams> }) {
   const user = await requireCapability("view_medical_record");
   const params = await searchParams;
   const config = EXAM[type];
   const { period, from, to } = periodToRange(params.periode);
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await listExaminations(type, { q: params.q, from, to }, skip, take);
+  const sort = parseSort(params, { tanggal: (d) => ({ performedAt: d }), pasien: (d) => ({ patient: { name: d } }), nama: (d) => ({ name: d }) });
+  const { rows, total } = await listExaminations(type, { q: params.q, from, to }, skip, take, sort.orderBy);
   const canEdit = can(user.role, "edit_medical_record");
-  const keep = { q: params.q, periode: period || undefined, baris: params.baris };
+  const keep = { q: params.q, periode: period || undefined, baris: params.baris, ...sort.keep };
   const add = canEdit ? <Button asChild><Link href={`${config.path}/baru`}>+ {type === "LAB" ? "Uji Lab Baru" : "Radiologi Baru"}</Link></Button> : undefined;
 
   return (
@@ -43,7 +44,7 @@ export async function ExamList({ type, searchParams }: { type: ExaminationType; 
         <FilterSelect name="periode" defaultValue={period} aria-label="Periode">{PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
-        columns={[{ label: "Tanggal" }, { label: "Pasien & pemilik" }, { label: config.nameLabel }, { label: type === "LAB" ? "Hasil / nilai uji" : "Temuan / interpretasi" }, { label: "Lampiran" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tanggal", sort: "tanggal" }, { label: "Pasien & pemilik", sort: "pasien" }, { label: config.nameLabel }, { label: type === "LAB" ? "Hasil / nilai uji" : "Temuan / interpretasi" }, { label: "Lampiran" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

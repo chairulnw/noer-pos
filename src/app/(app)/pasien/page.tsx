@@ -7,17 +7,18 @@ import { EmptyState } from "@/components/page-header";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ClinicalTags } from "@/components/clinical-flags";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { pagePatients } from "@/lib/patients";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
 
 const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
 
-async function PatientTable({ params }: { params: { q?: string } & PagingParams }) {
+async function PatientTable({ params }: { params: { q?: string } & PagingParams & SortParams }) {
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pagePatients(params.q ?? "", skip, take);
-  const keep = { q: params.q, baris: params.baris };
+  const sort = parseSort(params, { nama: (d) => ({ name: d }), jenis: (d) => ({ species: d }), kelamin: (d) => ({ sex: d }), pemilik: (d) => ({ owner: { name: d } }), berat: (d) => ({ lastWeightKg: { sort: d, nulls: "last" as const } }) });
+  const { rows, total } = await pagePatients(params.q ?? "", skip, take, sort.orderBy);
+  const keep = { q: params.q, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/pemilik/baru">+ Pasien Baru</Link></Button>;
 
   return (
@@ -25,7 +26,7 @@ async function PatientTable({ params }: { params: { q?: string } & PagingParams 
       <ListHeader icon={PawPrint} title="Pasien & Anabul" subtitle="Daftar identitas hewan pasien klinik, pemilik, jenis, ras, dan profil klinis" actions={add} />
       <ListToolbar base="/pasien" params={keep} placeholder="Cari nama hewan, pemilik, no. WA, no. RM, microchip…" total={total} />
       <TableCard
-        columns={[{ label: "Nama pasien (anabul)" }, { label: "Jenis & ras" }, { label: "Jenis kelamin" }, { label: "Pemilik (owner)" }, { label: "Berat badan", align: "right" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama pasien (anabul)", sort: "nama" }, { label: "Jenis & ras", sort: "jenis" }, { label: "Jenis kelamin", sort: "kelamin" }, { label: "Pemilik (owner)", sort: "pemilik" }, { label: "Berat badan", sort: "berat", align: "right" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}
@@ -61,7 +62,7 @@ async function PatientTable({ params }: { params: { q?: string } & PagingParams 
   );
 }
 
-export default async function PatientsPage({ searchParams }: { searchParams: Promise<{ q?: string; id?: string } & PagingParams> }) {
+export default async function PatientsPage({ searchParams }: { searchParams: Promise<{ q?: string; id?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_patients");
   const params = await searchParams;
   if (params.id && z.guid().safeParse(params.id).success) redirect(`/pasien/${params.id}`);

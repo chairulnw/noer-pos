@@ -9,11 +9,11 @@ import { stayDay } from "@/lib/admission-calc";
 import { admissionBase, type AdmissionType } from "@/lib/admission-paths";
 import { listActiveAdmissions } from "@/lib/admissions";
 import { formatDate, formatTime } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, sortRows, type PagingParams, type SortParams } from "@/lib/paging";
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 
-export async function AdmissionsList({ type, searchParams }: { type: AdmissionType; searchParams: Promise<PagingParams> }) {
+export async function AdmissionsList({ type, searchParams }: { type: AdmissionType; searchParams: Promise<PagingParams & SortParams> }) {
   const user = await requireCapability("manage_admission");
   const params = await searchParams;
   const canMonitor = can(user.role, "monitor_admission");
@@ -22,7 +22,8 @@ export async function AdmissionsList({ type, searchParams }: { type: AdmissionTy
   const base = admissionBase(type);
   const now = new Date();
   const { page, size, skip, take } = parsePaging(params);
-  const rows = admissions.slice(skip, skip + take);
+  const sorted = sortRows(admissions, params.urut, params.arah === "desc" ? "desc" : "asc", { kandang: (a) => a.room.name, pasien: (a) => a.patient.name, masuk: (a) => a.checkIn.getTime() });
+  const rows = sorted.slice(skip, skip + take);
   const checkIn = <Button asChild><Link href={`${base}/check-in`}>+ Check-in</Link></Button>;
 
   return (
@@ -34,12 +35,12 @@ export async function AdmissionsList({ type, searchParams }: { type: AdmissionTy
         actions={<>{type === "HOTEL" && can(user.role, "manage_rooms") && <Button asChild variant="outline"><Link href="/master-data/kandang">Master Kandang</Link></Button>}{checkIn}</>}
       />
       <TableCard
-        columns={[{ label: "Nomor kandang" }, { label: "Pasien & pemilik" }, { label: "Tgl masuk" }, { label: "Lama" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nomor kandang", sort: "kandang" }, { label: "Pasien & pemilik", sort: "pasien" }, { label: "Tgl masuk", sort: "masuk" }, { label: "Lama", sort: "masuk" }, { label: "Aksi", align: "right" }]}
         total={admissions.length}
         page={page}
         size={size}
         base={base}
-        params={{ baris: params.baris }}
+        params={{ baris: params.baris, urut: params.urut, arah: params.arah }}
         minWidth={640}
         empty={<EmptyState action={checkIn}>{type === "HOTEL" ? "Tidak ada anabul yang sedang menginap. Klik Check-in untuk mendaftarkan pasien penitipan baru." : "Belum ada pasien rawat inap. Mulai catat pasien rawat inap baru untuk pemantauan intensif."}</EmptyState>}
       >

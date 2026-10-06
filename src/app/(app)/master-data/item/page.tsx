@@ -7,20 +7,21 @@ import { Button } from "@/components/ui/button";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { ITEM_GROUPS } from "@/lib/item-groups";
 import { pageItems } from "@/lib/items";
-import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
+import { buildHref, parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 
 const STOCK_TONE = { AMAN: "success", MENIPIS: "warning", HAMPIR_EXPIRED: "warning", HABIS: "danger" } as const;
 const STOCK_LABEL = { AMAN: "", MENIPIS: " · menipis", HAMPIR_EXPIRED: " · hampir expired", HABIS: "" } as const;
 
-export default async function ItemsPage({ searchParams }: { searchParams: Promise<{ q?: string; tipe?: string } & PagingParams> }) {
+export default async function ItemsPage({ searchParams }: { searchParams: Promise<{ q?: string; tipe?: string } & PagingParams & SortParams> }) {
   const user = await requireCapability("manage_service_price");
   const params = await searchParams;
   const group = ITEM_GROUPS.some((g) => g.value === params.tipe) ? (params.tipe ?? "") : "";
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageItems(user.role, { q: params.q?.trim() || undefined, group, skip, take });
-  const keep = { q: params.q, tipe: group || undefined, baris: params.baris };
+  const sort = parseSort(params, { nama: (d) => ({ name: d }), kategori: (d) => ({ category: d }), harga: (d) => ({ sellPrice: d }) });
+  const { rows, total } = await pageItems(user.role, { q: params.q?.trim() || undefined, group, skip, take , orderBy: sort.orderBy });
+  const keep = { q: params.q, tipe: group || undefined, baris: params.baris, ...sort.keep };
   const canStock = can(user.role, "manage_stock");
   const add = <Button asChild><Link href="/master-data/item/baru">+ Produk Baru</Link></Button>;
 
@@ -35,7 +36,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
       <ListToolbar base="/master-data/item" params={{ q: params.q, tipe: group || undefined, baris: params.baris }} placeholder="Cari nama barang, barcode, SKU…" total={total} />
       <Chips items={ITEM_GROUPS.map((g) => ({ value: g.value, label: g.label }))} active={group} hrefFor={(value) => buildHref("/master-data/item", keep, { tipe: value || undefined, hal: undefined })} />
       <TableCard
-        columns={[{ label: "Nama produk / item" }, { label: "Kategori" }, { label: "Harga jual", align: "right" }, { label: "Sisa stok" }, { label: "Batch & kedaluwarsa (FEFO)" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama produk / item", sort: "nama" }, { label: "Kategori", sort: "kategori" }, { label: "Harga jual", sort: "harga", align: "right" }, { label: "Sisa stok" }, { label: "Batch & kedaluwarsa (FEFO)" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

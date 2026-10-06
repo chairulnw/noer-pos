@@ -186,7 +186,7 @@ export async function getUsableStock() {
   return Object.fromEntries(rows.map((r) => [r.itemId, Number(r._sum.qtyOnHand ?? 0)])) as Record<string, number>;
 }
 
-export async function pageStockMovements(q: string | undefined, skip: number, take: number) {
+export async function pageStockMovements(q: string | undefined, skip: number, take: number, orderBy?: Prisma.StockMovementOrderByWithRelationInput | Prisma.StockMovementOrderByWithRelationInput[]) {
   const term = q?.trim();
   const where: Prisma.StockMovementWhereInput = term
     ? { OR: [{ batch: { item: { name: { contains: term, mode: "insensitive" } } } }, { batch: { batchNo: { contains: term, mode: "insensitive" } } }, { note: { contains: term, mode: "insensitive" } }] }
@@ -199,7 +199,7 @@ export async function pageStockMovements(q: string | undefined, skip: number, ta
         batch: { select: { batchNo: true, item: { select: { id: true, name: true, baseUnit: true } } } },
         user: { select: { name: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: orderBy ?? { createdAt: "desc" },
       skip,
       take,
     }),

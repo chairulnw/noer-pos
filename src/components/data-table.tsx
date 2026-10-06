@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, RotateCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, RotateCw, Search } from "lucide-react";
 import { buildHref, pageRange, PAGE_SIZES } from "@/lib/paging";
 import { cn } from "@/lib/utils";
 
@@ -65,7 +65,7 @@ export function Chips({ items, active, hrefFor }: { items: { value: string; labe
   );
 }
 
-export type Column = { label: string; align?: "right" | "center"; className?: string };
+export type Column = { label: string; align?: "right" | "center"; className?: string; sort?: string };
 
 export function TableCard({ columns, children, empty, total, page, size, base, params, minWidth = 640 }: {
   columns: Column[];
@@ -88,7 +88,20 @@ export function TableCard({ columns, children, empty, total, page, size, base, p
         <table className="w-full text-[13.5px]" style={{ minWidth }}>
           <thead className="sticky top-0 z-10 bg-card">
             <tr className="border-b text-left text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">
-              {columns.map((c) => <th key={c.label} className={cn("px-4 py-3", c.align === "right" && "text-right", c.align === "center" && "text-center", c.className)}>{c.label}</th>)}
+              {columns.map((c) => {
+                const active = c.sort && params.urut === c.sort;
+                const next = active && params.arah !== "desc" ? "desc" : "asc";
+                const Arrow = active ? (params.arah === "desc" ? ArrowDown : ArrowUp) : ArrowUpDown;
+                return (
+                  <th key={c.label} aria-sort={active ? (params.arah === "desc" ? "descending" : "ascending") : undefined} className={cn("px-4 py-3", c.align === "right" && "text-right", c.align === "center" && "text-center", c.className)}>
+                    {c.sort ? (
+                      <Link href={href({ urut: c.sort, arah: next, hal: undefined })} className={cn("inline-flex items-center gap-1 hover:text-foreground", active && "text-foreground")}>
+                        {c.label}<Arrow className={cn("size-3.5", !active && "opacity-40")} />
+                      </Link>
+                    ) : c.label}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>{total === 0 && empty ? null : children}</tbody>

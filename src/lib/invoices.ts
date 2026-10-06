@@ -80,7 +80,7 @@ export async function createDraftInvoiceFromRecord(tx: Tx, userId: string, recor
   return invoice.id;
 }
 
-export async function listInvoices(filter: { q?: string; status?: "DRAFT" | "VOID"; includePaid?: boolean } = {}, skip = 0, take = 50) {
+export async function listInvoices(filter: { q?: string; status?: "DRAFT" | "VOID"; includePaid?: boolean } = {}, skip = 0, take = 50, orderBy?: Prisma.InvoiceOrderByWithRelationInput | Prisma.InvoiceOrderByWithRelationInput[]) {
   const where: Prisma.InvoiceWhereInput = {
     ...(filter.status ? { status: filter.status } : !filter.includePaid && { status: { not: "FINAL" as const } }),
     ...(filter.q && {
@@ -108,7 +108,7 @@ export async function listInvoices(filter: { q?: string; status?: "DRAFT" | "VOI
         visit: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
         admission: { select: { patient: { select: { name: true, allergyNote: true, aggressive: true } } } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: orderBy ?? { createdAt: "desc" },
       skip,
       take,
     }),
@@ -155,7 +155,7 @@ export const listRetailDrafts = () =>
     take: 20,
   });
 
-export async function listPaidInvoices(q: string | undefined, skip = 0, take = 50) {
+export async function listPaidInvoices(q: string | undefined, skip = 0, take = 50, orderBy?: Prisma.InvoiceOrderByWithRelationInput | Prisma.InvoiceOrderByWithRelationInput[]) {
   const where: Prisma.InvoiceWhereInput = {
     status: "FINAL",
     ...(q && {
@@ -183,7 +183,7 @@ export async function listPaidInvoices(q: string | undefined, skip = 0, take = 5
         admission: { select: { patient: { select: { name: true } } } },
         payments: { where: { voided: false }, select: { method: true }, orderBy: { paidAt: "asc" } },
       },
-      orderBy: { finalizedAt: "desc" },
+      orderBy: orderBy ?? { finalizedAt: "desc" },
       skip,
       take,
     }),

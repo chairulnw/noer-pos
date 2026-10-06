@@ -27,11 +27,11 @@ export async function createOpname(userId: string, note: string) {
   return { id: opname.id, resumed: false };
 }
 
-export async function listOpnames(skip = 0, take = 50) {
+export async function listOpnames(skip = 0, take = 50, orderBy?: Prisma.StockOpnameOrderByWithRelationInput | Prisma.StockOpnameOrderByWithRelationInput[]) {
   const [rows, total] = await Promise.all([
     prisma.stockOpname.findMany({
       select: { id: true, opnameDate: true, status: true, note: true, user: { select: { name: true } }, _count: { select: { items: true } }, items: { where: { diff: { not: 0 } }, select: { id: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy: orderBy ?? { createdAt: "desc" },
       skip,
       take,
     }),

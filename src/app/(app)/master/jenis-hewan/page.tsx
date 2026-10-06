@@ -6,15 +6,16 @@ import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { pageSpecies } from "@/lib/animals";
 import { formatDate } from "@/lib/format";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
-export default async function SpeciesPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams> }) {
+export default async function SpeciesPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_users_settings");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const { rows, total } = await pageSpecies(params.q, skip, take);
-  const keep = { q: params.q, baris: params.baris };
+  const sort = parseSort(params, { nama: (d) => ({ name: d }), ras: (d) => ({ breeds: { _count: d } }), status: (d) => ({ active: d }), tanggal: (d) => ({ createdAt: d }) });
+  const { rows, total } = await pageSpecies(params.q, skip, take, sort.orderBy);
+  const keep = { q: params.q, baris: params.baris, ...sort.keep };
   const add = <Button asChild><Link href="/master/jenis-hewan/baru">+ Jenis Baru</Link></Button>;
 
   return (
@@ -22,7 +23,7 @@ export default async function SpeciesPage({ searchParams }: { searchParams: Prom
       <ListHeader icon={Cat} title="Master Jenis Hewan" subtitle="Daftar jenis hewan (kucing, anjing, kelinci, unggas, reptil) untuk form pasien" actions={add} />
       <ListToolbar base="/master/jenis-hewan" params={keep} placeholder="Cari jenis hewan…" total={total} />
       <TableCard
-        columns={[{ label: "Nama jenis hewan" }, { label: "Jumlah ras", align: "right" }, { label: "Status" }, { label: "Tanggal dibuat" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Nama jenis hewan", sort: "nama" }, { label: "Jumlah ras", sort: "ras", align: "right" }, { label: "Status", sort: "status" }, { label: "Tanggal dibuat", sort: "tanggal" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}

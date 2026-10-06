@@ -47,7 +47,7 @@ export async function listItems(role: Role, filter: { q?: string; type?: "SERVIC
   return rows.map((row) => toItemView(row, role));
 }
 
-export async function pageItems(role: Role, { q, group, skip, take }: { q?: string; group?: string; skip: number; take: number }) {
+export async function pageItems(role: Role, { q, group, skip, take, orderBy }: { q?: string; group?: string; skip: number; take: number; orderBy?: Prisma.ItemOrderByWithRelationInput | Prisma.ItemOrderByWithRelationInput[] }) {
   const categories = groupCategories(group);
   const where: Prisma.ItemWhereInput = {
     deletedAt: null,
@@ -55,7 +55,7 @@ export async function pageItems(role: Role, { q, group, skip, take }: { q?: stri
     ...(q && { OR: [{ name: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }, { barcode: { contains: q } }] }),
   };
   const [rows, total, settings] = await Promise.all([
-    prisma.item.findMany({ where, select: SELECT, orderBy: [{ type: "asc" }, { category: "asc" }, { name: "asc" }], skip, take }),
+    prisma.item.findMany({ where, select: SELECT, orderBy: orderBy ?? [{ type: "asc" }, { category: "asc" }, { name: "asc" }], skip, take }),
     prisma.item.count({ where }),
     getSettings(),
   ]);

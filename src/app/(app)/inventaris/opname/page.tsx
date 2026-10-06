@@ -7,15 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/format";
 import { hasDraftOpname, listOpnames } from "@/lib/opname";
-import { parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 import { createOpnameAction } from "./actions";
 
-export default async function OpnamePage({ searchParams }: { searchParams: Promise<{ error?: string } & PagingParams> }) {
+export default async function OpnamePage({ searchParams }: { searchParams: Promise<{ error?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_stock");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
-  const [{ rows, total }, hasDraft] = await Promise.all([listOpnames(skip, take), hasDraftOpname()]);
+  const sort = parseSort(params, { tanggal: (d) => ({ opnameDate: d }), petugas: (d) => ({ user: { name: d } }), cakupan: (d) => ({ items: { _count: d } }), status: (d) => ({ status: d }) });
+  const [{ rows, total }, hasDraft] = await Promise.all([listOpnames(skip, take, sort.orderBy), hasDraftOpname()]);
 
   return (
     <ListPage>
@@ -29,12 +30,12 @@ export default async function OpnamePage({ searchParams }: { searchParams: Promi
         {params.error && <p role="alert" className="basis-full text-sm text-destructive">{params.error}</p>}
       </form>
       <TableCard
-        columns={[{ label: "Tanggal sesi" }, { label: "Petugas pelaksana" }, { label: "Cakupan batch", align: "right" }, { label: "Selisih", align: "right" }, { label: "Status audit" }, { label: "Aksi", align: "right" }]}
+        columns={[{ label: "Tanggal sesi", sort: "tanggal" }, { label: "Petugas pelaksana", sort: "petugas" }, { label: "Cakupan batch", sort: "cakupan", align: "right" }, { label: "Selisih", align: "right" }, { label: "Status audit", sort: "status" }, { label: "Aksi", align: "right" }]}
         total={total}
         page={page}
         size={size}
         base="/inventaris/opname"
-        params={{ baris: params.baris }}
+        params={{ baris: params.baris, ...sort.keep }}
         minWidth={720}
         empty={<EmptyState>Belum ada sesi stok opname. Mulai sesi audit fisik inventaris klinik atau petshop Anda.</EmptyState>}
       >
