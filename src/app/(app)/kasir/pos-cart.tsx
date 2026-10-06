@@ -149,7 +149,7 @@ export function PosCart({ invoiceId, lines, editable, canDiscount, customerName,
     });
 
   return (
-    <section aria-label="Keranjang" className={`flex flex-col gap-3 rounded-[10px] border bg-card p-5 md:min-h-0 md:flex-1 ${pending ? "opacity-70" : ""}`}>
+    <section aria-label="Keranjang" className={`flex flex-col gap-3 p-5 md:min-h-0 md:flex-1 ${pending ? "opacity-70" : ""}`}>
       <div className="flex items-center gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><ShoppingCart className="size-5" /></span>
         <div>

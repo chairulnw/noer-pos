@@ -56,7 +56,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
   );
 
   return (
-    <section aria-label="Katalog" className={cn("flex min-w-0 flex-col overflow-hidden rounded-[10px] border bg-card md:min-h-0 md:flex-1", pending && "opacity-70")}>
+    <section aria-label="Katalog" className={cn("flex min-w-0 flex-col bg-card md:min-h-0 md:flex-1", pending && "opacity-70")}>
       <div className="flex items-center gap-3 border-b p-4">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><Building2 className="size-5" /></span>
         <div className="min-w-0 flex-1">

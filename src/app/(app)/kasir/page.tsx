@@ -59,12 +59,12 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
   );
 
   return (
-    <div className="flex flex-col gap-5 md:h-[calc(100dvh-3.5rem)]">
+    <div className="-mx-4 -my-6 flex flex-col md:-mx-8 md:-my-7 md:h-dvh">
 
-      {voided && <p role="alert" className="rounded-lg border border-[#E9CFA6] p-3 text-sm text-warning">Tagihan {found?.invoiceNo} sudah di-void. Mulai transaksi baru di bawah.</p>}
+      {voided && <p role="alert" className="m-4 rounded-lg border border-[#E9CFA6] p-3 text-sm text-warning">Tagihan {found?.invoiceNo} sudah di-void. Mulai transaksi baru di bawah.</p>}
 
       {done && invoice ? (
-        <section className="mx-auto max-w-xl space-y-5 rounded-[10px] border bg-card p-8 text-center">
+        <section className="mx-4 my-8 space-y-5 md:mx-auto md:w-full md:max-w-xl rounded-[10px] border bg-card p-8 text-center">
           <StatusChip tone="success">Pembayaran berhasil</StatusChip>
           <div>
             <div className="text-sm text-muted-foreground">Total dibayar</div>
@@ -80,11 +80,11 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
           </div>
         </section>
       ) : (
-        <div className="flex flex-wrap items-stretch gap-5 md:min-h-0 md:flex-1 md:flex-nowrap">
+        <div className="flex flex-wrap items-stretch md:min-h-0 md:flex-1 md:flex-nowrap">
           <div className="flex min-w-0 flex-[999] basis-[460px] flex-col md:min-h-0">
             <PosCatalog items={items} invoiceId={invoice?.id ?? null} editable={editable} clinicName={settings.clinicName} actions={actions} />
           </div>
-          <div className="flex min-w-0 flex-1 basis-[360px] flex-col md:min-h-0 lg:max-w-md">
+          <div className="flex min-w-0 flex-1 basis-[360px] flex-col border-l bg-card md:min-h-0 lg:max-w-[420px]">
             <PosCart
               invoiceId={invoice?.id ?? null}
               editable={editable}
