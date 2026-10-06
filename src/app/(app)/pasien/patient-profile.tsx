@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BedDouble, FlaskConical, HeartPulse, PawPrint, Printer, Scissors, Stethoscope, Syringe, type LucideIcon } from "lucide-react";
+import { PawPrint, Printer, Syringe } from "lucide-react";
+import { ActivityList, buildActivities } from "./activity";
 import { Button } from "@/components/ui/button";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { StatusChip } from "@/components/status-chip";
@@ -10,8 +11,6 @@ import type { latestRawatInapLogs, listPatientAdmissions } from "@/lib/admission
 import type { listPatientGroomings } from "@/lib/groomings";
 import type { listPatientSurgeries } from "@/lib/surgeries";
 import { EXAM } from "@/lib/examination-schema";
-import { GROOMING_STATUS } from "@/lib/grooming-schema";
-import { SURGERY_STATUS } from "@/lib/surgery-schema";
 import { formatAge, formatWhatsapp } from "@/lib/patient-schema";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,6 @@ type Admissions = Awaited<ReturnType<typeof listPatientAdmissions>>;
 type Monitoring = Awaited<ReturnType<typeof latestRawatInapLogs>>;
 type Surgeries = Awaited<ReturnType<typeof listPatientSurgeries>>;
 type Groomings = Awaited<ReturnType<typeof listPatientGroomings>>;
-type Activity = { key: string; date: Date; icon: LucideIcon; tone: string; title: string; detail?: string; href?: string; chip?: { label: string; tone: "info" | "success" | "warning" | "neutral" | "danger" } };
 
 const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
 const TABS = { info: "Info Medis", rekam: "Rekam Medis", aktivitas: "Riwayat Aktivitas" } as const;
@@ -59,14 +57,7 @@ export function PatientProfile({ patient, tab, history, admissions, monitoring, 
   canMedical: boolean;
 }) {
   const age = patient.birthDate ? formatAge(patient.birthDate, todayJakarta()) : null;
-  const activities: Activity[] = [
-    ...(history?.visits ?? []).map((v) => ({ key: `v${v.id}`, date: v.visitDate, icon: Stethoscope, tone: "bg-info/10 text-info", title: `Kunjungan · ${v.medicalRecord?.diagnosis || v.complaint}`, detail: `${v.doctor.name}${v.medicalRecord?.diagnosis ? ` · Keluhan: ${v.complaint}` : ""}`, href: `/rekam-medis/${v.id}`, chip: v.medicalRecord?.finalized ? { label: "Final", tone: "info" as const } : { label: v.medicalRecord ? "Draft" : "Belum diisi", tone: "neutral" as const } })),
-    ...(history?.vaccinations ?? []).map((v) => ({ key: `x${v.id}`, date: v.givenAt, icon: Syringe, tone: "bg-success/10 text-success", title: `Vaksin ${v.item.name}`, detail: [v.batchNo && `Batch ${v.batchNo}`, v.nextDue && `ulang ${formatDate(v.nextDue)}`].filter(Boolean).join(" · ") })),
-    ...(history?.examinations ?? []).map((e) => ({ key: `e${e.id}`, date: e.performedAt, icon: FlaskConical, tone: "bg-accent text-primary", title: `${e.type === "LAB" ? "Hasil lab" : "Radiologi"} · ${e.name}`, detail: e.findings ?? undefined, href: `${EXAM[e.type].path}/${e.id}` })),
-    ...(canMedical ? surgeries : []).map((s) => ({ key: `s${s.id}`, date: s.surgeryDate, icon: HeartPulse, tone: "bg-destructive/10 text-destructive", title: `Operasi · ${s.procedure}`, detail: s.doctor.name, href: `/operasi/${s.id}`, chip: { label: SURGERY_STATUS[s.status].label, tone: SURGERY_STATUS[s.status].tone } })),
-    ...groomings.map((g) => ({ key: `g${g.id}`, date: g.groomingDate, icon: Scissors, tone: "bg-warning/10 text-warning", title: `Grooming · ${g.serviceItem?.name ?? "Layanan"}`, detail: g.notes ?? undefined, href: `/grooming/${g.id}`, chip: { label: GROOMING_STATUS[g.status].label, tone: GROOMING_STATUS[g.status].tone } })),
-    ...admissions.map((a) => ({ key: `a${a.id}`, date: a.checkIn, icon: BedDouble, tone: "bg-info/10 text-info", title: `${a.type === "HOTEL" ? "Pet Hotel" : "Rawat inap"} · Kandang ${a.room.name}`, detail: `${formatDate(a.checkIn)}${a.checkOut ? ` – ${formatDate(a.checkOut)}` : " – sekarang"}${a.billedDays !== null ? ` · ${a.billedDays} hari` : ""}`, href: `${a.type === "HOTEL" ? "/pet-hotel" : "/rawat-inap"}/${a.id}`, chip: a.status === "AKTIF" ? { label: "Menginap", tone: "warning" as const } : { label: "Selesai", tone: "neutral" as const } })),
-  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+  const activities = buildActivities({ history, surgeries: canMedical ? surgeries : [], groomings, admissions });
   const visible = (Object.keys(TABS) as ProfileTab[]).filter((t) => t !== "rekam" || canMedical);
   const recordCount = (history?.visits.length ?? 0) + (history?.examinations.length ?? 0);
   const staying = admissions.find((a) => a.status === "AKTIF");
@@ -166,18 +157,7 @@ export function PatientProfile({ patient, tab, history, admissions, monitoring, 
       {tab === "aktivitas" && (
         <Card title="Riwayat aktivitas (terbaru di atas)">
           {activities.length === 0 && <p className="text-[15px] text-muted-foreground">Belum ada aktivitas.</p>}
-          <ol className="relative">
-            {activities.map((a) => (
-              <li key={a.key}>
-                <Row href={a.href}>
-                  <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", a.tone)}><a.icon className="size-4" /></span>
-                  <span className="w-24 shrink-0 text-[13px] text-muted-foreground tabular-nums">{formatDate(a.date)}</span>
-                  <span className="min-w-0 flex-1"><span className="block truncate font-medium">{a.title}</span>{a.detail && <span className="block truncate text-[13px] text-muted-foreground">{a.detail}</span>}</span>
-                  {a.chip && <StatusChip tone={a.chip.tone}>{a.chip.label}</StatusChip>}
-                </Row>
-              </li>
-            ))}
-          </ol>
+          <ActivityList items={activities} />
         </Card>
       )}
     </section>

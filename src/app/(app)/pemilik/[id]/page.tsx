@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, PawPrint, Plus, Receipt, UserRound, WalletCards } from "lucide-react";
+import { ArrowDownLeft, ArrowLeft, ArrowUpRight, History, PawPrint, Plus, Receipt, UserRound, WalletCards } from "lucide-react";
 import { z } from "zod";
 import { EmptyState } from "@/components/page-header";
 import { ClinicalTags } from "@/components/clinical-flags";
@@ -10,7 +10,11 @@ import { formatDate, formatRupiah, formatTime } from "@/lib/format";
 import { INVOICE_STATUS } from "@/lib/invoice-status";
 import { METHOD_LABEL } from "@/lib/payment-method";
 import { can } from "@/lib/permissions";
-import { getOwner, listOwnerPurchases } from "@/lib/patients";
+import { getOwner, getPatientHistory, listOwnerPurchases } from "@/lib/patients";
+import { listPatientAdmissions } from "@/lib/admissions";
+import { listPatientGroomings } from "@/lib/groomings";
+import { listPatientSurgeries } from "@/lib/surgeries";
+import { ActivityList, buildActivities } from "../../pasien/activity";
 import { formatWhatsapp } from "@/lib/patient-schema";
 import { requireCapability } from "@/lib/require-role";
 import { pageWalletTransactions } from "@/lib/wallet";
@@ -26,10 +30,19 @@ export default async function OwnerPage({ params, searchParams }: { params: Prom
   const owner = await getOwner(id);
   if (!owner) notFound();
   const canMoney = can(user.role, "manage_invoice_payment");
-  const [wallet, purchases] = canMoney ? await Promise.all([pageWalletTransactions({ ownerId: id }, 0, 100), listOwnerPurchases(id)]) : [null, []];
+  const canMedical = can(user.role, "view_medical_record");
+  const [[wallet, purchases], perPet] = await Promise.all([
+    canMoney ? Promise.all([pageWalletTransactions({ ownerId: id }, 0, 100), listOwnerPurchases(id)]) : Promise.resolve([null, []] as const),
+    Promise.all(owner.patients.map(async (p) => {
+      const [history, surgeries, groomings, admissions] = await Promise.all([canMedical ? getPatientHistory(p.id) : null, canMedical ? listPatientSurgeries(p.id) : [], listPatientGroomings(p.id), listPatientAdmissions(p.id)]);
+      return buildActivities({ history, surgeries, groomings, admissions, petName: p.name });
+    })),
+  ]);
+  const activities = perPet.flat().sort((a, b) => b.date.getTime() - a.date.getTime());
 
   const tabs = [
     ...(canMoney ? [{ id: "deposit", label: `Riwayat Mutasi Deposit (${wallet!.total})`, icon: WalletCards }, { id: "pembelian", label: `Riwayat Pembelian & Tindakan (${purchases.length})`, icon: Receipt }] : []),
+    { id: "aktivitas", label: `Riwayat Aktivitas (${activities.length})`, icon: History },
     { id: "hewan", label: `Daftar Hewan / Anabul (${owner.patients.length})`, icon: PawPrint },
   ];
   const requested = (await searchParams).tab;
@@ -39,7 +52,7 @@ export default async function OwnerPage({ params, searchParams }: { params: Prom
     <div className="space-y-5">
       <Link href="/pemilik" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-primary"><ArrowLeft className="size-4" /> Pemilik Hewan</Link>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className={cn("grid gap-4", canMoney && "lg:grid-cols-[minmax(0,1fr)_380px]")}>
         <section className="rounded-2xl border bg-card p-6">
           <div className="flex flex-wrap items-start gap-5">
             <span className="grid size-20 shrink-0 place-items-center rounded-2xl bg-accent text-primary"><UserRound className="size-9" /></span>
@@ -132,9 +145,15 @@ export default async function OwnerPage({ params, searchParams }: { params: Prom
         </div>
       )}
 
+      {tab === "aktivitas" && (
+        <section className="rounded-2xl border bg-card px-5 py-2">
+          <ActivityList items={activities} />
+        </section>
+      )}
+
       {tab === "hewan" && (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {owner.patients.length === 0 && <EmptyState action={<Button asChild><Link href={`/pasien/baru?owner=${owner.id}`}>+ Hewan baru</Link></Button>}>Belum ada hewan terdaftar.</EmptyState>}
+          {owner.patients.length === 0 && <div className="col-span-full"><EmptyState action={<Button asChild><Link href={`/pasien/baru?owner=${owner.id}`}>+ Hewan baru</Link></Button>}>Belum ada hewan terdaftar.</EmptyState></div>}
           {owner.patients.map((p) => (
             <Link key={p.id} href={`/pasien/${p.id}`} className="flex items-center gap-4 rounded-2xl border bg-card p-4 hover:border-primary/40">
               {p.photoPath ? (
