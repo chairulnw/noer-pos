@@ -18,4 +18,4 @@ export const adjustSchema = z.object({
 export type TopUpInput = z.infer<typeof topUpSchema>;
 export type AdjustInput = z.infer<typeof adjustSchema>;
 
-export const WALLET_TYPE = { TOPUP: "Top-up", PAYMENT: "Pemakaian", RETURN: "Pengembalian (void)", ADJUST: "Koreksi" } as const;
+export const WALLET_TYPE = { TOPUP: "Top-up", PAYMENT: "Pemakaian", RETURN: "Pengembalian (pembatalan)", ADJUST: "Koreksi" } as const;

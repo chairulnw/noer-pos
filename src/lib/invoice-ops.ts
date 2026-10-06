@@ -11,7 +11,7 @@ type Tx = Prisma.TransactionClient;
 type Fail = { error: string };
 
 const NOT_FOUND = "Invoice tidak ditemukan.";
-const LOCKED = "Invoice sudah final atau di-void dan tidak bisa diubah.";
+const LOCKED = "Invoice sudah final atau dibatalkan dan tidak bisa diubah.";
 
 class Rejected extends Error {}
 
@@ -253,7 +253,7 @@ export async function voidInvoice(userId: string, invoiceId: string, input: Void
     await tx.payment.updateMany({ where: { invoiceId }, data: { voided: true } });
     if (invoice.ownerId) {
       for (const wp of walletPayments) {
-        await creditWallet(tx, "RETURN", { ownerId: invoice.ownerId, amount: wp.amount, invoiceId, paymentId: wp.id, method: "WALLET", note: `Void ${invoice.invoiceNo}`, userId });
+        await creditWallet(tx, "RETURN", { ownerId: invoice.ownerId, amount: wp.amount, invoiceId, paymentId: wp.id, method: "WALLET", note: `Pembatalan ${invoice.invoiceNo}`, userId });
       }
     }
     if (invoice.visitId) {
@@ -339,7 +339,7 @@ export async function correctDeposit(userId: string, invoiceId: string, newAmoun
     if (problem) return { error: problem };
 
     const deposit = invoice.payments[0];
-    if (deposit.method === "WALLET") return { error: "DP dari saldo deposit tidak bisa dikoreksi. Void invoice untuk mengembalikan saldo." };
+    if (deposit.method === "WALLET") return { error: "DP dari saldo deposit tidak bisa dikoreksi. Batalkan invoice untuk mengembalikan saldo." };
     await tx.payment.update({
       where: { id: deposit.id },
       data: { amount: newAmount, cashReceived: deposit.method === "TUNAI" ? Math.max(deposit.cashReceived ?? 0, newAmount) : null },

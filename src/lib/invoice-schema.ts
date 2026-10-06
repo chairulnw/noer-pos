@@ -24,7 +24,7 @@ export type Discount = z.infer<typeof discountSchema>;
 export type PayInput = z.infer<typeof paySchema>;
 
 export const voidSchema = z.object({
-  reason: z.string().trim().min(3, "Alasan void wajib diisi (minimal 3 karakter)").max(300, "Maksimal 300 karakter"),
+  reason: z.string().trim().min(3, "Alasan pembatalan wajib diisi (minimal 3 karakter)").max(300, "Maksimal 300 karakter"),
   restockLineIds: z.array(z.guid()).max(100),
 });
 

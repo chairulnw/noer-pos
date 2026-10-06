@@ -38,7 +38,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
             <td className="whitespace-nowrap px-4 py-3 tabular-nums"><div className="font-medium">{formatDate(p.paidAt)}</div><div className="text-[13px] text-muted-foreground">{formatTime(p.paidAt)}</div></td>
             <td className="px-4 py-3"><Link href={`/invoice/${p.invoice.id}`} className="font-medium text-primary tabular-nums">{p.invoice.invoiceNo}</Link></td>
             <td className="px-4 py-3">{(p.invoice.visit ?? p.invoice.admission)?.patient.name ?? p.invoice.owner?.name ?? p.invoice.customerName ?? "Umum / Walk-in"}</td>
-            <td className="px-4 py-3">{METHOD_LABEL[p.method]}{p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}{p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Void</StatusChip></span>}</td>
+            <td className="px-4 py-3">{METHOD_LABEL[p.method]}{p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}{p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Dibatalkan</StatusChip></span>}</td>
             <td className={`px-4 py-3 text-right font-medium tabular-nums ${p.voided ? "text-muted-foreground line-through" : ""}`}>{formatRupiah(p.amount)}</td>
             <td className="px-4 py-3 text-right">{!p.voided && <Link href={`/invoice/${p.invoice.id}/struk`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Struk</Link>}</td>
           </tr>

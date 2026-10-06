@@ -299,3 +299,4 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 - Uji cetak struk di printer thermal sungguhan (dialog print browser belum diuji otomatis) dan sesuaikan lebar kertas.
 - Pertanyaan terbuka yang memakai default SPEC: hitung hari menginap (BR-15), DP lebih besar dari tagihan (finalisasi ditolak, Admin koreksi), PPN default nonaktif 11% exclude.
 - Siapkan server tujuan backup terpisah (rsync) dan jadwalkan cron sesuai `docs/DEPLOY.md`.
+| 2026-10-07 | - | Selesai | Istilah **Void** diganti di seluruh UI menjadi **Batalkan / Dibatalkan** (menu, dialog, status invoice, daftar transaksi, pesan error, catatan saldo) karena membingungkan. Nama internal (status `VOID`, capability `void_invoice`, kode audit `invoice.void`) tidak diubah agar data lama tetap konsisten |

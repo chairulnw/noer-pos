@@ -180,7 +180,7 @@ export async function checkOutAdmission(userId: string, admissionId: string, che
     if (admission.type === "HOTEL") await tx.room.update({ where: { id: admission.roomId }, data: { needsCleaning: true } });
 
     let invoice = await tx.invoice.findFirst({ where: { admissionId, status: { not: "VOID" } }, select: { id: true, status: true } });
-    if (invoice && invoice.status !== "DRAFT") throw new CheckOutBlocked("Invoice rawat inap sudah final. Void invoice tersebut terlebih dahulu, lalu ulangi check-out.");
+    if (invoice && invoice.status !== "DRAFT") throw new CheckOutBlocked("Invoice rawat inap sudah final. Batalkan invoice tersebut terlebih dahulu, lalu ulangi check-out.");
     invoice ??= await tx.invoice.create({
       data: { invoiceNo: await nextInvoiceNoFor(tx), admissionId, ownerId: admission.patient.ownerId, createdById: userId },
       select: { id: true, status: true },

@@ -123,7 +123,7 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
               />
             )}
             {invoice && (
-              <Link href={`/invoice/${invoice.id}`} className="block text-center text-sm font-medium text-primary">Rincian tagihan, void, dan koreksi DP</Link>
+              <Link href={`/invoice/${invoice.id}`} className="block text-center text-sm font-medium text-primary">Rincian tagihan, pembatalan, dan koreksi DP</Link>
             )}
           </div>
         </div>

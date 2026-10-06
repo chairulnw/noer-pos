@@ -18,13 +18,13 @@ export function VoidPanel({ invoiceId, invoiceNo, products }: { invoiceId: strin
   return (
     <>
       <button type="button" role="menuitem" onClick={() => dialog.current?.showModal()} className={`${menuItemClass} text-destructive`}>
-        Void invoice
+        Batalkan invoice
       </button>
       <Modal dialogRef={dialog}>
-    <section aria-label="Void invoice" className="space-y-3.5">
-      <h2 className="text-base font-semibold text-destructive">Void {invoiceNo}</h2>
+    <section aria-label="Batalkan invoice" className="space-y-3.5">
+      <h2 className="text-base font-semibold text-destructive">Batalkan {invoiceNo}</h2>
       <p className="text-sm text-muted-foreground">
-        Void membatalkan invoice, bukan refund. Pembayaran yang sudah masuk tetap tercatat dan ditandai void. Jika uang dikembalikan, lakukan di luar sistem dan catat di alasan.
+        Pembatalan bukan refund. Pembayaran yang sudah masuk tetap tercatat dan ditandai dibatalkan. Jika uang dikembalikan, lakukan di luar sistem dan catat di alasan.
       </p>
       <div className="space-y-1.5">
         <label htmlFor="void-reason" className="text-sm font-medium">Alasan</label>
@@ -56,11 +56,11 @@ export function VoidPanel({ invoiceId, invoiceNo, products }: { invoiceId: strin
             startTransition(async () => {
               const result = await voidAction(invoiceId, { reason, restockLineIds: restock });
               setError(result.error);
-              if (!result.error) { dialog.current?.close(); toast("Invoice di-void"); }
+              if (!result.error) { dialog.current?.close(); toast("Invoice dibatalkan"); }
             })
           }
         >
-          {pending ? "Memproses…" : "Void invoice"}
+          {pending ? "Memproses…" : "Batalkan invoice"}
         </Button>
         <Button type="button" variant="outline" onClick={() => dialog.current?.close()}>
           Batal

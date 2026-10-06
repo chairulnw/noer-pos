@@ -70,7 +70,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
               </span>
               {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
             </div>
-            {invoice.status === "VOID" && invoice.voidReason && <p className="text-destructive">Void: {invoice.voidReason}</p>}
+            {invoice.status === "VOID" && invoice.voidReason && <p className="text-destructive">Dibatalkan: {invoice.voidReason}</p>}
             {error && <p role="alert" className="text-destructive">{error}</p>}
           </>
         }
@@ -132,7 +132,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                   <div>
                     <span className="font-medium">{METHOD[p.method]}</span>
                     {p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}
-                    {p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Void</StatusChip></span>}
+                    {p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Dibatalkan</StatusChip></span>}
                     <span className="text-muted-foreground"> · {formatDate(p.paidAt)} · {p.receivedBy.name}</span>
                     {p.reference && <div className="text-[13px] text-muted-foreground">{p.reference}</div>}
                     {p.cashReceived !== null && <div className="text-[13px] text-muted-foreground">Diterima {formatRupiah(p.cashReceived)} · kembalian {formatRupiah(p.cashReceived - p.amount)}</div>}
