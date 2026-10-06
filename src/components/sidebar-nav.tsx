@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Banknote, BarChart3, BedDouble, Bell, Building2, Cat, ChevronDown, ClipboardCheck, CreditCard, Dog, FileText, HeartPulse, History, Hotel, ImageIcon, LayoutDashboard, Package, PawPrint, Printer, Receipt, Scale, Scissors, ShoppingCart, Stethoscope, Syringe, UserCog, UserRound, Users, WalletCards, type LucideIcon } from "lucide-react";
+import { Banknote, BarChart3, BedDouble, Bell, Building2, Cat, ChevronDown, ClipboardCheck, CreditCard, Dog, DoorOpen, FileText, HeartPulse, History, Hotel, ImageIcon, LayoutDashboard, Package, PawPrint, Printer, Receipt, Scale, Scissors, ShoppingCart, Stethoscope, Syringe, UserCog, UserRound, Users, WalletCards, type LucideIcon } from "lucide-react";
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +62,7 @@ export const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/pengaturan", label: "Klinik", icon: Building2, capability: "manage_users_settings" },
       { href: "/master/jenis-hewan", label: "Jenis Hewan", icon: Cat, capability: "manage_users_settings" },
       { href: "/master/ras-hewan", label: "Ras Hewan", icon: Dog, capability: "manage_users_settings" },
+      { href: "/master-data/kandang", label: "Kandang", icon: DoorOpen, capability: "manage_rooms" },
       { href: "/pengguna", label: "Pengguna", icon: Users, capability: "manage_users_settings" },
       { href: "/pengaturan/printer", label: "Pengaturan Printer", icon: Printer, capability: "manage_users_settings" },
       { href: "/notifikasi", label: "Notifikasi", icon: Bell },
