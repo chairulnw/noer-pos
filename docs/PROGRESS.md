@@ -9,7 +9,7 @@ Dokumen hidup. **Diperbarui oleh agent di akhir setiap task.** Sumber daftar tas
 | | |
 |---|---|
 | Fase / milestone aktif | Fase 3 (`docs/PRD-fase3.md`, disetujui 6 Okt 2026), tahap 3A. 2.1 (import) dan 2.3 (export) tetap ditunda |
-| Task berikutnya | Operasi dan Grooming (3C.1, 3C.2), Pet Hotel lengkap (3C.3), 3E.3. Pengujian ditunda atas permintaan user; sebelum go-live perlu uji penuh per peran di browser |
+| Task berikutnya | Fase 3 selesai. Sisa: uji penuh per peran di browser (ditunda atas permintaan user), lalu Fase 2 yang ditunda (2.1 import, 2.3 export) bila diminta |
 | Terakhir diperbarui | 2026-10-03 |
 
 ---
@@ -98,7 +98,7 @@ Menu mengikuti VetCloud, gaya NOER tetap. Kehadiran tidak dibuat. Satu tahap = b
 **3E (pelengkap)**
 - [x] **3E.1** Jenis dan Ras Hewan
 - [x] **3E.2** Notifikasi
-- [ ] **3E.3** Pencarian global dan aksi cepat dasbor (Pengaturan Printer sudah selesai di 3E.2)
+- [x] **3E.3** Pencarian global dan aksi cepat dasbor (Pengaturan Printer sudah selesai di 3E.2)
 
 ---
 
@@ -268,6 +268,7 @@ Satu baris per sesi. Format: `tanggal | task | hasil | catatan untuk sesi beriku
 | 2026-10-07 | 3C.1 | Selesai | **Operasi** (`/operasi`): model `surgery` + `surgery_addendum` (migrasi `20261007100000_surgery`). Jadwal (prosedur, tanggal, dokter, anestesi, catatan pra-operasi, layanan untuk tagihan) dengan alur DIJADWALKAN → BERJALAN → SELESAI, BATAL hanya sebelum selesai. Selesai wajib catatan pasca-operasi, dan dalam satu transaksi membuat draft invoice atas nama pemilik berisi layanan terpilih (obat/bahan ditambah di kasir). Setelah selesai terkunci, koreksi lewat addendum (aturan 6). Semua perubahan masuk audit log. Hanya Admin/Dokter mengubah, Kasir tidak punya akses. Tes status dan skema ditambah; alur diuji skrip data |
 | 2026-10-07 | 3C.2 | Selesai | **Grooming** (`/grooming`): model `grooming` (migrasi `20261007110000_grooming`), layanan dari kategori "grooming" di Produk, alur MENUNGGU → PROSES → SELESAI, BATAL sebelum selesai. Selesai membuat draft invoice pemilik berisi layanan (satu transaksi, audit log). Groomer tidak dicatat (keputusan Q10). Semua peran termasuk Kasir. Tes status/skema ditambah, alur diuji skrip data |
 | 2026-10-07 | 3C.3 | Selesai | **Pet Hotel lengkap**: kolom baru di `room` (`needs_cleaning`, `default_rate_id`, `suitable_for`; migrasi `20261007120000_room_hotel`). Grid kandang di `/pet-hotel` dengan status Tersedia / Terisi / Perlu dibersihkan, ringkasan jumlah, dan tombol "Tandai bersih". Check-out hotel menandai kandang "perlu dibersihkan" (dalam transaksi check-out); check-in ke kandang kotor ditolak dan kandang kotor tidak muncul di pilihan. Master Kandang punya tarif harian bawaan (terpilih otomatis saat check-in) dan peruntukan. Instruksi pakan/obat bawaan memakai kolom catatan check-in yang sudah ada. Rawat inap tidak terpengaruh. `pnpm e2e` hijau, alur diuji skrip |
+| 2026-10-07 | 3E.3 | Selesai | **Pencarian global** (`/cari`, kolom di sidebar, pintasan Ctrl/⌘+K atau `/`): pasien, pemilik, tagihan, produk, masing-masing 5 teratas + tautan "Lihat semua"; kelompok hasil mengikuti hak akses peran (Kasir tidak melihat produk, Dokter tidak melihat tagihan). **Dasbor**: baris aksi cepat sesuai peran (Kasir, pasien baru, check-in hotel, grooming, operasi, janji temu) dan kartu "Janji temu hari ini". Fase 3 seluruhnya selesai; belum diuji di browser |
 | 2026-10-04 | UI/UX | Selesai | 14 catatan review UI/UX. Sidebar dikelompokkan (Pelayanan/Kasir/Stok/Admin), tetap di tempat dengan scroll sendiri, ikon saja di layar tablet; kolom cari global + pintasan `/`. Beranda Dokter (pasien belum diperiksa) dan Kasir (menunggu bayar, draft retail, pengingat tutup kas). Input uang berpemisah ribuan (`MoneyInput`, server tetap menerima integer). Void invoice dipindah ke menu "Lainnya"; semua konfirmasi memakai dialog yang sama (`ConfirmButton`, termasuk Tutup Kas dan finalisasi opname). Toast setelah simpan (cookie `flash` untuk aksi server, `toast()` untuk aksi klien). `PageHeader` seragam di Rekam Medis, Rawat Inap, Invoice, Opname; aksi tabel = satu tombol + menu; empty state dengan tombol aksi; grafik tren dengan skala dan ketuk-untuk-nilai; fokus otomatis ke kolom scan, Enter untuk bayar; lebar minimum tabel diturunkan untuk tablet. Butir 13 (form login) tidak direproduksi di kode: isian hilang hanya saat mengetik sebelum halaman siap di alat otomasi, perlu dicoba manual |
 
 ## Perintah Proyek
