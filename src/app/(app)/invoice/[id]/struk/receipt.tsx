@@ -51,7 +51,7 @@ export function Receipt({ data }: { data: ReceiptData }) {
       `}</style>
 
       <div className="mb-4 flex flex-wrap items-center gap-3 print:hidden">
-        <Link href={`/invoice/${data.invoiceId}`} className="text-[13px] font-medium text-primary">← Invoice</Link>
+        <Link href={`/invoice/${data.invoiceId}`} className="text-[12.5px] font-medium text-primary">← Invoice</Link>
         <Button
           type="button"
           disabled={pending}
@@ -64,7 +64,7 @@ export function Receipt({ data }: { data: ReceiptData }) {
         >
           {data.copy ? "Cetak ulang (salinan)" : "Cetak struk"}
         </Button>
-        <span className="text-[13px] text-muted-foreground">Kertas {data.paperWidth} mm (ubah di Pengaturan)</span>
+        <span className="text-[12.5px] text-muted-foreground">Kertas {data.paperWidth} mm (ubah di Pengaturan)</span>
       </div>
 
       <div
@@ -73,13 +73,13 @@ export function Receipt({ data }: { data: ReceiptData }) {
         className="bg-white px-3 py-3 font-mono text-[12px] leading-snug text-black shadow-sm ring-1 ring-border"
       >
         <div className="text-center">
-          <div className="text-[14px] font-bold">{data.clinic.name}</div>
+          <div className="text-[13.5px] font-bold">{data.clinic.name}</div>
           {data.clinic.address && <div>{data.clinic.address}</div>}
           {data.clinic.phone && <div>Telp {data.clinic.phone}</div>}
           {data.clinic.npwp && <div>NPWP {data.clinic.npwp}</div>}
         </div>
         <Rule />
-        {data.copy && <div className="mb-1 text-center text-[13px] font-bold tracking-widest">*** SALINAN ***</div>}
+        {data.copy && <div className="mb-1 text-center text-[12.5px] font-bold tracking-widest">*** SALINAN ***</div>}
         <Row left="No" right={data.invoiceNo} />
         <Row left="Tgl" right={`${formatDate(at)} ${formatTime(at)}`} />
         <Row left="Kasir" right={data.cashier} />

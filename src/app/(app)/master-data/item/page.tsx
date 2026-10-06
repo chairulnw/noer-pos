@@ -51,7 +51,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                 <span className={item.active ? "font-medium" : "font-medium text-muted-foreground"}>{item.name}</span>
                 {!item.active && <StatusChip tone="neutral">Nonaktif</StatusChip>}
               </div>
-              <div className="text-[13px] text-muted-foreground">{item.sku ? `SKU: ${item.sku}` : item.type === "SERVICE" ? "Layanan" : "Produk"}{item.billingUnit === "PER_DAY" && " · per hari"}</div>
+              <div className="text-[12.5px] text-muted-foreground">{item.sku ? `SKU: ${item.sku}` : item.type === "SERVICE" ? "Layanan" : "Produk"}{item.billingUnit === "PER_DAY" && " · per hari"}</div>
             </td>
             <td className="px-4 py-3 capitalize">{item.category}</td>
             <td className="px-4 py-3 text-right font-medium tabular-nums">{formatRupiah(item.sellPrice)}</td>

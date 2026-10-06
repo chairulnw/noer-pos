@@ -12,7 +12,7 @@ export default async function EditCostPage({ params }: { params: Promise<{ id: s
   if (!cost) notFound();
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah biaya: {cost.name}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah biaya: {cost.name}</h1>
       <CostForm id={cost.id} defaults={{ name: cost.name, amount: String(cost.amount), category: cost.category, costDate: cost.costDate.toISOString().slice(0, 10), notes: cost.notes ?? "" }} />
     </div>
   );

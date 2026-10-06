@@ -42,7 +42,7 @@ export default async function GroomingPage({ searchParams }: { searchParams: Pro
             <td className="whitespace-nowrap px-4 py-3 tabular-nums">{formatDate(g.groomingDate)}</td>
             <td className="px-4 py-3">
               <div className="flex flex-wrap items-center gap-1.5"><span className="font-medium">{g.patient.name}</span><ClinicalTags allergyNote={g.patient.allergyNote} aggressive={g.patient.aggressive} /></div>
-              <div className="text-[13px] text-muted-foreground">{g.patient.species} · {g.patient.owner.name}</div>
+              <div className="text-[12.5px] text-muted-foreground">{g.patient.species} · {g.patient.owner.name}</div>
             </td>
             <td className="px-4 py-3">{g.serviceItem?.name ?? "—"}</td>
             <td className="px-4 py-3"><StatusChip tone={GROOMING_STATUS[g.status].tone}>{GROOMING_STATUS[g.status].label}</StatusChip></td>

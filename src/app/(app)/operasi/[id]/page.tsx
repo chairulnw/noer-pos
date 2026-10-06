@@ -11,7 +11,7 @@ import { isEditable, SURGERY_STATUS } from "@/lib/surgery-schema";
 import { AddendumForm, CancelButton, CompleteForm, StartButton } from "../status-panel";
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div><dt className="text-[13px] text-muted-foreground">{label}</dt><dd className="whitespace-pre-wrap text-[15px]">{children || "—"}</dd></div>
+  <div><dt className="text-[12.5px] text-muted-foreground">{label}</dt><dd className="whitespace-pre-wrap text-[14px]">{children || "—"}</dd></div>
 );
 
 export default async function SurgeryDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,9 +24,9 @@ export default async function SurgeryDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <Link href="/operasi" className="text-[13px] font-medium text-primary">← Bedah & Operasi</Link>
+        <Link href="/operasi" className="text-[12.5px] font-medium text-primary">← Bedah & Operasi</Link>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-[22px] font-semibold leading-11">{s.procedure}</h1>
+          <h1 className="text-[20px] font-semibold leading-11">{s.procedure}</h1>
           <StatusChip tone={SURGERY_STATUS[s.status].tone}>{SURGERY_STATUS[s.status].label}</StatusChip>
           {canEdit && isEditable(s.status) && <Button asChild variant="outline"><Link href={`/operasi/${s.id}/ubah`}>Ubah</Link></Button>}
         </div>
@@ -71,8 +71,8 @@ export default async function SurgeryDetailPage({ params }: { params: Promise<{ 
           {s.addenda.length === 0 && <p className="text-sm text-muted-foreground">Belum ada addendum.</p>}
           {s.addenda.map((a) => (
             <div key={a.id} className="border-b pb-3 last:border-0">
-              <p className="whitespace-pre-wrap text-[15px]">{a.note}</p>
-              <p className="text-[13px] text-muted-foreground">{a.user.name} · {formatDate(a.createdAt)} {formatTime(a.createdAt)}</p>
+              <p className="whitespace-pre-wrap text-[14px]">{a.note}</p>
+              <p className="text-[12.5px] text-muted-foreground">{a.user.name} · {formatDate(a.createdAt)} {formatTime(a.createdAt)}</p>
             </div>
           ))}
           {canEdit && <AddendumForm id={s.id} />}

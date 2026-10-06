@@ -81,7 +81,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
             <dl className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3">
               {VITAL_LABELS.map(([key, label, unit]) => (
                 <div key={key}>
-                  <dt className="text-[13px] text-muted-foreground">{label}</dt>
+                  <dt className="text-[12.5px] text-muted-foreground">{label}</dt>
                   <dd className="text-lg font-semibold tabular-nums">{vitals[key] === null ? "—" : `${vitals[key]} ${unit}`}</dd>
                 </div>
               ))}
@@ -91,16 +91,16 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
             <div className="grid gap-4 md:grid-cols-2">
               {([["S · Subjective", record.subjective], ["O · Objective", record.objective], ["A · Assessment", record.assessment], ["P · Plan", record.plan]] as const).map(([label, value]) => (
                 <div key={label}>
-                  <h3 className="text-[14.5px] font-semibold">{label}</h3>
-                  <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{value || "—"}</p>
+                  <h3 className="text-[13.5px] font-semibold">{label}</h3>
+                  <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{value || "—"}</p>
                 </div>
               ))}
               <div className="md:col-span-2">
-                <h3 className="text-[14.5px] font-semibold">Diagnosa</h3>
-                <p className="text-[15px]">{record.diagnosis || "—"}</p>
+                <h3 className="text-[13.5px] font-semibold">Diagnosa</h3>
+                <p className="text-[14px]">{record.diagnosis || "—"}</p>
               </div>
             </div>
-            {record.finalizedAt && <p className="text-[13px] text-muted-foreground">Difinalkan {formatDate(record.finalizedAt)}. Isi asli tidak bisa diubah, koreksi lewat addendum.</p>}
+            {record.finalizedAt && <p className="text-[12.5px] text-muted-foreground">Difinalkan {formatDate(record.finalizedAt)}. Isi asli tidak bisa diubah, koreksi lewat addendum.</p>}
           </Card>
         </>
       ) : (
@@ -123,8 +123,8 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
             <div key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 last:border-0 last:pb-0">
               <div>
                 <span className="font-medium">{p.item.name}</span>
-                <span className="text-[13.5px] text-muted-foreground"> · {p.item.type === "SERVICE" ? "Tindakan" : "Resep"}</span>
-                {p.instruction && <div className="text-[13.5px] text-muted-foreground">{p.instruction}</div>}
+                <span className="text-[13px] text-muted-foreground"> · {p.item.type === "SERVICE" ? "Tindakan" : "Resep"}</span>
+                {p.instruction && <div className="text-[13px] text-muted-foreground">{p.instruction}</div>}
               </div>
               <span className="tabular-nums">{Number(p.qty)} {p.item.baseUnit}</span>
             </div>
@@ -138,7 +138,7 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
           <div key={v.id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2.5 last:border-0 last:pb-0">
             <div>
               <div className="font-medium">{v.item.name}</div>
-              <div className="text-[13.5px] text-muted-foreground">
+              <div className="text-[13px] text-muted-foreground">
                 {formatDate(v.givenAt)}{v.batchNo && ` · Batch ${v.batchNo}`}{v.nextDue && ` · berikutnya ${formatDate(v.nextDue)}`}
               </div>
             </div>
@@ -165,17 +165,17 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
         {examinations.map((e) => (
           <Link key={e.id} href={`${EXAM[e.type].path}/${e.id}`} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 font-medium text-primary last:border-0 last:pb-0">
             {e.name}
-            <span className="text-[13px] font-normal text-muted-foreground">{e.type === "LAB" ? "Lab" : "Radiologi"} · {formatDate(e.performedAt)}</span>
+            <span className="text-[12.5px] font-normal text-muted-foreground">{e.type === "LAB" ? "Lab" : "Radiologi"} · {formatDate(e.performedAt)}</span>
           </Link>
         ))}
       </Card>
 
-      <Card title="Lampiran hasil lab / rontgen" aside={<span className="text-[13px] text-muted-foreground">PDF, JPG, PNG, maks 10 MB</span>}>
+      <Card title="Lampiran hasil lab / rontgen" aside={<span className="text-[12.5px] text-muted-foreground">PDF, JPG, PNG, maks 10 MB</span>}>
         {record.attachments.length === 0 && <p className="text-sm text-muted-foreground">Belum ada lampiran.</p>}
         {record.attachments.map((a) => (
           <a key={a.id} href={`/api/lampiran/${a.id}`} target="_blank" rel="noreferrer" className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 font-medium text-primary last:border-0 last:pb-0">
             {a.fileName}
-            <span className="text-[13px] font-normal text-muted-foreground">{formatDate(a.createdAt)} · {(a.size / 1024).toFixed(0)} KB</span>
+            <span className="text-[12.5px] font-normal text-muted-foreground">{formatDate(a.createdAt)} · {(a.size / 1024).toFixed(0)} KB</span>
           </a>
         ))}
         {canEdit && <AttachmentForm visitId={visit.id} recordId={record.id} />}
@@ -186,8 +186,8 @@ export default async function RecordPage({ params }: { params: Promise<{ visitId
           {record.addenda.length === 0 && <p className="text-sm text-muted-foreground">Belum ada addendum.</p>}
           {record.addenda.map((a) => (
             <div key={a.id} className="border-b pb-3 last:border-0 last:pb-0">
-              <p className="whitespace-pre-wrap text-[15px]">{a.note}</p>
-              <p className="text-[13px] text-muted-foreground">{a.user.name} · {formatDate(a.createdAt)}</p>
+              <p className="whitespace-pre-wrap text-[14px]">{a.note}</p>
+              <p className="text-[12.5px] text-muted-foreground">{a.user.name} · {formatDate(a.createdAt)}</p>
             </div>
           ))}
           {canEdit && <AddendumForm visitId={visit.id} recordId={record.id} />}

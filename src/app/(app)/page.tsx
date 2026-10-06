@@ -41,7 +41,7 @@ const METRICS = [
 
 function Tile({ href, label, icon: Icon, tone }: { href: string; label: string; icon: LucideIcon; tone: keyof typeof TONE }) {
   return (
-    <Link href={href} className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-3 py-5 text-center text-[15px] font-semibold hover:border-primary/40">
+    <Link href={href} className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-3 py-5 text-center text-[14px] font-semibold hover:border-primary/40">
       <span className={cn("grid size-14 place-items-center rounded-2xl", TONE[tone])}><Icon className="size-6" /></span>
       {label}
     </Link>
@@ -52,10 +52,10 @@ function BigStat({ label, value, hint, icon: Icon, tone, href }: { label: string
   const body = (
     <div className="h-full rounded-2xl border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <span className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+        <span className="text-[12.5px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
         <span className={cn("grid size-10 place-items-center rounded-xl", TONE[tone])}><Icon className="size-5" /></span>
       </div>
-      <div className="mt-4 text-[28px] font-bold leading-none tabular-nums">{value}</div>
+      <div className="mt-4 text-[26px] font-bold leading-none tabular-nums">{value}</div>
       <div className="mt-2 text-sm text-muted-foreground">{hint}</div>
     </div>
   );
@@ -80,8 +80,8 @@ function AlertRow({ tone, title, detail, href, action }: { tone: keyof typeof DO
     <div className="flex min-h-14 items-center gap-3 border-b last:border-0">
       <span className={`size-2 shrink-0 rounded-full ${DOT[tone]}`} />
       <div className="min-w-0 flex-1 py-2">
-        <div className="truncate text-[14.5px] font-medium">{title}</div>
-        <div className="text-[13px] text-muted-foreground">{detail}</div>
+        <div className="truncate text-[13.5px] font-medium">{title}</div>
+        <div className="text-[12.5px] text-muted-foreground">{detail}</div>
       </div>
       <Link href={href} className="inline-flex min-h-11 items-center px-1 text-sm font-medium text-primary">{action}</Link>
     </div>
@@ -101,8 +101,8 @@ function QueueRow({ title, detail, href, action }: { title: React.ReactNode; det
   return (
     <div className="flex min-h-14 items-center gap-3 border-b last:border-0">
       <div className="min-w-0 flex-1 py-2">
-        <div className="flex flex-wrap items-center gap-1.5 text-[14.5px] font-medium">{title}</div>
-        <div className="truncate text-[13px] text-muted-foreground">{detail}</div>
+        <div className="flex flex-wrap items-center gap-1.5 text-[13.5px] font-medium">{title}</div>
+        <div className="truncate text-[12.5px] text-muted-foreground">{detail}</div>
       </div>
       <Button asChild variant="outline"><Link href={href}>{action}</Link></Button>
     </div>
@@ -223,7 +223,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
         <div className={cn("grid gap-2", metrics.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-1")}>
           {metrics.map((m) => (
-            <Link key={m.id} href={`/?metrik=${m.id}&periode=${period}`} className={cn("rounded-xl border px-4 py-2.5 text-center text-[15px] font-semibold", m.id === metric.id ? "border-primary bg-accent text-primary" : "bg-card text-muted-foreground")}>{m.label}</Link>
+            <Link key={m.id} href={`/?metrik=${m.id}&periode=${period}`} className={cn("rounded-xl border px-4 py-2.5 text-center text-[14px] font-semibold", m.id === metric.id ? "border-primary bg-accent text-primary" : "bg-card text-muted-foreground")}>{m.label}</Link>
           ))}
         </div>
         <div className="flex flex-wrap gap-2 text-sm font-semibold">
@@ -265,7 +265,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               action="Kartu stok"
             />
           ))}
-          <p className="pt-3 text-[13px] text-muted-foreground">Peringatan hampir expired: {alerts.warnDays} hari (Pengaturan). Batch expired tidak bisa dijual.</p>
+          <p className="pt-3 text-[12.5px] text-muted-foreground">Peringatan hampir expired: {alerts.warnDays} hari (Pengaturan). Batch expired tidak bisa dijual.</p>
         </section>
       )}
     </div>

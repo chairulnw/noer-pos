@@ -24,8 +24,8 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
     <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <Link href="/inventaris" className="text-[13px] font-medium text-primary">← Inventaris</Link>
-          <h1 className="text-[22px] font-semibold leading-11">{item.name}</h1>
+          <Link href="/inventaris" className="text-[12.5px] font-medium text-primary">← Inventaris</Link>
+          <h1 className="text-[20px] font-semibold leading-11">{item.name}</h1>
           <p className="text-sm text-muted-foreground">Kartu stok · satuan dasar {item.baseUnit}</p>
         </div>
         <Button asChild>
@@ -36,9 +36,9 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
       <section className="overflow-hidden rounded-[10px] border bg-card">
         <h2 className="border-b px-5 py-3 text-base font-semibold">Batch</h2>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-[14.5px]">
+          <table className="w-full min-w-[560px] text-[13.5px]">
             <thead>
-              <tr className="border-b text-left text-[13px] text-muted-foreground">
+              <tr className="border-b text-left text-[12.5px] text-muted-foreground">
                 <th className="px-5 py-2.5 font-normal">No. batch</th>
                 <th className="px-5 py-2.5 font-normal">Expired</th>
                 <th className="px-5 py-2.5 text-right font-normal">Sisa</th>
@@ -70,9 +70,9 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
       <section className="overflow-hidden rounded-[10px] border bg-card">
         <h2 className="border-b px-5 py-3 text-base font-semibold">Riwayat pergerakan</h2>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-[14.5px]">
+          <table className="w-full min-w-[560px] text-[13.5px]">
             <thead>
-              <tr className="border-b text-left text-[13px] text-muted-foreground">
+              <tr className="border-b text-left text-[12.5px] text-muted-foreground">
                 <th className="px-5 py-2.5 font-normal">Tanggal</th>
                 <th className="px-5 py-2.5 font-normal">Jenis</th>
                 <th className="px-5 py-2.5 font-normal">Batch</th>

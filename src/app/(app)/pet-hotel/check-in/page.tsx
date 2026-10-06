@@ -21,7 +21,7 @@ export default async function PetHotelCheckInPage() {
     <div className="mx-auto max-w-4xl space-y-5">
       <div className="flex items-center gap-3">
         <Link href="/pet-hotel" aria-label="Kembali" className="grid size-10 place-items-center rounded-lg border bg-card"><ArrowLeft className="size-4" /></Link>
-        <h1 className="text-[22px] leading-tight font-semibold">Form Check-In Pet Hotel</h1>
+        <h1 className="text-[20px] leading-tight font-semibold">Form Check-In Pet Hotel</h1>
       </div>
       <HotelCheckInForm slots={slots} patients={patients.map((p) => ({ id: p.id, name: p.name, detail: `${p.species} · ${p.owner.name}` }))} today={dateToJakartaLocal(new Date()).slice(0, 10)} />
     </div>

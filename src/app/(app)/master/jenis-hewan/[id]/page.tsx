@@ -12,7 +12,7 @@ export default async function EditSpeciesPage({ params }: { params: Promise<{ id
   if (!species) notFound();
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah jenis hewan: {species.name}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah jenis hewan: {species.name}</h1>
       <SpeciesForm id={species.id} defaults={{ name: species.name, active: species.active }} />
     </div>
   );

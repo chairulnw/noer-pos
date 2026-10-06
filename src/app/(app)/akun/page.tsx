@@ -6,7 +6,7 @@ export default async function AccountPage() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-[22px] font-semibold leading-11">Akun saya</h1>
+        <h1 className="text-[20px] font-semibold leading-11">Akun saya</h1>
         <p className="text-sm text-muted-foreground">{user.name}</p>
       </header>
       <PasswordForm />

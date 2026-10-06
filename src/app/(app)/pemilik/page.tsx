@@ -36,7 +36,7 @@ export default async function OwnersPage({ searchParams }: { searchParams: Promi
             <td className="px-4 py-3 tabular-nums">{formatWhatsapp(o.whatsapp)}</td>
             <td className="px-4 py-3 text-right tabular-nums">{formatRupiah(o.walletBalance)}</td>
             <td className="px-4 py-3">{o.pets.length === 0 ? <span className="text-muted-foreground">Belum ada</span> : o.pets.join(", ")}</td>
-            <td className="max-w-64 truncate px-4 py-3 text-muted-foreground">{o.address}</td>
+            <td className="max-w-64 truncate px-4 py-3 text-muted-foreground">{o.address || "—"}</td>
             <td className="px-4 py-3 text-right"><Link href={`/pemilik/${o.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Lihat</Link></td>
           </tr>
         ))}

@@ -40,7 +40,7 @@ export default async function OpnamePage({ searchParams }: { searchParams: Promi
       >
         {rows.map((o) => (
           <tr key={o.id} className="border-b last:border-0">
-            <td className="px-4 py-3"><div className="font-medium">{formatDate(o.opnameDate)}</div>{o.note && <div className="max-w-64 truncate text-[13px] text-muted-foreground">{o.note}</div>}</td>
+            <td className="px-4 py-3"><div className="font-medium">{formatDate(o.opnameDate)}</div>{o.note && <div className="max-w-64 truncate text-[12.5px] text-muted-foreground">{o.note}</div>}</td>
             <td className="px-4 py-3">{o.user.name}</td>
             <td className="px-4 py-3 text-right tabular-nums">{o._count.items}</td>
             <td className="px-4 py-3 text-right tabular-nums">{o.items.length}</td>

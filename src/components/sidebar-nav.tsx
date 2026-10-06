@@ -98,7 +98,7 @@ export function SidebarNav({ role }: { role: Role }) {
                 const text = roleLabel?.[role] ?? label;
                 if (soon) {
                   return (
-                    <div key={href} aria-disabled="true" title={`${text} (segera hadir)`} className="flex min-h-11 cursor-not-allowed items-center gap-3 rounded-lg px-3 text-[14.5px] font-medium text-muted-foreground/70 md:group-data-[collapsed=true]/side:hidden">
+                    <div key={href} aria-disabled="true" title={`${text} (segera hadir)`} className="flex min-h-11 cursor-not-allowed items-center gap-3 rounded-lg px-3 text-[13.5px] font-medium text-muted-foreground/70 md:group-data-[collapsed=true]/side:hidden">
                       <Icon className="size-[18px] shrink-0 text-[#B4BAC2]" />
                       <span className="flex-1">{text}</span>
                       <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">Segera</span>
@@ -113,7 +113,7 @@ export function SidebarNav({ role }: { role: Role }) {
                     title={text}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex min-h-11 items-center gap-3 rounded-lg px-3 text-[14.5px] font-medium text-sidebar-foreground hover:bg-muted md:group-data-[collapsed=true]/side:justify-center",
+                      "flex min-h-11 items-center gap-3 rounded-lg px-3 text-[13.5px] font-medium text-sidebar-foreground hover:bg-muted md:group-data-[collapsed=true]/side:justify-center",
                       active && "bg-sidebar-accent font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent",
                     )}
                   >

@@ -38,9 +38,9 @@ export default async function AdmissionPage({ params }: { params: Promise<{ id: 
 
       {(admission.feedingInstructions || admission.notes || admission.expectedCheckOut) && (
         <section className="grid gap-4 rounded-[10px] border bg-card p-5 md:grid-cols-2">
-          {admission.expectedCheckOut && <div><div className="text-[13px] text-muted-foreground">Estimasi check-out</div><div className="text-[15px]">{formatDate(admission.expectedCheckOut)}</div></div>}
-          {admission.feedingInstructions && <div className="md:col-span-2"><div className="text-[13px] text-muted-foreground">Instruksi pakan & jadwal makan</div><div className="whitespace-pre-wrap text-[15px]">{admission.feedingInstructions}</div></div>}
-          {admission.notes && <div className="md:col-span-2"><div className="text-[13px] text-muted-foreground">Catatan khusus / obat bawaan</div><div className="whitespace-pre-wrap text-[15px]">{admission.notes}</div></div>}
+          {admission.expectedCheckOut && <div><div className="text-[12.5px] text-muted-foreground">Estimasi check-out</div><div className="text-[14px]">{formatDate(admission.expectedCheckOut)}</div></div>}
+          {admission.feedingInstructions && <div className="md:col-span-2"><div className="text-[12.5px] text-muted-foreground">Instruksi pakan & jadwal makan</div><div className="whitespace-pre-wrap text-[14px]">{admission.feedingInstructions}</div></div>}
+          {admission.notes && <div className="md:col-span-2"><div className="text-[12.5px] text-muted-foreground">Catatan khusus / obat bawaan</div><div className="whitespace-pre-wrap text-[14px]">{admission.notes}</div></div>}
         </section>
       )}
 
@@ -57,10 +57,10 @@ export default async function AdmissionPage({ params }: { params: Promise<{ id: 
         {logs.map((log) => (
           <div key={log.id} className="grid grid-cols-[130px_minmax(0,1fr)] gap-4 border-b px-5 py-3.5 last:border-0">
             <div>
-              <div className="text-[14.5px] font-medium">{formatDate(log.loggedAt)}</div>
-              <div className="text-[13px] text-muted-foreground tabular-nums">{formatTime(log.loggedAt)} · {log.user.name}</div>
+              <div className="text-[13.5px] font-medium">{formatDate(log.loggedAt)}</div>
+              <div className="text-[12.5px] text-muted-foreground tabular-nums">{formatTime(log.loggedAt)} · {log.user.name}</div>
             </div>
-            <div className="min-w-0 space-y-0.5 text-[14.5px]">
+            <div className="min-w-0 space-y-0.5 text-[13.5px]">
               {log.tempC !== null && <div>Suhu <span className="font-medium tabular-nums">{Number(log.tempC).toLocaleString("id-ID")} °C</span></div>}
               {log.intake && <div>{log.intake}</div>}
               {log.note && <div className="whitespace-pre-wrap text-muted-foreground">{log.note}</div>}

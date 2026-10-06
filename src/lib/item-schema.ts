@@ -2,7 +2,7 @@ import { z } from "zod";
 import { can, type Capability, type Role } from "@/lib/permissions";
 
 export const SERVICE_CATEGORIES = ["konsultasi", "tindakan", "operasi", "rawat inap", "hotel", "grooming"] as const;
-export const PRODUCT_CATEGORIES = ["obat", "vaksin", "pet food", "aksesoris", "consumable"] as const;
+export const PRODUCT_CATEGORIES = ["obat", "vaksin", "pet food", "aksesoris"] as const;
 
 const number = (message = "Isi dengan angka") => z.number({ error: message });
 const rupiah = number().int("Harus bilangan bulat").min(0, "Minimal 0").max(1_000_000_000, "Terlalu besar");

@@ -1,6 +1,6 @@
 export const ITEM_GROUPS = [
   { value: "", label: "Semua Tipe", categories: [] as string[] },
-  { value: "petshop", label: "PetShop", categories: ["pet food", "aksesoris", "consumable"] },
+  { value: "petshop", label: "PetShop", categories: ["pet food", "aksesoris"] },
   { value: "obat", label: "Obat & Resep", categories: ["obat"] },
   { value: "vaksin", label: "Vaksin", categories: ["vaksin"] },
   { value: "konsultasi", label: "Konsultasi", categories: ["konsultasi"] },

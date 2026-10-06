@@ -25,13 +25,13 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: P
 
   const filter = (
     <form className="space-y-3 rounded-[10px] border bg-card p-4">
-      <div className="text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">Filter periode & tanggal</div>
+      <div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Filter periode & tanggal</div>
       <div className="flex flex-wrap items-end gap-2">
         {PL_PRESETS.map((p) => (
           <Link key={p.id} href={link(p.id)} className={cn("flex h-10 items-center rounded-full border px-4 text-sm font-medium", !("error" in range) && range.preset === p.id ? "border-primary bg-accent text-primary" : "bg-card text-muted-foreground")}>{p.label}</Link>
         ))}
-        <label className="ml-2 space-y-1 text-[13px] text-muted-foreground">Dari<input type="date" name="from" defaultValue={"error" in range ? params.from : range.from} className={`${field} block`} /></label>
-        <label className="space-y-1 text-[13px] text-muted-foreground">Sampai<input type="date" name="to" defaultValue={"error" in range ? params.to : range.to} className={`${field} block`} /></label>
+        <label className="ml-2 space-y-1 text-[12.5px] text-muted-foreground">Dari<input type="date" name="from" defaultValue={"error" in range ? params.from : range.from} className={`${field} block`} /></label>
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">Sampai<input type="date" name="to" defaultValue={"error" in range ? params.to : range.to} className={`${field} block`} /></label>
         <Button type="submit" variant="outline">Terapkan</Button>
       </div>
     </form>
@@ -61,7 +61,7 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: P
       {filter}
 
       <section className={cn("rounded-[10px] p-5 text-white", surplus ? "bg-[#0F8B7A]" : "bg-[#B3402F]")}>
-        <div className="text-[13px] font-semibold tracking-wide uppercase opacity-90">Laba bersih (net profit)</div>
+        <div className="text-[12.5px] font-semibold tracking-wide uppercase opacity-90">Laba bersih (net profit)</div>
         <div className="mt-1 text-4xl font-semibold tabular-nums">{formatRupiah(total.net)}</div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/30 pt-3 text-sm">
           <span>{surplus ? "Klinik dalam kondisi surplus operasional" : "Klinik defisit pada periode ini"}</span>
@@ -70,10 +70,10 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: P
       </section>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Pendapatan</div><div className="mt-1 text-xl font-semibold text-success tabular-nums">{formatRupiah(total.sales)}</div><div className="text-[13px] text-muted-foreground">{invoices} transaksi</div></div>
-        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">HPP</div><div className="mt-1 text-xl font-semibold tabular-nums">{formatRupiah(total.cost)}</div><div className="text-[13px] text-muted-foreground">harga beli saat transaksi</div></div>
-        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Laba kotor</div><div className="mt-1 text-xl font-semibold tabular-nums">{formatRupiah(gross)}</div><div className="text-[13px] text-muted-foreground">pendapatan − HPP</div></div>
-        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Pengeluaran</div><div className="mt-1 text-xl font-semibold text-destructive tabular-nums">{formatRupiah(total.opex)}</div><div className="text-[13px] text-muted-foreground">{costCount} pos biaya</div></div>
+        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Pendapatan</div><div className="mt-1 text-xl font-semibold text-success tabular-nums">{formatRupiah(total.sales)}</div><div className="text-[12.5px] text-muted-foreground">{invoices} transaksi</div></div>
+        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">HPP</div><div className="mt-1 text-xl font-semibold tabular-nums">{formatRupiah(total.cost)}</div><div className="text-[12.5px] text-muted-foreground">harga beli saat transaksi</div></div>
+        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Laba kotor</div><div className="mt-1 text-xl font-semibold tabular-nums">{formatRupiah(gross)}</div><div className="text-[12.5px] text-muted-foreground">pendapatan − HPP</div></div>
+        <div className="rounded-[10px] border bg-card p-4"><div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Pengeluaran</div><div className="mt-1 text-xl font-semibold text-destructive tabular-nums">{formatRupiah(total.opex)}</div><div className="text-[12.5px] text-muted-foreground">{costCount} pos biaya</div></div>
       </div>
 
       <ProfitChart
@@ -91,8 +91,8 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: P
           <p className="p-8 text-center text-sm text-muted-foreground">Tidak ada pengeluaran pada periode ini.</p>
         ) : (
           categories.map((c) => (
-            <div key={c.category} className="flex items-center justify-between gap-3 border-b px-5 py-3 text-[14.5px] last:border-0">
-              <span><span className="font-medium">{c.category}</span> <span className="text-[13px] text-muted-foreground">· {c.count} catatan</span></span>
+            <div key={c.category} className="flex items-center justify-between gap-3 border-b px-5 py-3 text-[13.5px] last:border-0">
+              <span><span className="font-medium">{c.category}</span> <span className="text-[12.5px] text-muted-foreground">· {c.count} catatan</span></span>
               <span className="font-medium tabular-nums">{formatRupiah(c.total)}</span>
             </div>
           ))

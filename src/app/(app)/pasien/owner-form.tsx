@@ -27,8 +27,8 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         <Field label="No. WhatsApp" name="whatsapp" errors={err("whatsapp")}>
           <Input id="whatsapp" name="whatsapp" inputMode="tel" defaultValue={owner?.whatsapp ? `0${owner.whatsapp.slice(2)}` : ""} placeholder="0812-3456-7890" required />
         </Field>
-        <Field label="Alamat" name="address" errors={err("address")} full>
-          <Textarea id="address" name="address" defaultValue={owner?.address} rows={2} required />
+        <Field label="Alamat (opsional)" name="address" errors={err("address")} full>
+          <Textarea id="address" name="address" defaultValue={owner?.address} rows={2} />
         </Field>
         <Field label="Catatan (opsional)" name="notes" errors={err("notes")} full>
           <Textarea id="notes" name="notes" defaultValue={owner?.notes ?? ""} rows={2} />

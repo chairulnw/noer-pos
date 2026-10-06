@@ -46,14 +46,23 @@ export function TopUpForm({ ownerId, ownerName, balance }: { ownerId: string; ow
 
 export function AdjustForm({ ownerId, ownerName, balance }: { ownerId: string; ownerName: string; balance: number }) {
   const [state, formAction, pending] = useActionState<WalletFormState, FormData>(adjustAction, {});
+  const [sign, setSign] = useState<1 | -1>(1);
+  const [amount, setAmount] = useState("");
   const err = (key: string) => state.errors?.[key];
   return (
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
       <input type="hidden" name="ownerId" value={ownerId} />
+      <input type="hidden" name="delta" value={amount ? String(sign * Number(amount)) : ""} />
       <Section title={`Koreksi saldo ${ownerName}`}>
-        <p className="text-sm text-muted-foreground md:col-span-2">Saldo saat ini <b className="text-foreground tabular-nums">{formatRupiah(balance)}</b>. Isi angka positif untuk menambah, negatif untuk mengurangi. Tercatat di audit log.</p>
-        <Field label="Selisih saldo (Rp)" name="delta" errors={err("delta")} hint="Contoh: 50000 atau -50000">
-          <Input id="delta" name="delta" type="number" step="1" required autoFocus />
+        <p className="text-sm text-muted-foreground md:col-span-2">Saldo saat ini <b className="text-foreground tabular-nums">{formatRupiah(balance)}</b>. Pilih tambah atau kurangi, lalu isi nominalnya. Tercatat di audit log.</p>
+        <Field label="Koreksi" name="sign">
+          <select id="sign" value={sign} onChange={(e) => setSign(Number(e.target.value) as 1 | -1)} className={selectClass}>
+            <option value={1}>Tambah saldo</option>
+            <option value={-1}>Kurangi saldo</option>
+          </select>
+        </Field>
+        <Field label="Nominal (Rp)" name="delta" errors={err("delta")}>
+          <MoneyInput id="delta" value={amount} onValueChange={setAmount} className="h-11 w-full rounded-lg border border-input bg-card px-3 text-base tabular-nums outline-none" required autoFocus />
         </Field>
         <Field label="Alasan koreksi" name="reason" errors={err("reason")} full>
           <Textarea id="reason" name="reason" rows={2} required />

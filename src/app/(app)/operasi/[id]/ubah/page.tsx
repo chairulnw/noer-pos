@@ -16,7 +16,7 @@ export default async function EditSurgeryPage({ params }: { params: Promise<{ id
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah operasi: {s.patient.name}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah operasi: {s.patient.name}</h1>
       <SurgeryForm
         surgeryId={s.id}
         doctors={doctors}

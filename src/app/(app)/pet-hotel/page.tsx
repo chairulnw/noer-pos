@@ -38,7 +38,7 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
   const stat = (label: string, value: number, cls: string) => (
     <div className={cn("rounded-2xl border p-4", cls)}>
       <div className="text-[12px] font-bold tracking-wide uppercase opacity-80">{label}</div>
-      <div className="mt-1 text-[28px] leading-none font-bold tabular-nums">{value}</div>
+      <div className="mt-1 text-[26px] leading-none font-bold tabular-nums">{value}</div>
     </div>
   );
 
@@ -46,7 +46,7 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
     <div className="space-y-5">
       <div className="flex items-center gap-3">
         <span className="grid size-10 place-items-center rounded-lg bg-accent text-primary"><Hotel className="size-5" /></span>
-        <h1 className="text-[22px] leading-tight font-semibold">Pet Hotel & Penitipan</h1>
+        <h1 className="text-[20px] leading-tight font-semibold">Pet Hotel & Penitipan</h1>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -60,7 +60,7 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
         <form action="/pet-hotel" className="flex min-w-60 flex-1 items-center gap-2.5 rounded-xl border border-input bg-background px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
           <input type="hidden" name="tab" value={tab} />
           <Search className="size-[18px] text-muted-foreground" />
-          <input name="q" defaultValue={params.q} data-search aria-label="Cari" placeholder="Cari pasien, pemilik, atau nomor kandang…" className="h-11 min-w-0 flex-1 bg-transparent text-[15px] outline-none" />
+          <input name="q" defaultValue={params.q} data-search aria-label="Cari" placeholder="Cari pasien, pemilik, atau nomor kandang…" className="h-11 min-w-0 flex-1 bg-transparent text-[14px] outline-none" />
         </form>
         <MasterKandang rooms={master} canManage={can(user.role, "manage_rooms")} />
         <Button asChild><Link href="/pet-hotel/check-in"><Plus className="size-4" /> Check-In Boarding</Link></Button>
@@ -82,11 +82,11 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="text-base font-bold">{a.patient.name}</div>
-                      <div className="text-[13px] text-muted-foreground">Owner: {a.patient.owner.name}</div>
+                      <div className="text-[12.5px] text-muted-foreground">Owner: {a.patient.owner.name}</div>
                     </div>
                     <span className="rounded-full border border-warning/40 bg-warning/10 px-2.5 py-0.5 text-[12px] font-bold text-warning">Kandang {a.room.name}</span>
                   </div>
-                  <dl className="space-y-1 rounded-xl bg-muted/50 p-3 text-[13.5px]">
+                  <dl className="space-y-1 rounded-xl bg-muted/50 p-3 text-[13px]">
                     <div className="flex justify-between"><dt className="text-muted-foreground">Tgl Masuk:</dt><dd className="font-semibold">{formatDate(a.checkIn)}</dd></div>
                     {a.expectedCheckOut && <div className="flex justify-between"><dt className="text-muted-foreground">Estimasi Keluar:</dt><dd className="font-semibold">{formatDate(a.expectedCheckOut)}</dd></div>}
                     <div className="flex justify-between"><dt className="text-muted-foreground">Durasi Berjalan:</dt><dd className="font-semibold text-warning">{days} Hari ({formatRupiah(a.rateItem.sellPrice)}/hari)</dd></div>
@@ -111,7 +111,7 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
               return (
                 <div key={r.id} className={cn("space-y-1.5 rounded-2xl border p-4", STATE[state].card)}>
                   <div className="flex items-center justify-between"><span className="text-xl font-bold">{r.name}</span><span className={cn("size-2.5 rounded-full", STATE[state].dot)} /></div>
-                  <div className="text-[14px] font-semibold text-foreground">{r.suitableFor ?? "Umum"}{r.capacity > 1 && ` · ${r.admissions.length}/${r.capacity}`}</div>
+                  <div className="text-[13.5px] font-semibold text-foreground">{r.suitableFor ?? "Umum"}{r.capacity > 1 && ` · ${r.admissions.length}/${r.capacity}`}</div>
                   <div className="text-[12.5px] text-muted-foreground">{r.defaultRate ? `${formatRupiah(r.defaultRate.sellPrice)} / hari` : "Tarif belum diisi"}</div>
                   <div className="flex items-center justify-between border-t pt-2 text-[12px] font-bold tracking-wide uppercase">
                     {STATE[state].label}
@@ -133,7 +133,7 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
               <div key={a.id} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
                 <CheckCircle2 className="size-5 text-success" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[14.5px] font-semibold">{a.patient.name} • Kandang {a.room.name}</div>
+                  <div className="text-[13.5px] font-semibold">{a.patient.name} • Kandang {a.room.name}</div>
                   <div className="text-[12.5px] text-muted-foreground">Check-Out: {a.checkOut ? formatDate(a.checkOut) : "—"} · Owner {a.patient.owner.name}</div>
                 </div>
                 {a.invoices[0] && can(user.role, "manage_invoice_payment") && <Link href={`/invoice/${a.invoices[0].id}`} className="text-sm font-medium text-primary">Tagihan</Link>}

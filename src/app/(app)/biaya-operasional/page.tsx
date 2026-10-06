@@ -44,7 +44,7 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
         {rows.map((c) => (
           <tr key={c.id} className="border-b last:border-0">
             <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(c.costDate)}</td>
-            <td className="px-4 py-3"><div className="font-medium">{c.name}</div>{c.notes && <div className="max-w-80 truncate text-[13px] text-muted-foreground">{c.notes}</div>}</td>
+            <td className="px-4 py-3"><div className="font-medium">{c.name}</div>{c.notes && <div className="max-w-80 truncate text-[12.5px] text-muted-foreground">{c.notes}</div>}</td>
             <td className="px-4 py-3">{c.category}</td>
             <td className="px-4 py-3 text-right font-medium tabular-nums">{formatRupiah(c.amount)}</td>
             <td className="px-4 py-3">

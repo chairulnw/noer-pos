@@ -1,5 +1,6 @@
 "use client";
 
+import { MoneyInput } from "@/components/money-input";
 import { Minus, Plus, ShoppingCart, Trash2, UserRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
@@ -32,8 +33,8 @@ function Line({ invoiceId, line, editable, canDiscount, run }: { invoiceId: stri
     <li className="space-y-2 border-b py-3 last:border-0">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[14.5px] leading-snug font-medium">{line.name}</div>
-          <div className="text-[13px] text-muted-foreground tabular-nums">{formatRupiah(line.unitPrice)}</div>
+          <div className="text-[13.5px] leading-snug font-medium">{line.name}</div>
+          <div className="text-[12.5px] text-muted-foreground tabular-nums">{formatRupiah(line.unitPrice)}</div>
         </div>
         {editable && (
           <button type="button" aria-label={`Hapus ${line.name}`} onClick={() => run(() => removeItemAction(invoiceId, line.id))} className="-mt-1 -mr-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted">
@@ -67,9 +68,9 @@ function Line({ invoiceId, line, editable, canDiscount, run }: { invoiceId: stri
         <div className="text-right">
           <div className="font-semibold tabular-nums">{formatRupiah(line.total)}</div>
           {editable && canDiscount ? (
-            <button type="button" onClick={() => setOpen(!open)} className="min-h-8 text-[13px] font-medium text-primary">{discountText}</button>
+            <button type="button" onClick={() => setOpen(!open)} className="min-h-8 text-[12.5px] font-medium text-primary">{discountText}</button>
           ) : (
-            line.discountAmount > 0 && <div className="text-[13px] text-muted-foreground">{discountText}</div>
+            line.discountAmount > 0 && <div className="text-[12.5px] text-muted-foreground">{discountText}</div>
           )}
         </div>
       </div>
@@ -80,7 +81,7 @@ function Line({ invoiceId, line, editable, canDiscount, run }: { invoiceId: stri
             <option value="PERCENT">Persen (%)</option>
             <option value="AMOUNT">Nominal (Rp)</option>
           </select>
-          {type && <input type="number" min="0" step="1" aria-label="Nilai diskon" value={value} onChange={(e) => setValue(e.target.value)} className={`${small} w-28`} />}
+          {type === "AMOUNT" ? <MoneyInput aria-label="Nilai diskon" value={value} onValueChange={setValue} className={`${small} w-28`} /> : type && <input type="number" min="0" max="100" step="1" aria-label="Nilai diskon (%)" value={value} onChange={(e) => setValue(e.target.value)} className={`${small} w-28`} />}
           <button type="button" onClick={() => { save(line.qty, { type: type || null, value: Number(value) || 0 }); setOpen(false); }} className="h-10 rounded-lg border px-3 text-sm font-medium">Terapkan</button>
         </div>
       )}
@@ -124,11 +125,11 @@ function Customer({ invoiceId, name, locked, editable, run }: { invoiceId: strin
       {open && (
         <div className="space-y-2 rounded-lg bg-muted/50 p-3">
           <input value={query} onChange={(e) => search(e.target.value)} autoFocus aria-label="Cari pemilik" placeholder="Nama atau no. WhatsApp pemilik" className={`${small} w-full`} />
-          {query.trim().length >= 2 && results.length === 0 && <p className="text-[13px] text-muted-foreground">Pemilik tidak ditemukan.</p>}
+          {query.trim().length >= 2 && results.length === 0 && <p className="text-[12.5px] text-muted-foreground">Pemilik tidak ditemukan.</p>}
           {results.map((o) => (
             <button key={o.id} type="button" onClick={() => choose(o.id)} className="flex min-h-11 w-full flex-col items-start rounded-lg border bg-card px-3 py-1.5 text-left">
               <span className="text-sm font-medium">{o.name}</span>
-              <span className="text-[13px] text-muted-foreground">{o.pets.length ? o.pets.join(", ") : "Belum ada hewan"}</span>
+              <span className="text-[12.5px] text-muted-foreground">{o.pets.length ? o.pets.join(", ") : "Belum ada hewan"}</span>
             </button>
           ))}
         </div>
@@ -154,7 +155,7 @@ export function PosCart({ invoiceId, lines, editable, canDiscount, customerName,
         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><ShoppingCart className="size-5" /></span>
         <div>
           <h2 className="text-base leading-tight font-semibold">Keranjang</h2>
-          <p className="text-[13px] text-muted-foreground tabular-nums">{invoiceNo ? `${invoiceNo} · ` : ""}{lines.length} item</p>
+          <p className="text-[12.5px] text-muted-foreground tabular-nums">{invoiceNo ? `${invoiceNo} · ` : ""}{lines.length} item</p>
         </div>
       </div>
       <Customer invoiceId={invoiceId} name={customerName} locked={customerLocked} editable={editable} run={run} />

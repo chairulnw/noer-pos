@@ -12,7 +12,7 @@ export default async function StockInPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Stok masuk</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Stok masuk</h1>
       <StockInForm products={products} defaultItemId={item && z.guid().safeParse(item).success ? item : undefined} />
     </div>
   );

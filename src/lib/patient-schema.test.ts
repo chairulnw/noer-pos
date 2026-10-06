@@ -69,9 +69,12 @@ describe("ownerSchema", () => {
   it.each([
     ["nama kosong", { name: " " }],
     ["WA terlalu pendek", { whatsapp: "0812-33" }],
-    ["alamat kosong", { address: "" }],
   ])("menolak %s", (_name, patch) => {
     expect(ownerSchema.safeParse({ ...valid, ...patch }).success).toBe(false);
+  });
+
+  it("alamat boleh kosong", () => {
+    expect(ownerSchema.safeParse({ ...valid, address: "" }).success).toBe(true);
   });
 });
 

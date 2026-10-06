@@ -25,7 +25,7 @@ export default async function VisitsPage() {
       <AutoRefresh seconds={10} />
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-semibold leading-11">{isDoctor ? "Pasien Hari Ini" : "Kunjungan"}</h1>
+          <h1 className="text-[20px] font-semibold leading-11">{isDoctor ? "Pasien Hari Ini" : "Kunjungan"}</h1>
           <p className="text-sm text-muted-foreground">{formatDate(todayJakarta())}</p>
         </div>
         <Button asChild>
@@ -34,9 +34,9 @@ export default async function VisitsPage() {
       </header>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[560px] text-[14.5px]">
+        <table className="w-full min-w-[560px] text-[13.5px]">
           <thead>
-            <tr className="border-b text-left text-[13px] text-muted-foreground">
+            <tr className="border-b text-left text-[12.5px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Jam</th>
               <th className="px-4 py-2.5 font-normal">Pasien</th>
               <th className="px-4 py-2.5 font-normal">Keluhan</th>
@@ -63,7 +63,7 @@ export default async function VisitsPage() {
                     </Link>
                     <ClinicalTags allergyNote={v.patient.allergyNote} aggressive={v.patient.aggressive} />
                   </div>
-                  <div className="text-[13px] text-muted-foreground">
+                  <div className="text-[12.5px] text-muted-foreground">
                     {v.patient.species} · {v.patient.rmNo}
                   </div>
                 </td>

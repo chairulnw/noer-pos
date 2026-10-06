@@ -36,15 +36,15 @@ export default async function DepositPage({ searchParams }: { searchParams: Prom
       />
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-[10px] border bg-card p-4">
-          <div className="text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">Total saldo titipan klien</div>
+          <div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Total saldo titipan klien</div>
           <div className="mt-1 text-3xl font-semibold tabular-nums">{formatRupiah(summary.total)}</div>
-          <div className="text-[13px] text-muted-foreground">{summary.owners} pemilik memiliki saldo aktif</div>
+          <div className="text-[12.5px] text-muted-foreground">{summary.owners} pemilik memiliki saldo aktif</div>
         </div>
         {owner && (
           <div className="rounded-[10px] border bg-card p-4">
-            <div className="text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">Filter pemilik</div>
+            <div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Filter pemilik</div>
             <div className="mt-1 text-xl font-semibold">{owner.name}</div>
-            <div className="text-[13px] text-muted-foreground">Saldo <b className="text-foreground tabular-nums">{formatRupiah(owner.walletBalance)}</b> · <Link href={`/deposit?${new URLSearchParams({ ...(params.q && { q: params.q }) })}`} className="font-medium text-primary">Lihat semua</Link></div>
+            <div className="text-[12.5px] text-muted-foreground">Saldo <b className="text-foreground tabular-nums">{formatRupiah(owner.walletBalance)}</b> · <Link href={`/deposit?${new URLSearchParams({ ...(params.q && { q: params.q }) })}`} className="font-medium text-primary">Lihat semua</Link></div>
           </div>
         )}
       </div>
@@ -61,12 +61,12 @@ export default async function DepositPage({ searchParams }: { searchParams: Prom
       >
         {rows.map((t) => (
           <tr key={t.id} className="border-b last:border-0">
-            <td className="whitespace-nowrap px-4 py-3"><div className="font-medium">{formatDate(t.createdAt)}</div><div className="text-[13px] text-muted-foreground">{formatTime(t.createdAt)}</div></td>
+            <td className="whitespace-nowrap px-4 py-3"><div className="font-medium">{formatDate(t.createdAt)}</div><div className="text-[12.5px] text-muted-foreground">{formatTime(t.createdAt)}</div></td>
             <td className="px-4 py-3"><Link href={`/deposit?pemilik=${t.owner.id}`} className="font-medium">{t.owner.name}</Link></td>
-            <td className="px-4 py-3">{WALLET_TYPE[t.type]}{t.type === "TOPUP" && t.method && <div className="text-[13px] text-muted-foreground">{METHOD_LABEL[t.method]}</div>}</td>
+            <td className="px-4 py-3">{WALLET_TYPE[t.type]}{t.type === "TOPUP" && t.method && <div className="text-[12.5px] text-muted-foreground">{METHOD_LABEL[t.method]}</div>}</td>
             <td className="px-4 py-3 text-right"><StatusChip tone={t.amount < 0 ? "danger" : "success"}>{t.amount > 0 ? "+" : "−"} {formatRupiah(Math.abs(t.amount))}</StatusChip></td>
             <td className="px-4 py-3 text-right tabular-nums">{formatRupiah(t.balanceAfter)}</td>
-            <td className="max-w-64 px-4 py-3 text-muted-foreground"><div className="truncate">{t.invoice ? <Link href={`/invoice/${t.invoice.id}`} className="font-medium text-primary">{t.invoice.invoiceNo}</Link> : (t.note ?? "—")}</div>{t.invoice && t.note && <div className="truncate text-[13px]">{t.note}</div>}</td>
+            <td className="max-w-64 px-4 py-3 text-muted-foreground"><div className="truncate">{t.invoice ? <Link href={`/invoice/${t.invoice.id}`} className="font-medium text-primary">{t.invoice.invoiceNo}</Link> : (t.note ?? "—")}</div>{t.invoice && t.note && <div className="truncate text-[12.5px]">{t.note}</div>}</td>
             <td className="px-4 py-3">{t.createdBy.name}</td>
           </tr>
         ))}

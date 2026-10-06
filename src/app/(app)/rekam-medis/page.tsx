@@ -59,10 +59,10 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
                   <Link href={`/pasien?id=${v.patient.id}`} className="font-medium">{v.patient.name}</Link>
                   <ClinicalTags allergyNote={v.patient.allergyNote} aggressive={v.patient.aggressive} />
                 </div>
-                <div className="text-[13px] text-muted-foreground">{v.patient.rmNo} · {v.patient.owner.name}</div>
+                <div className="text-[12.5px] text-muted-foreground">{v.patient.rmNo} · {v.patient.owner.name}</div>
               </td>
               <td className="px-4 py-3">{v.doctor.name}</td>
-              <td className="max-w-72 px-4 py-3"><div className="truncate">{v.complaint}</div>{record?.diagnosis && <div className="truncate text-[13px] text-muted-foreground">Dx: {record.diagnosis}</div>}</td>
+              <td className="max-w-72 px-4 py-3"><div className="truncate">{v.complaint}</div>{record?.diagnosis && <div className="truncate text-[12.5px] text-muted-foreground">Dx: {record.diagnosis}</div>}</td>
               <td className="px-4 py-3"><StatusChip tone={state.tone}>{state.label}</StatusChip></td>
               <td className="px-4 py-3 text-right"><Button asChild variant={record ? "outline" : "default"}><Link href={`/rekam-medis/${v.id}`}>{record?.finalized ? "Lihat" : "Periksa"}</Link></Button></td>
             </tr>

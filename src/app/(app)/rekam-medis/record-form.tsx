@@ -34,12 +34,12 @@ const SOAP = [
 function Vital({ name, label, unit, error, value, step = "any", min }: { name: string; label: string; unit: string; error?: string[]; value: number | null; step?: string; min?: number }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={name} className="text-[13.5px] font-medium">
+      <label htmlFor={name} className="text-[13px] font-medium">
         {label}
       </label>
       <div className="flex h-11 items-center gap-1.5 rounded-lg border border-input bg-card px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
         <input id={name} name={name} type="number" step={step} min={min} defaultValue={value ?? ""} className="min-w-0 flex-1 bg-transparent text-base font-medium outline-none" />
-        <span className="text-[13px] text-muted-foreground">{unit}</span>
+        <span className="text-[12.5px] text-muted-foreground">{unit}</span>
       </div>
       {error?.map((e) => (
         <p key={e} className="text-[12.5px] text-destructive">
@@ -66,7 +66,7 @@ export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote,
           <Vital name="rr" label="Resp. rate" unit="/mnt" value={v.rr} step="1" error={err("rr")} />
           <Vital name="weight" label="Berat" unit="kg" value={v.weight} error={err("weight")} min={0} />
           <div className="space-y-1.5">
-            <label htmlFor="bcs" className="text-[13.5px] font-medium">
+            <label htmlFor="bcs" className="text-[13px] font-medium">
               BCS
             </label>
             <select id="bcs" name="bcs" defaultValue={v.bcs ?? ""} className={selectClass}>
@@ -85,15 +85,15 @@ export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote,
       <section className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-x-5 gap-y-4 rounded-[10px] border bg-card p-5">
         {SOAP.map(({ name, letter, title, hint, rows }) => (
           <div key={name} className="space-y-1.5">
-            <label htmlFor={name} className="text-[14.5px] font-semibold">
-              <span className="text-primary">{letter}</span> · {title} <span className="text-[13px] font-normal text-muted-foreground">{hint}</span>
+            <label htmlFor={name} className="text-[13.5px] font-semibold">
+              <span className="text-primary">{letter}</span> · {title} <span className="text-[12.5px] font-normal text-muted-foreground">{hint}</span>
             </label>
-            <Textarea id={name} name={name} rows={rows} value={soap[name]} onChange={(e) => setSoap({ ...soap, [name]: e.target.value })} className="min-h-24 text-[15px] leading-relaxed" />
+            <Textarea id={name} name={name} rows={rows} value={soap[name]} onChange={(e) => setSoap({ ...soap, [name]: e.target.value })} className="min-h-24 text-[14px] leading-relaxed" />
             {picks[name].length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Pilih cepat ${title}`}>
                 <span className="text-[12.5px] text-muted-foreground">Pilih cepat:</span>
                 {picks[name].map((pick) => (
-                  <button key={pick} type="button" onClick={() => setSoap({ ...soap, [name]: appendPick(soap[name], pick) })} className="min-h-9 rounded-full border bg-card px-3 text-[13px] font-medium text-primary hover:bg-accent">
+                  <button key={pick} type="button" onClick={() => setSoap({ ...soap, [name]: appendPick(soap[name], pick) })} className="min-h-9 rounded-full border bg-card px-3 text-[12.5px] font-medium text-primary hover:bg-accent">
                     + {pick}
                   </button>
                 ))}
@@ -107,8 +107,8 @@ export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote,
           </div>
         ))}
         <div className="space-y-1.5 md:col-span-2">
-          <label htmlFor="diagnosis" className="text-[14.5px] font-semibold">
-            Diagnosa <span className="text-[13px] font-normal text-muted-foreground">ketik baru atau pilih dari daftar</span>
+          <label htmlFor="diagnosis" className="text-[13.5px] font-semibold">
+            Diagnosa <span className="text-[12.5px] font-normal text-muted-foreground">ketik baru atau pilih dari daftar</span>
           </label>
           <Input id="diagnosis" name="diagnosis" list="diagnosis-options" defaultValue={initial.diagnosis} />
           <datalist id="diagnosis-options">
@@ -127,7 +127,7 @@ export function RecordForm({ visitId, recordId, diagnoses, catalog, allergyNote,
       <ItemsPicker catalog={catalog} allergyNote={allergyNote} initial={items} error={err("items")} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="text-[13.5px] text-muted-foreground">Setelah final, catatan terkunci. Perubahan lewat addendum.</span>
+        <span className="text-[13px] text-muted-foreground">Setelah final, catatan terkunci. Perubahan lewat addendum.</span>
         <div className="flex flex-wrap items-center gap-2">
           {state.message && (
             <p role="status" className={`text-sm ${state.ok ? "text-success" : "text-destructive"}`}>

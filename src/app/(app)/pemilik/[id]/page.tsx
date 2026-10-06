@@ -19,10 +19,10 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <Link href="/pemilik" className="text-[13px] font-medium text-primary">
+          <Link href="/pemilik" className="text-[12.5px] font-medium text-primary">
             ← Pemilik Hewan
           </Link>
-          <h1 className="text-[22px] font-semibold leading-11">{owner.name}</h1>
+          <h1 className="text-[20px] font-semibold leading-11">{owner.name}</h1>
           <p className="text-sm text-muted-foreground">WA {formatWhatsapp(owner.whatsapp)}</p>
           <p className="text-sm text-muted-foreground">{owner.address}</p>
           {owner.notes && <p className="text-sm">{owner.notes}</p>}
@@ -43,10 +43,10 @@ export default async function OwnerPage({ params }: { params: Promise<{ id: stri
         {owner.patients.map((p) => (
           <Link key={p.id} href={`/pasien?id=${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[15px] font-semibold">{p.name}</span>
+              <span className="text-[14px] font-semibold">{p.name}</span>
               <ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} />
             </div>
-            <span className="text-[13.5px] text-muted-foreground">{[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")}</span>
+            <span className="text-[13px] text-muted-foreground">{[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")}</span>
           </Link>
         ))}
       </section>

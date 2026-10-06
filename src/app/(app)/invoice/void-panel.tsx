@@ -34,7 +34,7 @@ export function VoidPanel({ invoiceId, invoiceNo, products }: { invoiceId: strin
         <fieldset className="space-y-1">
           <legend className="text-sm font-medium">Kembalikan stok</legend>
           {products.map((p) => (
-            <label key={p.id} className="flex min-h-11 items-center gap-2.5 text-[14.5px]">
+            <label key={p.id} className="flex min-h-11 items-center gap-2.5 text-[13.5px]">
               <input
                 type="checkbox"
                 className="size-5 accent-primary"

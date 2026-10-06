@@ -22,7 +22,7 @@ export default async function EditOwnerPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah owner</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah owner</h1>
       <OwnerForm owner={owner} />
       <form action={deleteOwnerAction.bind(null, owner.id)} className="space-y-2 pt-4">
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

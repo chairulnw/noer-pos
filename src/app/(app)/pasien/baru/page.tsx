@@ -14,7 +14,7 @@ export default async function NewPatientPage({ searchParams }: { searchParams: P
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Hewan baru</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Hewan baru</h1>
       <PatientForm ownerId={owner.id} ownerName={owner.name} patient={null} options={options} />
     </div>
   );

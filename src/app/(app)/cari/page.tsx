@@ -22,7 +22,7 @@ function Group({ title, more, children }: { title: string; more: string; childre
 const Hit = ({ href, title, detail }: { href: string; title: string; detail?: string }) => (
   <Link href={href} className="flex flex-col border-b px-4 py-3 last:border-0 hover:bg-accent/50">
     <span className="font-medium">{title}</span>
-    {detail && <span className="text-[13px] text-muted-foreground">{detail}</span>}
+    {detail && <span className="text-[12.5px] text-muted-foreground">{detail}</span>}
   </Link>
 );
 

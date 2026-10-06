@@ -36,7 +36,7 @@ export default async function LoginPage({
         <Image src={logo} alt="NOER Petshop & Vet Clinic" width={143} height={64} unoptimized priority style={{ width: "auto" }} className="h-16" />
         <form action={login} className="flex w-full flex-col gap-5 rounded-xl border bg-card p-8">
           <div className="space-y-1">
-            <h1 className="text-[22px] font-semibold leading-11">Masuk</h1>
+            <h1 className="text-[20px] font-semibold leading-11">Masuk</h1>
             <p className="text-sm text-muted-foreground">Gunakan akun yang diberikan Admin klinik.</p>
           </div>
           <div className="space-y-1.5">
@@ -47,12 +47,12 @@ export default async function LoginPage({
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" autoComplete="current-password" required className="h-12" />
           </div>
-          {error && <p className="-mt-2 text-[13px] text-destructive">{error}</p>}
+          {error && <p className="-mt-2 text-[12.5px] text-destructive">{error}</p>}
           <Button type="submit" className="h-12 text-base">
             Masuk
           </Button>
         </form>
-        <p className="text-center text-[13px] text-muted-foreground">Lupa password? Hubungi Admin klinik.</p>
+        <p className="text-center text-[12.5px] text-muted-foreground">Lupa password? Hubungi Admin klinik.</p>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { MoneyInput } from "@/components/money-input";
 import { Barcode, Minus, Plus, Search, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ function LineRow({ invoiceId, line, editable, canDiscount, run }: { invoiceId: s
 
   return (
     <div className="border-b last:border-0">
-      <div className="grid min-h-16 grid-cols-[minmax(0,2.4fr)_124px_minmax(0,1fr)_80px_minmax(0,1.1fr)_44px] items-center gap-3 px-1 text-[14.5px]">
+      <div className="grid min-h-16 grid-cols-[minmax(0,2.4fr)_124px_minmax(0,1fr)_80px_minmax(0,1.1fr)_44px] items-center gap-3 px-1 text-[13.5px]">
         <div className="min-w-0 font-medium">{line.name}</div>
         {editable ? (
           <div className="flex h-11 items-center overflow-hidden rounded-lg border border-input">
@@ -77,7 +78,7 @@ function LineRow({ invoiceId, line, editable, canDiscount, run }: { invoiceId: s
             <option value="PERCENT">Persen (%)</option>
             <option value="AMOUNT">Nominal (Rp)</option>
           </select>
-          {type && <input type="number" min="0" step="1" aria-label="Nilai diskon" value={value} onChange={(e) => setValue(e.target.value)} className={`${selectSmall} w-32`} />}
+          {type === "AMOUNT" ? <MoneyInput aria-label="Nilai diskon" value={value} onValueChange={setValue} className={`${selectSmall} w-32`} /> : type && <input type="number" min="0" max="100" step="1" aria-label="Nilai diskon (%)" value={value} onChange={(e) => setValue(e.target.value)} className={`${selectSmall} w-32`} />}
           <Button type="button" variant="outline" onClick={() => { save(line.qty, discount()); setOpen(false); }}>
             Terapkan
           </Button>
@@ -125,7 +126,7 @@ export function InvoiceEditor({ invoiceId, lines, catalog, editable, canDiscount
               data-search
               autoFocus
               placeholder="Tambah layanan / produk, atau scan barcode"
-              className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+              className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
             />
             <Barcode className="size-[18px] text-muted-foreground" aria-hidden />
           </div>
@@ -133,7 +134,7 @@ export function InvoiceEditor({ invoiceId, lines, catalog, editable, canDiscount
             <div className="absolute z-10 mt-1.5 w-full overflow-hidden rounded-lg border bg-card shadow-lg">
               {results.map((c) => (
                 <button key={c.id} type="button" onClick={() => add(c)} className="flex min-h-13 w-full items-center justify-between gap-3 border-b px-3.5 py-2 text-left last:border-0 hover:bg-muted">
-                  <span className="text-[14.5px] font-medium">
+                  <span className="text-[13.5px] font-medium">
                     {c.name} <span className="font-normal text-muted-foreground">· {c.type === "SERVICE" ? "Layanan" : "Produk"} · {c.baseUnit}</span>
                   </span>
                   <span className="tabular-nums text-muted-foreground">{formatRupiah(c.sellPrice)}</span>
@@ -146,7 +147,7 @@ export function InvoiceEditor({ invoiceId, lines, catalog, editable, canDiscount
 
       <div className="overflow-x-auto">
         <div className="min-w-[560px]">
-          <div className="grid grid-cols-[minmax(0,2.4fr)_124px_minmax(0,1fr)_80px_minmax(0,1.1fr)_44px] gap-3 border-b px-1 py-2 text-[13px] text-muted-foreground">
+          <div className="grid grid-cols-[minmax(0,2.4fr)_124px_minmax(0,1fr)_80px_minmax(0,1.1fr)_44px] gap-3 border-b px-1 py-2 text-[12.5px] text-muted-foreground">
             <span>Item</span>
             <span className="text-center">Qty</span>
             <span className="text-right">Harga</span>

@@ -12,7 +12,7 @@ export default async function AdjustPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Koreksi saldo klien</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Koreksi saldo klien</h1>
       <AdjustForm ownerId={owner.id} ownerName={owner.name} balance={owner.walletBalance} />
     </div>
   );

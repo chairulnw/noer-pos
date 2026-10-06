@@ -45,9 +45,9 @@ export default async function SurgeriesPage({ searchParams }: { searchParams: Pr
                 <span className="font-medium">{s.patient.name}</span>
                 <ClinicalTags allergyNote={s.patient.allergyNote} aggressive={s.patient.aggressive} />
               </div>
-              <div className="text-[13px] text-muted-foreground">{s.patient.species} · {s.patient.owner.name}</div>
+              <div className="text-[12.5px] text-muted-foreground">{s.patient.species} · {s.patient.owner.name}</div>
             </td>
-            <td className="max-w-64 px-4 py-3"><div className="truncate">{s.procedure}</div>{s.anesthesia && <div className="truncate text-[13px] text-muted-foreground">{s.anesthesia}</div>}</td>
+            <td className="max-w-64 px-4 py-3"><div className="truncate">{s.procedure}</div>{s.anesthesia && <div className="truncate text-[12.5px] text-muted-foreground">{s.anesthesia}</div>}</td>
             <td className="px-4 py-3">{s.doctor.name}</td>
             <td className="px-4 py-3"><StatusChip tone={SURGERY_STATUS[s.status].tone}>{SURGERY_STATUS[s.status].label}</StatusChip></td>
             <td className="px-4 py-3 text-right"><Link href={`/operasi/${s.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Detail</Link></td>

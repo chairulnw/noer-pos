@@ -8,7 +8,7 @@ export default async function NewBreedPage({ searchParams }: { searchParams: Pro
   const species = (await listAllSpecies()).filter((s) => s.active);
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ras hewan baru</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ras hewan baru</h1>
       <BreedForm id={null} species={species} defaults={{ name: "", speciesId: species.some((s) => s.id === jenis) ? (jenis ?? "") : "", active: true }} />
     </div>
   );

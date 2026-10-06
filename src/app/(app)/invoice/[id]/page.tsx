@@ -128,14 +128,14 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
             <section className="space-y-3 rounded-[10px] border bg-card p-5">
               <h2 className="text-base font-semibold">Pembayaran</h2>
               {invoice.payments.map((p) => (
-                <div key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 text-[14.5px] last:border-0 last:pb-0">
+                <div key={p.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-2.5 text-[13.5px] last:border-0 last:pb-0">
                   <div>
                     <span className="font-medium">{METHOD[p.method]}</span>
                     {p.kind !== "LUNAS" && <span className="text-muted-foreground"> · {KIND[p.kind]}</span>}
                     {p.voided && <span className="ml-2 align-middle"><StatusChip tone="danger">Dibatalkan</StatusChip></span>}
                     <span className="text-muted-foreground"> · {formatDate(p.paidAt)} · {p.receivedBy.name}</span>
-                    {p.reference && <div className="text-[13px] text-muted-foreground">{p.reference}</div>}
-                    {p.cashReceived !== null && <div className="text-[13px] text-muted-foreground">Diterima {formatRupiah(p.cashReceived)} · kembalian {formatRupiah(p.cashReceived - p.amount)}</div>}
+                    {p.reference && <div className="text-[12.5px] text-muted-foreground">{p.reference}</div>}
+                    {p.cashReceived !== null && <div className="text-[12.5px] text-muted-foreground">Diterima {formatRupiah(p.cashReceived)} · kembalian {formatRupiah(p.cashReceived - p.amount)}</div>}
                   </div>
                   <span className="font-semibold tabular-nums">{formatRupiah(p.amount)}</span>
                   {canCorrectDeposit && !p.voided && p.kind === "DP" && <div className="basis-full"><CorrectDeposit invoiceId={invoice.id} current={p.amount} /></div>}

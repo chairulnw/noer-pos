@@ -30,9 +30,9 @@ export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial:
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[700px] text-[14.5px]">
+        <table className="w-full min-w-[700px] text-[13.5px]">
           <thead>
-            <tr className="border-b text-left text-[13px] text-muted-foreground">
+            <tr className="border-b text-left text-[12.5px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Produk / batch</th>
               <th className="px-4 py-2.5 font-normal">Expired</th>
               <th className="px-4 py-2.5 text-right font-normal">Sistem</th>
@@ -48,7 +48,7 @@ export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial:
                 <tr key={r.id} className="border-b last:border-0">
                   <td className="px-4 py-3">
                     <div className="font-medium">{r.name}</div>
-                    <div className="text-[13px] text-muted-foreground">Batch {r.batchNo}</div>
+                    <div className="text-[12.5px] text-muted-foreground">Batch {r.batchNo}</div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{r.expiry ?? "—"}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{fmt(r.system)} {r.unit}</td>

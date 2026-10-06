@@ -25,7 +25,7 @@ export function CheckOutForm({ admissionId, checkInIso, defaultCheckOut, rateNam
           <label htmlFor="checkOut" className="text-sm font-medium">Waktu keluar</label>
           <Input id="checkOut" name="checkOut" type="datetime-local" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} required />
         </div>
-        <div className="rounded-lg bg-muted/50 p-4 text-[14.5px]">
+        <div className="rounded-lg bg-muted/50 p-4 text-[13.5px]">
           {days === null ? (
             <span className="text-destructive">Waktu keluar tidak boleh sebelum waktu masuk.</span>
           ) : (
@@ -35,7 +35,7 @@ export function CheckOutForm({ admissionId, checkInIso, defaultCheckOut, rateNam
               {ratePrice !== null && (
                 <div className="mt-1.5 flex justify-between border-t pt-1.5"><span className="text-muted-foreground">{days} × {formatRupiah(ratePrice)}</span><span className="font-semibold tabular-nums">{formatRupiah(days * ratePrice)}</span></div>
               )}
-              <p className="mt-2 text-[13px] text-muted-foreground">Hari dihitung dari selisih tanggal kalender, minimal 1 hari. Item tarif × hari masuk ke draft invoice.</p>
+              <p className="mt-2 text-[12.5px] text-muted-foreground">Hari dihitung dari selisih tanggal kalender, minimal 1 hari. Item tarif × hari masuk ke draft invoice.</p>
             </>
           )}
         </div>

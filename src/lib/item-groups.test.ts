@@ -9,8 +9,8 @@ describe("kelompok produk", () => {
     expect(groupCategories("ngawur")).toBeNull();
   });
 
-  it("PetShop mencakup pakan, aksesoris, dan consumable", () => {
-    expect(groupCategories("petshop")).toEqual(["pet food", "aksesoris", "consumable"]);
+  it("PetShop mencakup pakan dan aksesoris", () => {
+    expect(groupCategories("petshop")).toEqual(["pet food", "aksesoris"]);
   });
 
   it("setiap kategori item masuk tepat satu kelompok (tidak ada yang hilang dari filter)", () => {

@@ -43,7 +43,7 @@ export const ownerSchema = z.object({
     .string()
     .transform(normalizeWhatsapp)
     .refine((value) => value !== "", "Nomor WhatsApp tidak valid (minimal 10 digit)"),
-  address: text(300).min(1, "Alamat wajib diisi"),
+  address: text(300),
   notes: text(500),
 });
 

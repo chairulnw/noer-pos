@@ -19,9 +19,9 @@ export default async function GroomingDetailPage({ params }: { params: Promise<{
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <Link href="/grooming" className="text-[13px] font-medium text-primary">← Grooming & Salon</Link>
+        <Link href="/grooming" className="text-[12.5px] font-medium text-primary">← Grooming & Salon</Link>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-[22px] font-semibold leading-11">{g.serviceItem?.name ?? "Grooming"}</h1>
+          <h1 className="text-[20px] font-semibold leading-11">{g.serviceItem?.name ?? "Grooming"}</h1>
           <StatusChip tone={GROOMING_STATUS[g.status].tone}>{GROOMING_STATUS[g.status].label}</StatusChip>
         </div>
       </div>
@@ -35,10 +35,10 @@ export default async function GroomingDetailPage({ params }: { params: Promise<{
         <ClinicalNotes allergyNote={g.patient.allergyNote} aggressive={g.patient.aggressive} behaviorNote={null} />
       </div>
       <dl className="grid gap-4 rounded-[10px] border bg-card p-5 md:grid-cols-2">
-        <div><dt className="text-[13px] text-muted-foreground">Tanggal</dt><dd className="text-[15px]">{formatDate(g.groomingDate)}</dd></div>
-        {g.finishedAt && <div><dt className="text-[13px] text-muted-foreground">Selesai</dt><dd className="text-[15px]">{formatDate(g.finishedAt)} {formatTime(g.finishedAt)}</dd></div>}
-        <div className="md:col-span-2"><dt className="text-[13px] text-muted-foreground">Catatan</dt><dd className="whitespace-pre-wrap text-[15px]">{g.notes || "—"}</dd></div>
-        {g.invoice && can(user.role, "manage_invoice_payment") && <div><dt className="text-[13px] text-muted-foreground">Tagihan</dt><dd><Link href={`/invoice/${g.invoice.id}`} className="font-medium text-primary">{g.invoice.invoiceNo}</Link></dd></div>}
+        <div><dt className="text-[12.5px] text-muted-foreground">Tanggal</dt><dd className="text-[14px]">{formatDate(g.groomingDate)}</dd></div>
+        {g.finishedAt && <div><dt className="text-[12.5px] text-muted-foreground">Selesai</dt><dd className="text-[14px]">{formatDate(g.finishedAt)} {formatTime(g.finishedAt)}</dd></div>}
+        <div className="md:col-span-2"><dt className="text-[12.5px] text-muted-foreground">Catatan</dt><dd className="whitespace-pre-wrap text-[14px]">{g.notes || "—"}</dd></div>
+        {g.invoice && can(user.role, "manage_invoice_payment") && <div><dt className="text-[12.5px] text-muted-foreground">Tagihan</dt><dd><Link href={`/invoice/${g.invoice.id}`} className="font-medium text-primary">{g.invoice.invoiceNo}</Link></dd></div>}
       </dl>
       {isEditable(g.status) && <section className="rounded-[10px] border bg-card p-5"><StatusButtons id={g.id} status={g.status} /></section>}
     </div>

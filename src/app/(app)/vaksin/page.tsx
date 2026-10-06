@@ -52,7 +52,7 @@ export default async function VaccinesPage({ searchParams }: { searchParams: Pro
             const late = row.nextDue!.getTime() < today;
             return (
               <tr key={row.id} className="border-b last:border-0">
-                <td className="px-4 py-3"><Link href={`/pasien?id=${patient.id}`} className="font-medium">{patient.name}</Link><div className="text-[13px] text-muted-foreground">{patient.species}</div></td>
+                <td className="px-4 py-3"><Link href={`/pasien?id=${patient.id}`} className="font-medium">{patient.name}</Link><div className="text-[12.5px] text-muted-foreground">{patient.species}</div></td>
                 <td className="px-4 py-3">{patient.owner.name}</td>
                 <td className="px-4 py-3 tabular-nums">{formatWhatsapp(patient.owner.whatsapp)}</td>
                 <td className="px-4 py-3">{row.item.name}</td>
@@ -94,8 +94,8 @@ export default async function VaccinesPage({ searchParams }: { searchParams: Pro
           return (
             <tr key={row.id} className="border-b last:border-0">
               <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(row.givenAt)}</td>
-              <td className="px-4 py-3"><Link href={`/pasien?id=${patient.id}`} className="font-medium">{patient.name}</Link><div className="text-[13px] text-muted-foreground">{patient.rmNo} · {patient.owner.name}</div></td>
-              <td className="px-4 py-3">{row.item.name}<div className="text-[13px] text-muted-foreground">{row.batchNo ? `Batch ${row.batchNo}` : "Tanpa batch"}</div></td>
+              <td className="px-4 py-3"><Link href={`/pasien?id=${patient.id}`} className="font-medium">{patient.name}</Link><div className="text-[12.5px] text-muted-foreground">{patient.rmNo} · {patient.owner.name}</div></td>
+              <td className="px-4 py-3">{row.item.name}<div className="text-[12.5px] text-muted-foreground">{row.batchNo ? `Batch ${row.batchNo}` : "Tanpa batch"}</div></td>
               <td className="px-4 py-3">{row.nextDue ? formatDate(row.nextDue) : <span className="text-muted-foreground">-</span>}</td>
               <td className="px-4 py-3 text-right"><Button asChild variant="outline"><Link href={`/rekam-medis/${visitId}`}>Rekam medis</Link></Button></td>
             </tr>

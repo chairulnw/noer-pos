@@ -26,11 +26,11 @@ function Summary({ closing, late }: { closing: ClosingView; late: number }) {
       </div>
       <dl className="grid gap-3 sm:grid-cols-3">
         {rows.map(([label, value]) => (
-          <div key={label}><dt className="text-[13px] text-muted-foreground">{label}</dt><dd className="text-xl font-semibold tabular-nums">{value}</dd></div>
+          <div key={label}><dt className="text-[12.5px] text-muted-foreground">{label}</dt><dd className="text-xl font-semibold tabular-nums">{value}</dd></div>
         ))}
       </dl>
       {closing.note && <p className="text-sm"><span className="text-muted-foreground">Catatan: </span>{closing.note}</p>}
-      <p className="text-[13px] text-muted-foreground">Ditutup oleh {closing.closedBy} pukul {formatTime(closing.createdAt)}.</p>
+      <p className="text-[12.5px] text-muted-foreground">Ditutup oleh {closing.closedBy} pukul {formatTime(closing.createdAt)}.</p>
       {late !== 0 && <p role="status" className="rounded-lg border border-[#E9CFA6] p-3 text-sm text-warning">Ada transaksi tunai senilai {formatRupiah(Math.abs(late))} {late > 0 ? "yang masuk" : "yang berkurang"} setelah kas ditutup. Angka di atas tidak ikut berubah.</p>}
     </section>
   );
@@ -44,7 +44,7 @@ export default async function CashPage() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-[22px] font-semibold leading-11">Tutup Kas</h1>
+        <h1 className="text-[20px] font-semibold leading-11">Tutup Kas</h1>
         <p className="text-sm text-muted-foreground">Hitung uang tunai di laci di akhir hari. Selisih dihitung terhadap modal awal ditambah pembayaran tunai hari ini.</p>
       </header>
 
@@ -53,9 +53,9 @@ export default async function CashPage() {
       <section className="space-y-2">
         <h2 className="text-base font-semibold">Riwayat penutupan</h2>
         <div className="overflow-x-auto rounded-[10px] border bg-card">
-          <table className="w-full min-w-[560px] text-[14.5px]">
+          <table className="w-full min-w-[560px] text-[13.5px]">
             <thead>
-              <tr className="border-b text-left text-[13px] text-muted-foreground">
+              <tr className="border-b text-left text-[12.5px] text-muted-foreground">
                 <th className="px-4 py-2.5 font-normal">Tanggal</th>
                 <th className="px-4 py-2.5 font-normal">Ditutup oleh</th>
                 <th className="px-4 py-2.5 text-right font-normal">Modal awal</th>

@@ -27,7 +27,7 @@ export function PrinterForm({ initial, clinicName }: { initial: 58 | 80; clinicN
               <label key={s.value} className={cn("flex cursor-pointer flex-col gap-0.5 rounded-lg border p-4", width === s.value ? "border-primary bg-accent shadow-[inset_0_0_0_1px_var(--color-primary)]" : "bg-card")}>
                 <input type="radio" name="paperWidth" value={s.value} checked={width === s.value} onChange={() => setWidth(s.value)} className="sr-only" />
                 <span className="text-base font-semibold">{s.label}</span>
-                <span className="text-[13px] text-muted-foreground">{s.hint}</span>
+                <span className="text-[12.5px] text-muted-foreground">{s.hint}</span>
               </label>
             ))}
           </div>

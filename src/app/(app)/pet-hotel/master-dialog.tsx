@@ -29,7 +29,7 @@ function RoomForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form key={state.nonce} action={formAction} className="space-y-3 border-b bg-accent/40 p-4">
-      <h3 className="text-[13px] font-bold tracking-wide text-primary uppercase">Tambah slot kandang baru</h3>
+      <h3 className="text-[12.5px] font-bold tracking-wide text-primary uppercase">Tambah slot kandang baru</h3>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="space-y-1 text-[12.5px] font-semibold text-muted-foreground">Nomor/Kode *
           <Input name="name" placeholder="Contoh: K-04" required maxLength={50} className="bg-card text-foreground" />
@@ -83,8 +83,8 @@ export function MasterKandang({ rooms, canManage }: { rooms: MasterRoom[]; canMa
             <div className="flex items-center gap-3 bg-primary p-4 text-primary-foreground">
               <span className="grid size-10 place-items-center rounded-xl bg-white/15"><Home className="size-5" /></span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-[15px] font-bold tracking-wide uppercase">Master data kandang & kamar pet hotel</h2>
-                <p className="text-[13px] opacity-80">Kelola kapasitas slot, ukuran, kategori, dan tarif sewa harian</p>
+                <h2 className="text-[14px] font-bold tracking-wide uppercase">Master data kandang & kamar pet hotel</h2>
+                <p className="text-[12.5px] opacity-80">Kelola kapasitas slot, ukuran, kategori, dan tarif sewa harian</p>
               </div>
               <button type="button" aria-label="Tutup" onClick={() => dialog.current?.close()} className="grid size-9 place-items-center rounded-full bg-white/15"><X className="size-5" /></button>
             </div>
@@ -98,13 +98,13 @@ export function MasterKandang({ rooms, canManage }: { rooms: MasterRoom[]; canMa
                 {rooms.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Belum ada kandang. Klik Tambah Kandang.</p>}
                 {rooms.map((r) => (
                   <div key={r.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-                    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-accent text-[13px] font-bold text-primary">{r.name}</span>
+                    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-accent text-[12.5px] font-bold text-primary">{r.name}</span>
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2 text-[14.5px] font-semibold">
+                      <div className="flex flex-wrap items-center gap-2 text-[13.5px] font-semibold">
                         Kandang {r.name}{r.suitableFor && ` • ${r.suitableFor}`}
                         <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase", STATE[r.state][1])}>{STATE[r.state][0]}</span>
                       </div>
-                      <div className="text-[13px] text-muted-foreground">{r.dimensions ?? "Ukuran belum diisi"}{r.capacity > 1 && ` · kapasitas ${r.capacity}`} · <b className="text-primary">{r.rate ? `${formatRupiah(r.rate)} / hari` : "Tarif belum diisi"}</b></div>
+                      <div className="text-[12.5px] text-muted-foreground">{r.dimensions ?? "Ukuran belum diisi"}{r.capacity > 1 && ` · kapasitas ${r.capacity}`} · <b className="text-primary">{r.rate ? `${formatRupiah(r.rate)} / hari` : "Tarif belum diisi"}</b></div>
                     </div>
                     {r.state !== "busy" && (
                       <Button type="button" size="sm" variant="outline" className="h-9" onClick={() => run(() => setCleaningAction(r.id, r.state === "free"))}>{r.state === "dirty" ? "Set Tersedia" : "Set Dibersihkan"}</Button>

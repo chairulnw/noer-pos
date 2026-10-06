@@ -1,5 +1,6 @@
 "use client";
 
+import { MoneyInput } from "@/components/money-input";
 import { Tag } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
@@ -33,14 +34,14 @@ export function PosCheckout({ invoiceId, qty, hasItems, pay }: { invoiceId: stri
 
   return (
     <div className="space-y-3 border-t pt-4">
-      <div className="flex items-center justify-between text-[14.5px]">
+      <div className="flex items-center justify-between text-[13.5px]">
         <span className="text-muted-foreground">Total Kuantitas</span>
         <b className="tabular-nums">{qty.toLocaleString("id-ID")} item</b>
       </div>
 
       <div className="rounded-xl border bg-background/60">
         <div className="flex min-h-11 items-center justify-between gap-2 px-3">
-          <span className="flex items-center gap-2 text-[14.5px] font-semibold"><Tag className="size-4 text-primary" /> Diskon Cart</span>
+          <span className="flex items-center gap-2 text-[13.5px] font-semibold"><Tag className="size-4 text-primary" /> Diskon Cart</span>
           {discountText && <span className="text-sm font-semibold tabular-nums text-destructive">{discountText}</span>}
           {canDiscount && <button type="button" onClick={() => setOpen(!open)} className="min-h-11 text-sm font-semibold text-primary">{discount.type ? "Ubah" : "+ Tambah Diskon"}</button>}
         </div>
@@ -51,7 +52,7 @@ export function PosCheckout({ invoiceId, qty, hasItems, pay }: { invoiceId: stri
               <option value="PERCENT">Persen (%)</option>
               <option value="AMOUNT">Nominal (Rp)</option>
             </select>
-            {type && <input type="number" min="0" step="1" aria-label="Nilai diskon" value={value} onChange={(e) => setValue(e.target.value)} className="h-10 w-28 rounded-lg border border-input bg-card px-2 text-sm" />}
+            {type === "AMOUNT" ? <MoneyInput aria-label="Nilai diskon" value={value} onValueChange={setValue} className="h-10 w-28 rounded-lg border border-input bg-card px-2 text-sm" /> : type && <input type="number" min="0" max="100" step="1" aria-label="Nilai diskon (%)" value={value} onChange={(e) => setValue(e.target.value)} className="h-10 w-28 rounded-lg border border-input bg-card px-2 text-sm" />}
             <Button type="button" variant="outline" disabled={pending} onClick={apply}>Terapkan</Button>
             {error && <p role="alert" className="basis-full text-sm text-destructive">{error}</p>}
           </div>
@@ -59,7 +60,7 @@ export function PosCheckout({ invoiceId, qty, hasItems, pay }: { invoiceId: stri
       </div>
 
       {pay && pay.totals.taxRate > 0 && hasItems && (
-        <div className="flex items-center justify-between text-[14.5px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <span className="text-muted-foreground">PPN {pay.totals.taxRate}%{pay.totals.taxIncluded && " (termasuk)"}</span>
           <span className="tabular-nums">{formatRupiah(pay.totals.taxTotal)}</span>
         </div>
@@ -67,7 +68,7 @@ export function PosCheckout({ invoiceId, qty, hasItems, pay }: { invoiceId: stri
 
       <div className="flex items-baseline justify-between border-t pt-3">
         <span className="text-base font-semibold">Total Tagihan</span>
-        <span className="text-[28px] font-bold text-primary tabular-nums">{formatRupiah(pay?.totals.grandTotal ?? 0)}</span>
+        <span className="text-[26px] font-bold text-primary tabular-nums">{formatRupiah(pay?.totals.grandTotal ?? 0)}</span>
       </div>
       {pay && pay.paid > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Sisa setelah DP</span><b className="tabular-nums">{formatRupiah(total)}</b></div>}
 

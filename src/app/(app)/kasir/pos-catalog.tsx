@@ -61,7 +61,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><Building2 className="size-5" /></span>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-base leading-tight font-semibold">{clinicName}</h2>
-          <p className="text-[13px] text-muted-foreground">Katalog Produk & Kasir (POS)</p>
+          <p className="text-[12.5px] text-muted-foreground">Katalog Produk & Kasir (POS)</p>
         </div>
         {actions}
         <div className="flex gap-1 rounded-xl bg-muted/70 p-1">
@@ -87,7 +87,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
             data-search
             autoFocus
             placeholder="Cari nama produk, obat, atau scan barcode…"
-            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+            className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
           />
           <Barcode className="size-[18px] text-muted-foreground" aria-hidden />
         </div>
@@ -121,7 +121,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
                     <span className="truncate rounded-md bg-muted/70 px-2 py-0.5 font-mono text-[12px] text-muted-foreground">{item.sku ?? item.baseUnit}</span>
                     {stock}
                   </span>
-                  <span className="min-h-10 text-[15px] leading-snug font-semibold">{item.name}</span>
+                  <span className="min-h-10 text-[14px] leading-snug font-semibold">{item.name}</span>
                   <span className="flex items-end justify-between gap-2 border-t pt-3">
                     <span>
                       <span className="block text-[12px] text-muted-foreground">Harga</span>
@@ -133,7 +133,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
               ) : (
                 <button key={item.id} type="button" disabled={!editable || out} onClick={() => add(item)} className="flex items-center gap-3 rounded-xl border bg-card px-3.5 py-2.5 text-left hover:border-primary/50 disabled:cursor-not-allowed">
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-semibold">{item.name}</span>
+                    <span className="block truncate text-[14px] font-semibold">{item.name}</span>
                     <span className="text-[12.5px] text-muted-foreground">{item.sku ?? item.baseUnit}</span>
                   </span>
                   {stock}

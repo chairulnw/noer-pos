@@ -35,12 +35,12 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
           const methods = [...new Set(inv.payments.map((p) => METHOD_LABEL[p.method]))].join(", ");
           return (
             <tr key={inv.id} className="border-b last:border-0">
-              <td className="whitespace-nowrap px-4 py-3 tabular-nums"><div className="font-medium">{formatDate(at)}</div><div className="text-[13px] text-muted-foreground">{formatTime(at)}</div></td>
+              <td className="whitespace-nowrap px-4 py-3 tabular-nums"><div className="font-medium">{formatDate(at)}</div><div className="text-[12.5px] text-muted-foreground">{formatTime(at)}</div></td>
               <td className="px-4 py-3"><Link href={`/invoice/${inv.id}`} className="font-medium text-primary tabular-nums">{inv.invoiceNo}</Link></td>
               <td className="px-4 py-3">{(inv.visit ?? inv.admission)?.patient.name ?? inv.owner?.name ?? inv.customerName ?? "Umum / Walk-in"}</td>
               <td className="px-4 py-3">{methods || "—"}</td>
               <td className="px-4 py-3 text-right font-medium tabular-nums">{formatRupiah(inv.grandTotal)}</td>
-              <td className="px-4 py-3 text-right"><Link href={`/invoice/${inv.id}/struk`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Struk</Link></td>
+              <td className="whitespace-nowrap px-4 py-3 text-right"><Link href={`/invoice/${inv.id}/struk`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Struk</Link><a href={`/api/invoice/${inv.id}/pdf`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Invoice PDF</a></td>
             </tr>
           );
         })}

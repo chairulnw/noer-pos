@@ -46,7 +46,7 @@ function PatientPicker({ initial, error }: { initial: PatientOption[]; error?: s
           aria-label="Cari pasien"
           placeholder="Cari nama pasien atau pemilik…"
           autoComplete="off"
-          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+          className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
         />
         <ChevronDown className="size-4 text-muted-foreground" />
       </div>
@@ -56,12 +56,12 @@ function PatientPicker({ initial, error }: { initial: PatientOption[]; error?: s
           {options.map((p) => (
             <button key={p.id} type="button" role="option" aria-selected={picked?.id === p.id} onClick={() => { setPicked(p); setOpen(false); }} className="flex w-full flex-col border-b px-4 py-2.5 text-left last:border-0 hover:bg-accent/60">
               <span className="font-semibold">{p.name}</span>
-              <span className="text-[13px] text-muted-foreground">{p.detail}</span>
+              <span className="text-[12.5px] text-muted-foreground">{p.detail}</span>
             </button>
           ))}
         </div>
       )}
-      {error && <p className="mt-1 text-[13px] text-destructive">{error}</p>}
+      {error && <p className="mt-1 text-[12.5px] text-destructive">{error}</p>}
     </div>
   );
 }
@@ -90,23 +90,23 @@ export function HotelCheckInForm({ slots, patients, today }: { slots: SlotOption
             return (
               <button key={s.id} type="button" role="radio" aria-checked={slot === s.id} disabled={disabled} onClick={() => setSlot(s.id)} className={cn("rounded-xl border p-3.5 text-left", slot === s.id ? "border-primary bg-accent shadow-[inset_0_0_0_1px_var(--color-primary)]" : "bg-card", disabled && "cursor-not-allowed bg-muted/50 opacity-60")}>
                 <span className="flex items-center justify-between gap-2"><b className="text-lg">{s.name}</b><span className={cn("text-[11px] font-bold uppercase", s.state === "free" ? "text-success" : "text-muted-foreground")}>{s.rate === null && s.state === "free" ? "Tanpa tarif" : LABEL[s.state]}</span></span>
-                <span className="block text-[13px] text-muted-foreground">{s.category ?? "Umum"}</span>
-                <span className="block text-[13px] font-bold text-primary">{s.rate === null ? "Tarif belum diisi" : `${formatRupiah(s.rate)}/hari`}</span>
+                <span className="block text-[12.5px] text-muted-foreground">{s.category ?? "Umum"}</span>
+                <span className="block text-[12.5px] font-bold text-primary">{s.rate === null ? "Tarif belum diisi" : `${formatRupiah(s.rate)}/hari`}</span>
               </button>
             );
           })}
         </div>
-        {err("roomId") && <p className="text-[13px] text-destructive">{err("roomId")}</p>}
+        {err("roomId") && <p className="text-[12.5px] text-destructive">{err("roomId")}</p>}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2"><span className={heading}>Tanggal check-in *</span>
           <Input name="checkInDate" type="date" defaultValue={today} required className="h-12 rounded-xl" />
-          {err("checkInDate") && <span className="block text-[13px] text-destructive">{err("checkInDate")}</span>}
+          {err("checkInDate") && <span className="block text-[12.5px] text-destructive">{err("checkInDate")}</span>}
         </label>
         <label className="space-y-2"><span className={heading}>Estimasi check-out</span>
           <Input name="expectedCheckOut" type="date" min={today} className="h-12 rounded-xl" />
-          {err("expectedCheckOut") && <span className="block text-[13px] text-destructive">{err("expectedCheckOut")}</span>}
+          {err("expectedCheckOut") && <span className="block text-[12.5px] text-destructive">{err("expectedCheckOut")}</span>}
         </label>
       </div>
 
@@ -115,7 +115,7 @@ export function HotelCheckInForm({ slots, patients, today }: { slots: SlotOption
       </label>
       <label className="block space-y-2"><span className={heading}>Catatan khusus / obat bawaan pasien</span>
         <Textarea name="notes" rows={3} maxLength={300} placeholder="Contoh: Minum obat lambung 1 tablet tiap pagi sebelum makan, anabul takut suara petir…" className="rounded-xl" />
-        {err("notes") && <span className="block text-[13px] text-destructive">{err("notes")}</span>}
+        {err("notes") && <span className="block text-[12.5px] text-destructive">{err("notes")}</span>}
       </label>
 
       {state.message && <p role="alert" className="text-sm text-destructive">{state.message}</p>}

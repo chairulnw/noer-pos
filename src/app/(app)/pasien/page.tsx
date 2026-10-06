@@ -44,11 +44,11 @@ async function PatientTable({ params }: { params: { q?: string } & PagingParams 
                 <Link href={`/pasien?id=${p.id}`} className="font-medium">{p.name}</Link>
                 <ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} />
               </div>
-              <div className="text-[13px] text-muted-foreground">{p.rmNo}</div>
+              <div className="text-[12.5px] text-muted-foreground">{p.rmNo}</div>
             </td>
             <td className="px-4 py-3">{[p.species, p.breed].filter(Boolean).join(" · ")}</td>
             <td className="px-4 py-3">{SEX[p.sex]}</td>
-            <td className="px-4 py-3"><Link href={`/pemilik/${p.owner.id}`} className="font-medium">{p.owner.name}</Link><div className="text-[13px] text-muted-foreground">{formatWhatsapp(p.owner.whatsapp)}</div></td>
+            <td className="px-4 py-3"><Link href={`/pemilik/${p.owner.id}`} className="font-medium">{p.owner.name}</Link><div className="text-[12.5px] text-muted-foreground">{formatWhatsapp(p.owner.whatsapp)}</div></td>
             <td className="px-4 py-3 text-right tabular-nums">{p.lastWeightKg === null ? "—" : `${p.lastWeightKg.toLocaleString("id-ID")} kg`}</td>
             <td className="px-4 py-3 text-right"><Link href={`/pasien?id=${p.id}`} className="inline-flex min-h-11 items-center px-2 font-medium text-primary">Profil</Link></td>
           </tr>
@@ -76,7 +76,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[22px] font-semibold leading-11">Hewan Peliharaan</h1>
+        <h1 className="text-[20px] font-semibold leading-11">Hewan Peliharaan</h1>
         <Button asChild>
           <Link href="/pemilik/baru">+ Owner baru</Link>
         </Button>
@@ -91,9 +91,9 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
             defaultValue={q}
             aria-label="Cari hewan atau pemilik"
             placeholder="Nama owner/hewan, no. WA, no. RM, microchip"
-            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+            className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
           />
-          <span className="text-[13px] text-muted-foreground">{q ? `${total} hasil` : "Terbaru"}</span>
+          <span className="text-[12.5px] text-muted-foreground">{q ? `${total} hasil` : "Terbaru"}</span>
         </form>
       </div>
 
@@ -107,21 +107,21 @@ export default async function PatientsPage({ searchParams }: { searchParams: Pro
               className={cn("flex flex-col gap-1 border-b px-4 py-3.5 last:border-0", p.id === selected?.id && "bg-accent")}
             >
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[15px] font-semibold">{p.name}</span>
+                <span className="text-[14px] font-semibold">{p.name}</span>
                 <ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} />
               </div>
-              <div className="text-[13.5px] text-muted-foreground">
+              <div className="text-[13px] text-muted-foreground">
                 {[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")}
               </div>
-              <div className="text-[13.5px] text-muted-foreground">
+              <div className="text-[13px] text-muted-foreground">
                 {p.owner.name} · {formatWhatsapp(p.owner.whatsapp)}
               </div>
             </Link>
           ))}
           {ownersWithoutPets.map((o) => (
             <Link key={o.id} href={`/pemilik/${o.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
-              <span className="text-[15px] font-semibold">{o.name}</span>
-              <span className="text-[13.5px] text-muted-foreground">Owner, belum ada hewan · {formatWhatsapp(o.whatsapp)}</span>
+              <span className="text-[14px] font-semibold">{o.name}</span>
+              <span className="text-[13px] text-muted-foreground">Owner, belum ada hewan · {formatWhatsapp(o.whatsapp)}</span>
             </Link>
           ))}
         </section>

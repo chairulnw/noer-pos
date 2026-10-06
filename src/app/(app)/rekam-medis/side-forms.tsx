@@ -35,7 +35,7 @@ export function VaccinationForm({ visitId, recordId, vaccines, today }: { visitI
       className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] items-end gap-3"
     >
       <div className="space-y-1.5">
-        <label htmlFor="itemId" className="text-[13.5px] font-medium">Vaksin</label>
+        <label htmlFor="itemId" className="text-[13px] font-medium">Vaksin</label>
         <select id="itemId" name="itemId" defaultValue="" className={selectClass} required>
           <option value="" disabled>Pilih vaksin</option>
           {vaccines.map((v) => (
@@ -45,16 +45,16 @@ export function VaccinationForm({ visitId, recordId, vaccines, today }: { visitI
         <Errors errors={state.errors?.itemId} />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="givenAt" className="text-[13.5px] font-medium">Tanggal diberikan</label>
+        <label htmlFor="givenAt" className="text-[13px] font-medium">Tanggal diberikan</label>
         <Input id="givenAt" name="givenAt" type="date" defaultValue={today} required />
         <Errors errors={state.errors?.givenAt} />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="batchNo" className="text-[13.5px] font-medium">No. batch</label>
+        <label htmlFor="batchNo" className="text-[13px] font-medium">No. batch</label>
         <Input id="batchNo" name="batchNo" />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="nextDue" className="text-[13.5px] font-medium">Jatuh tempo berikutnya</label>
+        <label htmlFor="nextDue" className="text-[13px] font-medium">Jatuh tempo berikutnya</label>
         <Input id="nextDue" name="nextDue" type="date" />
         <p className="text-[12.5px] text-muted-foreground">Kosong = ikut interval vaksin</p>
       </div>

@@ -35,8 +35,8 @@ export default async function StockHistoryPage({ searchParams }: { searchParams:
           const qty = Number(m.qty);
           return (
             <tr key={m.id} className="border-b last:border-0">
-              <td className="whitespace-nowrap px-4 py-3"><div className="font-medium">{formatDate(m.createdAt)}</div><div className="text-[13px] text-muted-foreground">{formatTime(m.createdAt)}</div></td>
-              <td className="px-4 py-3"><Link href={`/inventaris/${m.batch.item.id}`} className="font-medium">{m.batch.item.name}</Link><div className="text-[13px] text-muted-foreground">Batch {m.batch.batchNo}</div></td>
+              <td className="whitespace-nowrap px-4 py-3"><div className="font-medium">{formatDate(m.createdAt)}</div><div className="text-[12.5px] text-muted-foreground">{formatTime(m.createdAt)}</div></td>
+              <td className="px-4 py-3"><Link href={`/inventaris/${m.batch.item.id}`} className="font-medium">{m.batch.item.name}</Link><div className="text-[12.5px] text-muted-foreground">Batch {m.batch.batchNo}</div></td>
               <td className="px-4 py-3 text-center"><StatusChip tone={qty < 0 ? "danger" : "success"}>{qty > 0 ? "+" : ""}{qty.toLocaleString("id-ID")} {m.batch.item.baseUnit}</StatusChip></td>
               <td className="px-4 py-3 font-medium">{TYPE[m.type]}</td>
               <td className="max-w-72 truncate px-4 py-3 text-muted-foreground">{m.note ?? "—"}</td>

@@ -19,7 +19,7 @@ const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1 rounded-[10px] border bg-card px-4 py-3.5">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <span className="text-[12.5px] text-muted-foreground">{label}</span>
       <span className="text-xl font-semibold tabular-nums">{value}</span>
     </div>
   );
@@ -38,7 +38,7 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
     <section aria-label="Profil pasien" className="flex min-w-0 flex-col gap-4">
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-4 p-5">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[22px] font-semibold leading-11 text-accent-foreground">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[20px] font-semibold leading-11 text-accent-foreground">
             {patient.name[0]?.toUpperCase()}
           </div>
           <div className="flex min-w-60 flex-1 flex-col gap-1">
@@ -49,8 +49,8 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
                 <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
               </span>
             </div>
-            <div className="text-[14.5px] text-muted-foreground">{details.join(" · ")}</div>
-            <div className="text-[14.5px] text-muted-foreground">
+            <div className="text-[13.5px] text-muted-foreground">{details.join(" · ")}</div>
+            <div className="text-[13.5px] text-muted-foreground">
               Owner{" "}
               <Link href={`/pemilik/${patient.owner.id}`} className="font-medium text-primary">
                 {patient.owner.name}
@@ -84,8 +84,8 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
           {admissions.map((a) => (
             <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3.5 last:border-0">
               <div>
-                <div className="text-[14.5px] font-medium">{a.type === "HOTEL" ? "Hotel" : "Rawat inap"} · {a.room.name}</div>
-                <div className="text-[13.5px] text-muted-foreground">
+                <div className="text-[13.5px] font-medium">{a.type === "HOTEL" ? "Hotel" : "Rawat inap"} · {a.room.name}</div>
+                <div className="text-[13px] text-muted-foreground">
                   {formatDate(a.checkIn)}{a.checkOut && ` – ${formatDate(a.checkOut)}`}{a.billedDays !== null && ` · ${a.billedDays} hari`}
                 </div>
               </div>
@@ -102,7 +102,7 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
             <Link href={`/rawat-inap/${monitoring.admission.id}`} className="text-sm font-medium text-primary">Semua</Link>
           </div>
           {monitoring.logs.map((log) => (
-            <div key={log.id} className="grid grid-cols-[130px_minmax(0,1fr)] gap-4 border-b px-5 py-3 text-[14.5px] last:border-0">
+            <div key={log.id} className="grid grid-cols-[130px_minmax(0,1fr)] gap-4 border-b px-5 py-3 text-[13.5px] last:border-0">
               <span className="text-muted-foreground tabular-nums">{formatDate(log.loggedAt)} · {formatTime(log.loggedAt)}</span>
               <span>
                 {log.tempC !== null && <span className="font-medium tabular-nums">{Number(log.tempC).toLocaleString("id-ID")} °C </span>}
@@ -121,12 +121,12 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
             {history.visits.map((v) => (
               <Link key={v.id} href={`/rekam-medis/${v.id}`} className="grid grid-cols-[116px_minmax(0,1fr)_auto] items-center gap-4 border-b px-5 py-3.5 last:border-0">
                 <div>
-                  <div className="text-[14.5px] font-medium">{formatDate(v.visitDate)}</div>
-                  <div className="text-[13px] text-muted-foreground">{v.doctor.name}</div>
+                  <div className="text-[13.5px] font-medium">{formatDate(v.visitDate)}</div>
+                  <div className="text-[12.5px] text-muted-foreground">{v.doctor.name}</div>
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate text-[14.5px] font-medium">{v.medicalRecord?.diagnosis || v.complaint}</div>
-                  {v.medicalRecord?.diagnosis && <div className="truncate text-[13.5px] text-muted-foreground">{v.complaint}</div>}
+                  <div className="truncate text-[13.5px] font-medium">{v.medicalRecord?.diagnosis || v.complaint}</div>
+                  {v.medicalRecord?.diagnosis && <div className="truncate text-[13px] text-muted-foreground">{v.complaint}</div>}
                 </div>
                 <StatusChip tone={v.medicalRecord?.finalized ? "info" : "neutral"}>{v.medicalRecord?.finalized ? "Final" : "Draft"}</StatusChip>
               </Link>
@@ -137,10 +137,10 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
             {history.examinations.length === 0 && <p className="p-5 text-sm text-muted-foreground">Belum ada hasil lab atau radiologi.</p>}
             {history.examinations.map((e) => (
               <Link key={e.id} href={`${EXAM[e.type].path}/${e.id}`} className="grid grid-cols-[116px_minmax(0,1fr)_auto] items-center gap-4 border-b px-5 py-3.5 last:border-0">
-                <div className="text-[14.5px] font-medium">{formatDate(e.performedAt)}</div>
+                <div className="text-[13.5px] font-medium">{formatDate(e.performedAt)}</div>
                 <div className="min-w-0">
-                  <div className="truncate text-[14.5px] font-medium">{e.name}</div>
-                  {e.findings && <div className="truncate text-[13.5px] text-muted-foreground">{e.findings}</div>}
+                  <div className="truncate text-[13.5px] font-medium">{e.name}</div>
+                  {e.findings && <div className="truncate text-[13px] text-muted-foreground">{e.findings}</div>}
                 </div>
                 <StatusChip tone="info">{e.type === "LAB" ? "Lab" : "Radiologi"}</StatusChip>
               </Link>
@@ -151,8 +151,8 @@ export function PatientProfile({ patient, history, admissions, monitoring }: { p
             {history.vaccinations.length === 0 && <p className="p-5 text-sm text-muted-foreground">Belum ada vaksinasi.</p>}
             {history.vaccinations.map((v) => (
               <div key={v.id} className="border-b px-5 py-3.5 last:border-0">
-                <div className="text-[14.5px] font-medium">{v.item.name}</div>
-                <div className="text-[13.5px] text-muted-foreground">
+                <div className="text-[13.5px] font-medium">{v.item.name}</div>
+                <div className="text-[13px] text-muted-foreground">
                   {formatDate(v.givenAt)}
                   {v.batchNo && ` · Batch ${v.batchNo}`}
                   {v.nextDue && ` · berikutnya ${formatDate(v.nextDue)}`}

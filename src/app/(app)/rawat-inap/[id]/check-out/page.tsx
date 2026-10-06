@@ -26,7 +26,7 @@ export default async function CheckOutPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Check-out</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Check-out</h1>
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="space-y-1 p-4">
           <div className="flex flex-wrap items-center gap-2.5">

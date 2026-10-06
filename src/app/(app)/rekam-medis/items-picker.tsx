@@ -24,7 +24,7 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
     <section className="space-y-3 rounded-[10px] border bg-card p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-base font-semibold">Tindakan & resep</h2>
-        <span className="text-[13px] text-muted-foreground">Masuk ke draft invoice saat difinalkan</span>
+        <span className="text-[12.5px] text-muted-foreground">Masuk ke draft invoice saat difinalkan</span>
       </div>
 
       <div className="relative">
@@ -36,7 +36,7 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
             onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
             aria-label="Cari tindakan atau obat"
             placeholder="Cari tindakan atau obat"
-            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none"
+            className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
           />
         </div>
         {results.length > 0 && (
@@ -53,11 +53,11 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
                   }}
                   className="flex min-h-13 w-full flex-col items-start justify-center gap-0.5 border-b px-3.5 py-2 text-left last:border-0 hover:bg-muted"
                 >
-                  <span className="text-[14.5px] font-medium">
+                  <span className="text-[13.5px] font-medium">
                     {item.name} <span className="font-normal text-muted-foreground">· {TYPE_LABEL[item.type]} · {item.baseUnit}</span>
                   </span>
                   {warn && (
-                    <span className="flex items-center gap-1.5 text-[13px] text-destructive">
+                    <span className="flex items-center gap-1.5 text-[12.5px] text-destructive">
                       <TriangleAlert className="size-3.5" />
                       Pasien tercatat alergi obat ini
                     </span>
@@ -73,8 +73,8 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
         <p className="text-sm text-muted-foreground">Belum ada tindakan atau obat.</p>
       ) : (
         <div className="overflow-x-auto">
-          <div className="min-w-[560px] text-[14.5px]">
-            <div className="grid grid-cols-[90px_minmax(0,2fr)_minmax(0,1.6fr)_90px_44px] gap-3 border-b px-1 py-2 text-[13px] text-muted-foreground">
+          <div className="min-w-[560px] text-[13.5px]">
+            <div className="grid grid-cols-[90px_minmax(0,2fr)_minmax(0,1.6fr)_90px_44px] gap-3 border-b px-1 py-2 text-[12.5px] text-muted-foreground">
               <span>Jenis</span>
               <span>Item</span>
               <span>Aturan pakai</span>
@@ -92,7 +92,7 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
                   <span>
                     <span className="font-medium">{item.name}</span>
                     {warn && (
-                      <span className="flex items-center gap-1.5 text-[13px] text-destructive">
+                      <span className="flex items-center gap-1.5 text-[12.5px] text-destructive">
                         <TriangleAlert className="size-3.5" />
                         Pasien tercatat alergi obat ini
                       </span>
@@ -105,7 +105,7 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
                       onChange={(e) => update(i, { instruction: e.target.value })}
                       aria-label={`Aturan pakai ${item.name}`}
                       placeholder="mis. 2× sehari ½ tab"
-                      className="h-10 min-w-0 rounded-lg border border-input bg-card px-2.5 text-[14.5px] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      className="h-10 min-w-0 rounded-lg border border-input bg-card px-2.5 text-[13.5px] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                     />
                   ) : (
                     <>
@@ -122,9 +122,9 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
                       value={row.qty}
                       onChange={(e) => update(i, { qty: Number(e.target.value) })}
                       aria-label={`Jumlah ${item.name}`}
-                      className="h-10 w-16 rounded-lg border border-input bg-card px-2 text-[14.5px] tabular-nums outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      className="h-10 w-16 rounded-lg border border-input bg-card px-2 text-[13.5px] tabular-nums outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                     />
-                    <span className="text-[13px] text-muted-foreground">{item.baseUnit}</span>
+                    <span className="text-[12.5px] text-muted-foreground">{item.baseUnit}</span>
                   </div>
                   <button type="button" aria-label={`Hapus ${item.name}`} onClick={() => setRows((current) => current.filter((_, idx) => idx !== i))} className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted">
                     <X className="size-4" />
@@ -136,7 +136,7 @@ export function ItemsPicker({ catalog, allergyNote, initial, error }: { catalog:
         </div>
       )}
       {error?.map((e) => (
-        <p key={e} className="text-[13px] text-destructive">{e}</p>
+        <p key={e} className="text-[12.5px] text-destructive">{e}</p>
       ))}
     </section>
   );

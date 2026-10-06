@@ -60,7 +60,7 @@ export async function ExamList({ type, searchParams }: { type: ExaminationType; 
             <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(e.performedAt)}</td>
             <td className="px-4 py-3">
               <div className="flex flex-wrap items-center gap-1.5"><Link href={`/pasien?id=${e.patient.id}`} className="font-medium">{e.patient.name}</Link><ClinicalTags allergyNote={e.patient.allergyNote} aggressive={e.patient.aggressive} /></div>
-              <div className="text-[13px] text-muted-foreground">{e.patient.rmNo} · {e.patient.owner.name}</div>
+              <div className="text-[12.5px] text-muted-foreground">{e.patient.rmNo} · {e.patient.owner.name}</div>
             </td>
             <td className="px-4 py-3 font-medium">{e.name}</td>
             <td className="max-w-64 px-4 py-3"><div className="truncate">{e.findings ?? <span className="text-muted-foreground">-</span>}</div></td>
@@ -83,7 +83,7 @@ export async function ExamNew({ type, searchParams }: { type: ExaminationType; s
     const results = (await searchPatients(q)).patients;
     return (
       <div className="space-y-5">
-        <h1 className="text-[22px] font-semibold leading-11">{config.title} baru: pilih pasien</h1>
+        <h1 className="text-[20px] font-semibold leading-11">{config.title} baru: pilih pasien</h1>
         <form className="flex gap-2">
           <Input name="q" defaultValue={q} autoFocus placeholder="Nama owner/hewan, no. WA, no. RM, microchip" aria-label="Cari pasien" />
           <Button type="submit" variant="outline">Cari</Button>
@@ -92,8 +92,8 @@ export async function ExamNew({ type, searchParams }: { type: ExaminationType; s
           {results.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Tidak ada pasien ditemukan.</p>}
           {results.map((p) => (
             <Link key={p.id} href={`${config.path}/baru?patient=${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
-              <span className="flex flex-wrap items-center gap-1.5"><span className="text-[15px] font-semibold">{p.name}</span><ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} /></span>
-              <span className="text-[13.5px] text-muted-foreground">{[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")} · {p.owner.name}</span>
+              <span className="flex flex-wrap items-center gap-1.5"><span className="text-[14px] font-semibold">{p.name}</span><ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} /></span>
+              <span className="text-[13px] text-muted-foreground">{[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")} · {p.owner.name}</span>
             </Link>
           ))}
         </div>
@@ -104,7 +104,7 @@ export async function ExamNew({ type, searchParams }: { type: ExaminationType; s
   const records = await listRecordOptions(patient.id);
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">{config.title} baru</h1>
+      <h1 className="text-[20px] font-semibold leading-11">{config.title} baru</h1>
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-2.5 p-4">
           <span className="text-lg font-semibold">{patient.name}</span>
@@ -148,8 +148,8 @@ export async function ExamDetail({ type, id }: { type: ExaminationType; id: stri
       />
 
       <section className="space-y-3 rounded-[10px] border bg-card p-5">
-        <div><h2 className="text-sm font-semibold">{config.findingsLabel}</h2><p className="mt-1 whitespace-pre-wrap text-[15px]">{exam.findings ?? "-"}</p></div>
-        <div><h2 className="text-sm font-semibold">{config.notesLabel}</h2><p className="mt-1 whitespace-pre-wrap text-[15px]">{exam.notes ?? "-"}</p></div>
+        <div><h2 className="text-sm font-semibold">{config.findingsLabel}</h2><p className="mt-1 whitespace-pre-wrap text-[14px]">{exam.findings ?? "-"}</p></div>
+        <div><h2 className="text-sm font-semibold">{config.notesLabel}</h2><p className="mt-1 whitespace-pre-wrap text-[14px]">{exam.notes ?? "-"}</p></div>
         {exam.recordId && <p className="text-sm text-muted-foreground">Terkait rekam medis pasien ini.</p>}
       </section>
 
@@ -157,13 +157,13 @@ export async function ExamDetail({ type, id }: { type: ExaminationType; id: stri
         <h2 className="text-base font-semibold">Lampiran</h2>
         {exam.attachments.length === 0 && <p className="text-sm text-muted-foreground">Belum ada lampiran.</p>}
         {exam.attachments.map((a) => (
-          <div key={a.id} className="flex items-center justify-between gap-3 border-b pb-2.5 text-[14.5px] last:border-0">
+          <div key={a.id} className="flex items-center justify-between gap-3 border-b pb-2.5 text-[13.5px] last:border-0">
             <a href={`/api/lampiran/${a.id}`} target="_blank" rel="noreferrer" className="min-w-0 truncate font-medium text-primary">{a.fileName}</a>
-            <span className="shrink-0 text-[13px] text-muted-foreground">{(a.size / 1024).toFixed(0)} KB · {formatDate(a.createdAt)}</span>
+            <span className="shrink-0 text-[12.5px] text-muted-foreground">{(a.size / 1024).toFixed(0)} KB · {formatDate(a.createdAt)}</span>
           </div>
         ))}
         {canEdit && <ExamFileForm examId={exam.id} />}
-        <p className="text-[13px] text-muted-foreground">PDF, JPG, atau PNG, maksimal 10 MB.</p>
+        <p className="text-[12.5px] text-muted-foreground">PDF, JPG, atau PNG, maksimal 10 MB.</p>
       </section>
     </div>
   );
@@ -179,7 +179,7 @@ export async function ExamEdit({ type, id }: { type: ExaminationType; id: string
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah {EXAM[type].singular}: {exam.patient.name}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah {EXAM[type].singular}: {exam.patient.name}</h1>
       <ExamForm type={type} examId={exam.id} defaults={{ name: exam.name, performedAt: exam.performedAt.toISOString().slice(0, 10), findings: exam.findings ?? "", notes: exam.notes ?? "", recordId: exam.recordId ?? "" }} records={records} cancelHref={`${EXAM[type].path}/${exam.id}`} />
     </div>
   );

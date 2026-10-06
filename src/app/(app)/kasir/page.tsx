@@ -40,11 +40,11 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
               <div className="absolute right-0 z-20 mt-2 max-h-96 w-80 overflow-y-auto rounded-lg border bg-card shadow-lg">
                 {openDrafts.map((d) => (
                   <Link key={d.id} href={`/kasir?inv=${d.id}`} className="flex flex-col gap-0.5 border-b px-4 py-3 last:border-0 hover:bg-muted">
-                    <span className="flex justify-between gap-2 text-[14.5px] font-medium">
+                    <span className="flex justify-between gap-2 text-[13.5px] font-medium">
                       <span className="tabular-nums">{d.invoiceNo}</span>
                       <span className="tabular-nums">{formatRupiah(d.grandTotal)}</span>
                     </span>
-                    <span className="text-[13px] text-muted-foreground">{d.visit?.patient.name ?? d.admission?.patient.name ?? d.customerName ?? "Tanpa nama"} · {d._count.items} item</span>
+                    <span className="text-[12.5px] text-muted-foreground">{d.visit?.patient.name ?? d.admission?.patient.name ?? d.customerName ?? "Tanpa nama"} · {d._count.items} item</span>
                   </Link>
                 ))}
               </div>

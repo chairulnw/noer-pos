@@ -23,7 +23,7 @@ export function ModulesDialog({ role }: { role: Role }) {
 
   return (
     <>
-      <button type="button" onClick={() => dialog.current?.showModal()} className="flex w-full flex-col items-center gap-3 rounded-2xl border bg-card px-3 py-5 text-center text-[15px] font-semibold text-primary hover:border-primary/40">
+      <button type="button" onClick={() => dialog.current?.showModal()} className="flex w-full flex-col items-center gap-3 rounded-2xl border bg-card px-3 py-5 text-center text-[14px] font-semibold text-primary hover:border-primary/40">
         <span className="grid size-14 place-items-center rounded-2xl bg-accent text-primary"><LayoutGrid className="size-6" /></span>
         Lainnya
       </button>
@@ -41,7 +41,7 @@ export function ModulesDialog({ role }: { role: Role }) {
               </div>
               <label className="flex h-12 items-center gap-2.5 rounded-xl border bg-background px-3.5 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
                 <Search className="size-[18px] text-muted-foreground" />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari menu…" aria-label="Cari menu" className="min-w-0 flex-1 bg-transparent text-[15px] outline-none" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari menu…" aria-label="Cari menu" className="min-w-0 flex-1 bg-transparent text-[14px] outline-none" />
               </label>
             </div>
             <div className="flex-1 space-y-5 overflow-y-auto border-t bg-background/60 p-5">

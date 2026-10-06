@@ -28,8 +28,8 @@ export default async function NotificationsPage() {
           <Link key={n.key} href={n.href} className={cn("flex items-start gap-3 border-b px-5 py-3.5 last:border-0 hover:bg-muted/50", n.unread && "bg-accent/40")}>
             <span className={cn("mt-2 size-2 shrink-0 rounded-full", DOT[n.tone])} />
             <span className="min-w-0 flex-1">
-              <span className={cn("block text-[14.5px]", n.unread ? "font-semibold" : "font-medium")}>{n.title}</span>
-              <span className="block text-[13.5px] text-muted-foreground">{n.detail}</span>
+              <span className={cn("block text-[13.5px]", n.unread ? "font-semibold" : "font-medium")}>{n.title}</span>
+              <span className="block text-[13px] text-muted-foreground">{n.detail}</span>
             </span>
             {n.unread && <span className="mt-1 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">Baru</span>}
           </Link>

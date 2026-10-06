@@ -42,9 +42,9 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
 
       {final ? (
         <div className="overflow-x-auto rounded-[10px] border bg-card">
-          <table className="w-full min-w-[600px] text-[14.5px]">
+          <table className="w-full min-w-[600px] text-[13.5px]">
             <thead>
-              <tr className="border-b text-left text-[13px] text-muted-foreground">
+              <tr className="border-b text-left text-[12.5px] text-muted-foreground">
                 <th className="px-4 py-2.5 font-normal">Produk / batch</th>
                 <th className="px-4 py-2.5 text-right font-normal">Sistem</th>
                 <th className="px-4 py-2.5 text-right font-normal">Hitung fisik</th>
@@ -57,7 +57,7 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
                 const diff = r.counted - r.system;
                 return (
                   <tr key={r.id} className="border-b last:border-0">
-                    <td className="px-4 py-3"><div className="font-medium">{r.name}</div><div className="text-[13px] text-muted-foreground">Batch {r.batchNo}</div></td>
+                    <td className="px-4 py-3"><div className="font-medium">{r.name}</div><div className="text-[12.5px] text-muted-foreground">Batch {r.batchNo}</div></td>
                     <td className="px-4 py-3 text-right tabular-nums">{r.system.toLocaleString("id-ID")}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{r.counted.toLocaleString("id-ID")}</td>
                     <td className={`px-4 py-3 text-right font-medium tabular-nums ${diff < 0 ? "text-destructive" : diff > 0 ? "text-success" : "text-muted-foreground"}`}>{diff === 0 ? "0" : `${diff > 0 ? "+" : ""}${diff.toLocaleString("id-ID")}`}</td>

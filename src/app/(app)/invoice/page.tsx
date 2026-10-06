@@ -49,7 +49,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                   <span className="font-medium">{patient?.name ?? inv.customerName ?? "Umum / Walk-in"}</span>
                   {patient && <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />}
                 </div>
-                {inv.owner && <div className="text-[13px] text-muted-foreground">{inv.owner.name}</div>}
+                {inv.owner && <div className="text-[12.5px] text-muted-foreground">{inv.owner.name}</div>}
               </td>
               <td className="px-4 py-3 text-muted-foreground">{formatDate(inv.createdAt)}</td>
               <td className="px-4 py-3 text-right tabular-nums">{formatRupiah(inv.grandTotal)}</td>

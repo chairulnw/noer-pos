@@ -22,7 +22,7 @@ export async function CheckInView({ searchParams, type }: { searchParams: Promis
     const results = (await searchPatients(q)).patients;
     return (
       <div className="space-y-5">
-        <h1 className="text-[22px] font-semibold leading-11">{heading}: pilih pasien</h1>
+        <h1 className="text-[20px] font-semibold leading-11">{heading}: pilih pasien</h1>
         <form className="flex gap-2">
           <Input name="q" defaultValue={q} autoFocus placeholder="Nama owner/hewan, no. WA, no. RM, microchip" aria-label="Cari pasien" />
           <Button type="submit" variant="outline">Cari</Button>
@@ -32,10 +32,10 @@ export async function CheckInView({ searchParams, type }: { searchParams: Promis
           {results.map((p) => (
             <Link key={p.id} href={`${base}/check-in?patient=${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
               <span className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[15px] font-semibold">{p.name}</span>
+                <span className="text-[14px] font-semibold">{p.name}</span>
                 <ClinicalTags allergyNote={p.allergyNote} aggressive={p.aggressive} />
               </span>
-              <span className="text-[13.5px] text-muted-foreground">{[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")} · {p.owner.name}</span>
+              <span className="text-[13px] text-muted-foreground">{[p.species, p.breed, p.rmNo].filter(Boolean).join(" · ")} · {p.owner.name}</span>
             </Link>
           ))}
         </div>
@@ -47,7 +47,7 @@ export async function CheckInView({ searchParams, type }: { searchParams: Promis
 
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">{heading}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">{heading}</h1>
       <div className="overflow-hidden rounded-[10px] border bg-card">
         <div className="flex flex-wrap items-center gap-2.5 p-4">
           <span className="text-lg font-semibold">{patient.name}</span>

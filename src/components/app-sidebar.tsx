@@ -41,7 +41,7 @@ export async function AppSidebar({ user, logo }: { user: { id: string; name?: st
         <SidebarNav role={user.role} />
       </div>
       <div className="mt-3 flex items-center gap-2.5 border-t border-sidebar-border px-2 pt-4 md:group-data-[collapsed=true]/side:flex-col">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-[13px] font-semibold text-accent-foreground">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-[12.5px] font-semibold text-accent-foreground">
           {initials(name)}
         </div>
         <Link href="/akun" title="Akun saya" className="min-w-0 flex-1 rounded-lg py-1 hover:bg-muted md:group-data-[collapsed=true]/side:hidden">

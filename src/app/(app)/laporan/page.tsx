@@ -25,9 +25,9 @@ const num = "px-4 py-3 text-right tabular-nums";
 function Table({ head, children, empty, emptyText = "Tidak ada data pada periode ini." }: { head: [string, boolean?][]; children: React.ReactNode; empty?: boolean; emptyText?: string }) {
   return (
     <div className="overflow-x-auto rounded-[10px] border bg-card">
-      <table className="w-full min-w-[560px] text-[14.5px]">
+      <table className="w-full min-w-[560px] text-[13.5px]">
         <thead>
-          <tr className="border-b text-left text-[13px] text-muted-foreground">
+          <tr className="border-b text-left text-[12.5px] text-muted-foreground">
             {head.map(([label, right]) => <th key={label} className={cn(th, right && "text-right")}>{label}</th>)}
           </tr>
         </thead>
@@ -43,9 +43,9 @@ function Table({ head, children, empty, emptyText = "Tidak ada data pada periode
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="h-full rounded-[10px] border bg-card p-4">
-      <div className="text-[13px] text-muted-foreground">{label}</div>
+      <div className="text-[12.5px] text-muted-foreground">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
-      {hint && <div className="mt-0.5 text-[13px] text-muted-foreground">{hint}</div>}
+      {hint && <div className="mt-0.5 text-[12.5px] text-muted-foreground">{hint}</div>}
     </div>
   );
 }
@@ -79,7 +79,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-[22px] font-semibold leading-11">Laporan</h1>
+        <h1 className="text-[20px] font-semibold leading-11">Laporan</h1>
         <p className="text-sm text-muted-foreground">Hanya invoice FINAL. Penjualan dihitung tanpa PPN, laba kotor = penjualan − HPP (harga beli saat transaksi).</p>
       </header>
 
@@ -92,14 +92,14 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
             </Link>
           ))}
         </div>
-        <label className="space-y-1 text-[13px] text-muted-foreground">Dari<input type="date" name="from" defaultValue={"error" in range ? params.from : range.from} className={`${field} block`} /></label>
-        <label className="space-y-1 text-[13px] text-muted-foreground">Sampai<input type="date" name="to" defaultValue={"error" in range ? params.to : range.to} className={`${field} block`} /></label>
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">Dari<input type="date" name="from" defaultValue={"error" in range ? params.from : range.from} className={`${field} block`} /></label>
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">Sampai<input type="date" name="to" defaultValue={"error" in range ? params.to : range.to} className={`${field} block`} /></label>
         <Button type="submit">Terapkan</Button>
       </form>
 
       <div role="tablist" className="flex gap-1 overflow-x-auto border-b">
         {TABS.map((t) => (
-          <Link key={t.id} href={query({ tab: t.id })} role="tab" aria-selected={tab === t.id} className={cn("flex h-12 shrink-0 items-center border-b-2 px-3 text-[14.5px] font-medium text-muted-foreground", tab === t.id ? "border-primary font-semibold text-primary" : "border-transparent")}>
+          <Link key={t.id} href={query({ tab: t.id })} role="tab" aria-selected={tab === t.id} className={cn("flex h-12 shrink-0 items-center border-b-2 px-3 text-[13.5px] font-medium text-muted-foreground", tab === t.id ? "border-primary font-semibold text-primary" : "border-transparent")}>
             {t.label}
           </Link>
         ))}
@@ -156,7 +156,7 @@ async function Section({ tab, range, per, query }: { tab: string; range: Exclude
       <div className="space-y-5">
         <section className="space-y-2"><h2 className="text-base font-semibold">10 produk teratas</h2><ItemTable rows={products} /></section>
         <section className="space-y-2"><h2 className="text-base font-semibold">10 layanan teratas</h2><ItemTable rows={services} /></section>
-        <p className="text-[13px] text-muted-foreground">Diurutkan menurut penjualan. Angka per item sudah termasuk diskon item, belum termasuk diskon di tingkat invoice.</p>
+        <p className="text-[12.5px] text-muted-foreground">Diurutkan menurut penjualan. Angka per item sudah termasuk diskon item, belum termasuk diskon di tingkat invoice.</p>
       </div>
     );
   }
@@ -186,7 +186,7 @@ async function Section({ tab, range, per, query }: { tab: string; range: Exclude
   const [alerts, due] = await Promise.all([getStockAlerts(), listDueVaccinations(30)]);
   return (
     <div className="space-y-5">
-      <p className="text-[13px] text-muted-foreground">Kondisi saat ini, tidak mengikuti rentang tanggal.</p>
+      <p className="text-[12.5px] text-muted-foreground">Kondisi saat ini, tidak mengikuti rentang tanggal.</p>
       <section className="space-y-2">
         <h2 className="text-base font-semibold">Stok menipis ({alerts.low.length})</h2>
         <Table head={[["Produk"], ["Sisa", true], ["Batas minimum", true]]} empty={alerts.low.length === 0} emptyText="Tidak ada.">

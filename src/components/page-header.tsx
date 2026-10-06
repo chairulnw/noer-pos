@@ -14,9 +14,9 @@ export function PageHeader({ back, title, status, meta, actions, children }: Pro
     <header className="overflow-hidden rounded-[10px] border bg-card">
       <div className="flex flex-wrap items-start justify-between gap-3 p-4 px-5">
         <div className="min-w-0 space-y-1">
-          <Link href={back.href} className="text-[13px] font-medium text-primary">← {back.label}</Link>
+          <Link href={back.href} className="text-[12.5px] font-medium text-primary">← {back.label}</Link>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold leading-11">{title}</h1>
+            <h1 className="text-[20px] font-semibold leading-11">{title}</h1>
             {status}
           </div>
           {meta && <div className="space-y-1 text-sm text-muted-foreground">{meta}</div>}

@@ -13,7 +13,7 @@ export default async function EditRoomPage({ params }: { params: Promise<{ id: s
   if (!room) notFound();
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah kandang {room.name}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah kandang {room.name}</h1>
       <RoomForm room={room} />
     </div>
   );

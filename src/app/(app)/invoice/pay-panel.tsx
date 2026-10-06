@@ -70,7 +70,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
 
   return (
     <section aria-label="Pembayaran" className={bare ? "space-y-4" : "space-y-4 rounded-[10px] border bg-card p-5"}>
-      <div className="space-y-2 text-[14.5px]">
+      <div className="space-y-2 text-[13.5px]">
         <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">{formatRupiah(totals.subtotal)}</span></div>
         {totals.discountTotal > 0 && (
           <div className="flex justify-between"><span className="text-muted-foreground">Diskon invoice</span><span className="tabular-nums">− {formatRupiah(totals.discountTotal)}</span></div>
@@ -93,7 +93,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
               <option value="PERCENT">Persen (%)</option>
               <option value="AMOUNT">Nominal (Rp)</option>
             </select>
-            {dType && <input type="number" min="0" step="1" aria-label="Nilai diskon invoice" value={dValue} onChange={(e) => setDValue(e.target.value)} className="h-10 w-32 rounded-lg border border-input bg-card px-2 text-sm" />}
+            {dType === "AMOUNT" ? <MoneyInput aria-label="Nilai diskon invoice" value={dValue} onValueChange={setDValue} className="h-10 w-32 rounded-lg border border-input bg-card px-2 text-sm" /> : dType && <input type="number" min="0" max="100" step="1" aria-label="Nilai diskon invoice (%)" value={dValue} onChange={(e) => setDValue(e.target.value)} className="h-10 w-32 rounded-lg border border-input bg-card px-2 text-sm" />}
             <Button type="button" variant="outline" disabled={pending} onClick={() => run(async () => { const r = await setDiscountAction(invoiceId, { type: dType || null, value: Number(dValue) || 0 }); if (!r.error) setDiscOpen(false); return r; }, "Diskon tersimpan")}>
               Terapkan
             </Button>
@@ -102,15 +102,15 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
       </div>
 
       <div className="flex items-baseline justify-between border-t pt-3.5">
-        <span className="text-[15px] font-medium">Total</span>
-        <span className={`font-semibold tabular-nums ${paid > 0 ? "text-xl" : "text-[28px]"}`}>{formatRupiah(totals.grandTotal)}</span>
+        <span className="text-[14px] font-medium">Total</span>
+        <span className={`font-semibold tabular-nums ${paid > 0 ? "text-xl" : "text-[26px]"}`}>{formatRupiah(totals.grandTotal)}</span>
       </div>
       {paid > 0 && (
         <>
-          <div className="flex justify-between text-[14.5px]"><span className="text-muted-foreground">DP dibayar</span><span className="tabular-nums">− {formatRupiah(paid)}</span></div>
+          <div className="flex justify-between text-[13.5px]"><span className="text-muted-foreground">DP dibayar</span><span className="tabular-nums">− {formatRupiah(paid)}</span></div>
           <div className="flex items-baseline justify-between">
-            <span className="text-[15px] font-medium">Sisa</span>
-            <span className="text-[28px] font-semibold tabular-nums">{formatRupiah(total)}</span>
+            <span className="text-[14px] font-medium">Sisa</span>
+            <span className="text-[26px] font-semibold tabular-nums">{formatRupiah(total)}</span>
           </div>
         </>
       )}
@@ -132,7 +132,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
                 type="button"
                 aria-pressed={method === m.id}
                 onClick={() => setMethod(m.id)}
-                className={`h-[52px] rounded-lg border text-[15px] font-medium ${method === m.id ? "border-primary bg-accent text-primary shadow-[inset_0_0_0_1px_var(--color-primary)]" : "border-input bg-card"}`}
+                className={`h-[52px] rounded-lg border text-[14px] font-medium ${method === m.id ? "border-primary bg-accent text-primary shadow-[inset_0_0_0_1px_var(--color-primary)]" : "border-input bg-card"}`}
               >
                 {m.label}
               </button>
@@ -143,18 +143,18 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
             <div className="space-y-2">
               <label htmlFor="received" className="text-sm font-medium">Uang diterima</label>
               <div className="flex h-12 items-center gap-2 rounded-lg border border-input px-3">
-                <span className="text-[15px] text-muted-foreground">Rp</span>
+                <span className="text-[14px] text-muted-foreground">Rp</span>
                 <MoneyInput id="received" onKeyDown={(e) => e.key === "Enter" && canSubmit && pay()} value={received ?? String(total)} onValueChange={setReceived} className="min-w-0 flex-1 bg-transparent text-lg font-medium tabular-nums outline-none" />
               </div>
               <div className="grid grid-cols-4 gap-1.5">
                 {quick.map((v) => (
-                  <button key={v} type="button" onClick={() => setReceived(String(v))} className="h-11 rounded-lg border text-[13.5px] font-medium text-[#3B434C]">
+                  <button key={v} type="button" onClick={() => setReceived(String(v))} className="h-11 rounded-lg border text-[13px] font-medium text-[#3B434C]">
                     {v === total ? "Uang pas" : formatRupiah(v).replace("Rp ", "")}
                   </button>
                 ))}
               </div>
               <div className="flex items-baseline justify-between pt-1.5">
-                <span className="text-[14.5px] text-muted-foreground">Kembalian</span>
+                <span className="text-[13.5px] text-muted-foreground">Kembalian</span>
                 <span className="text-xl font-semibold tabular-nums">{formatRupiah(changeDue(cash, total))}</span>
               </div>
             </div>

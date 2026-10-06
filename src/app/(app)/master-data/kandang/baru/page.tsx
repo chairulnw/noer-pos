@@ -6,7 +6,7 @@ export default async function NewRoomPage({ searchParams }: { searchParams: Prom
   await requireCapability("manage_rooms");
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Kandang Baru</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Kandang Baru</h1>
       <RoomForm room={null} defaultType={jenis === "HOTEL" ? "HOTEL" : "RAWAT_INAP"} />
     </div>
   );

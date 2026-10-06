@@ -32,9 +32,9 @@ export function Field({
     <div className={cn("space-y-1.5", full && "md:col-span-2")}>
       <Label htmlFor={name}>{label}</Label>
       {children}
-      {hint && <p className="text-[13px] text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-[12.5px] text-muted-foreground">{hint}</p>}
       {errors?.map((error) => (
-        <p key={error} className="text-[13px] text-destructive">
+        <p key={error} className="text-[12.5px] text-destructive">
           {error}
         </p>
       ))}

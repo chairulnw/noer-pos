@@ -23,7 +23,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[22px] font-semibold leading-11">Inventaris</h1>
+        <h1 className="text-[20px] font-semibold leading-11">Inventaris</h1>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/inventaris/opname">Stok opname</Link>
@@ -39,9 +39,9 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       </form>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[600px] text-[14.5px]">
+        <table className="w-full min-w-[600px] text-[13.5px]">
           <thead>
-            <tr className="border-b text-left text-[13px] text-muted-foreground">
+            <tr className="border-b text-left text-[12.5px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Produk</th>
               <th className="px-4 py-2.5 text-right font-normal">Stok</th>
               <th className="px-4 py-2.5 font-normal">Expired terdekat</th>
@@ -59,7 +59,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
               <tr key={row.id} className="border-b last:border-0">
                 <td className="px-4 py-3">
                   <Link href={`/inventaris/${row.id}`} className="font-medium">{row.name}</Link>
-                  <div className="text-[13px] capitalize text-muted-foreground">{row.category}{!row.active && " · nonaktif"}</div>
+                  <div className="text-[12.5px] capitalize text-muted-foreground">{row.category}{!row.active && " · nonaktif"}</div>
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums">{row.usable.toLocaleString("id-ID")} {row.baseUnit}</td>
                 <td className="px-4 py-3 text-muted-foreground">{row.nearestExpiry ? formatDate(row.nearestExpiry) : "—"}</td>

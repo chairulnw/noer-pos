@@ -13,7 +13,7 @@ export function ListHeader({ icon: Icon, title, subtitle, actions }: { icon?: Re
       <div className="flex min-w-0 items-center gap-3">
         {Icon && <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><Icon className="size-5" /></div>}
         <div className="min-w-0">
-          <h1 className="text-[22px] leading-tight font-semibold">{title}</h1>
+          <h1 className="text-[20px] leading-tight font-semibold">{title}</h1>
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
@@ -40,7 +40,7 @@ export function ListToolbar({ base, params, searchName = "q", placeholder = "Car
         {hidden.map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />)}
         <div className="flex h-11 w-full max-w-md items-center gap-2.5 rounded-lg border border-input bg-card px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
           <Search className="size-[18px] text-muted-foreground" />
-          <input name={searchName} data-search defaultValue={params[searchName] ?? ""} aria-label={placeholder} placeholder={placeholder} className="min-w-0 flex-1 bg-transparent text-[15px] outline-none" />
+          <input name={searchName} data-search defaultValue={params[searchName] ?? ""} aria-label={placeholder} placeholder={placeholder} className="min-w-0 flex-1 bg-transparent text-[14px] outline-none" />
         </div>
         {children}
       </form>
@@ -85,7 +85,7 @@ export function TableCard({ columns, children, empty, total, page, size, base, p
   return (
     <section className="flex min-h-96 flex-1 flex-col overflow-hidden rounded-[10px] border bg-card md:min-h-0">
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full text-[14.5px]" style={{ minWidth }}>
+        <table className="w-full text-[13.5px]" style={{ minWidth }}>
           <thead className="sticky top-0 z-10 bg-card">
             <tr className="border-b text-left text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">
               {columns.map((c) => <th key={c.label} className={cn("px-4 py-3", c.align === "right" && "text-right", c.align === "center" && "text-center", c.className)}>{c.label}</th>)}

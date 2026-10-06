@@ -13,7 +13,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ id: s
   if (!item) notFound();
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-semibold leading-11">Ubah: {item.name}</h1>
+      <h1 className="text-[20px] font-semibold leading-11">Ubah: {item.name}</h1>
       <ItemForm item={item} />
     </div>
   );

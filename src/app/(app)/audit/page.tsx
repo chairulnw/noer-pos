@@ -25,30 +25,30 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-[22px] font-semibold leading-11">Audit Log</h1>
+        <h1 className="text-[20px] font-semibold leading-11">Audit Log</h1>
         <p className="text-sm text-muted-foreground">{total.toLocaleString("id-ID")} catatan perubahan sensitif. Hanya baca, tidak bisa diubah atau dihapus.</p>
       </header>
 
       <form className="flex flex-wrap items-end gap-3 rounded-[10px] border bg-card p-4">
-        <label className="space-y-1 text-[13px] text-muted-foreground">
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">
           Pengguna
           <select name="userId" defaultValue={filter.userId ?? ""} className={`${field} block`}>
             <option value="">Semua</option>
             {options.users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
         </label>
-        <label className="space-y-1 text-[13px] text-muted-foreground">
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">
           Entitas
           <select name="entity" defaultValue={filter.entity ?? ""} className={`${field} block`}>
             <option value="">Semua</option>
             {options.entities.map((e) => <option key={e} value={e}>{e}</option>)}
           </select>
         </label>
-        <label className="space-y-1 text-[13px] text-muted-foreground">
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">
           Dari
           <input type="date" name="from" defaultValue={filter.from ?? ""} className={`${field} block`} />
         </label>
-        <label className="space-y-1 text-[13px] text-muted-foreground">
+        <label className="space-y-1 text-[12.5px] text-muted-foreground">
           Sampai
           <input type="date" name="to" defaultValue={filter.to ?? ""} className={`${field} block`} />
         </label>
@@ -57,9 +57,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
       </form>
 
       <div className="overflow-x-auto rounded-[10px] border bg-card">
-        <table className="w-full min-w-[600px] text-[14.5px]">
+        <table className="w-full min-w-[600px] text-[13.5px]">
           <thead>
-            <tr className="border-b text-left text-[13px] text-muted-foreground">
+            <tr className="border-b text-left text-[12.5px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Waktu (WIB)</th>
               <th className="px-4 py-2.5 font-normal">Pengguna</th>
               <th className="px-4 py-2.5 font-normal">Aksi</th>

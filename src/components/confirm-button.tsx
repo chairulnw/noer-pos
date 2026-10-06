@@ -12,7 +12,7 @@ export function ConfirmButton({ message, confirmLabel = "Ya, lanjutkan", onConfi
     <>
       <Button type="button" {...props} ref={button} onClick={() => dialog.current?.showModal()} />
       <Modal dialogRef={dialog}>
-        <p className="text-[15px] font-medium">{message}</p>
+        <p className="text-[14px] font-medium">{message}</p>
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => dialog.current?.close()}>Batal</Button>
           <Button
