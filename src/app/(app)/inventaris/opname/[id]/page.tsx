@@ -9,7 +9,7 @@ import { requireCapability } from "@/lib/require-role";
 import { OpnameEditor } from "../opname-editor";
 
 export default async function OpnameSessionPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireCapability("manage_stock");
+  await requireCapability("stock_opname");
   const { id } = await params;
   if (!z.guid().safeParse(id).success) notFound();
   const opname = await getOpname(id);

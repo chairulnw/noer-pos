@@ -17,6 +17,7 @@ export type Capability =
   | "void_invoice"
   | "correct_deposit"
   | "manage_stock"
+  | "stock_opname"
   | "view_revenue_reports"
   | "view_audit_log";
 
@@ -37,6 +38,7 @@ const MATRIX: Record<Capability, Role[]> = {
   void_invoice: ["ADMIN"],
   correct_deposit: ["ADMIN"],
   manage_stock: ["ADMIN"],
+  stock_opname: ["ADMIN", "KASIR"],
   view_revenue_reports: ["ADMIN"],
   view_audit_log: ["ADMIN"],
 };

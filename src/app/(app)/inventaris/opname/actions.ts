@@ -10,7 +10,7 @@ import { requireCapability } from "@/lib/require-role";
 export type OpnameResult = { error?: string; ok?: boolean };
 
 export async function createOpnameAction(formData: FormData) {
-  const user = await requireCapability("manage_stock");
+  const user = await requireCapability("stock_opname");
   const note = String(formData.get("note") ?? "").trim().slice(0, 300);
   const result = await createOpname(user.id, note);
   if (result.error) redirect(`/inventaris/opname?error=${encodeURIComponent(result.error)}`);
@@ -19,7 +19,7 @@ export async function createOpnameAction(formData: FormData) {
 }
 
 async function run(opnameId: string, rows: OpnameRowInput[], finalize: boolean): Promise<OpnameResult> {
-  const user = await requireCapability("manage_stock");
+  const user = await requireCapability("stock_opname");
   const parsed = opnameRowsSchema.safeParse(rows);
   if (!parsed.success || !z.guid().safeParse(opnameId).success) return { error: parsed.success ? "Data tidak valid." : (parsed.error.issues[0]?.message ?? "Data tidak valid.") };
 

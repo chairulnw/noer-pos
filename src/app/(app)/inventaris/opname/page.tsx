@@ -12,7 +12,7 @@ import { requireCapability } from "@/lib/require-role";
 import { createOpnameAction } from "./actions";
 
 export default async function OpnamePage({ searchParams }: { searchParams: Promise<{ error?: string } & PagingParams & SortParams> }) {
-  await requireCapability("manage_stock");
+  await requireCapability("stock_opname");
   const params = await searchParams;
   const { page, size, skip, take } = parsePaging(params);
   const sort = parseSort(params, { tanggal: (d) => ({ opnameDate: d }), petugas: (d) => ({ user: { name: d } }), cakupan: (d) => ({ items: { _count: d } }), status: (d) => ({ status: d }) });
