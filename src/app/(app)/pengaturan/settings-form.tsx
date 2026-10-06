@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,11 +10,22 @@ import { keepValuesOnError } from "@/lib/form";
 import { updateSettings, type SettingsState } from "./actions";
 
 export function SettingsForm({ settings }: { settings: Settings }) {
-  const [state, formAction, pending] = useActionState<SettingsState, FormData>(updateSettings, {});
+  const [editing, setEditing] = useState(false);
+  const [version, setVersion] = useState(0);
+  return <SettingsFields key={version} settings={settings} editing={editing} onEdit={() => setEditing(true)} onDone={(reset) => { setEditing(false); if (reset) setVersion((v) => v + 1); }} />;
+}
+
+function SettingsFields({ settings, editing, onEdit, onDone }: { settings: Settings; editing: boolean; onEdit: () => void; onDone: (reset: boolean) => void }) {
+  const [state, formAction, pending] = useActionState<SettingsState, FormData>(async (prev, formData) => {
+    const result = await updateSettings(prev, formData);
+    if (result.ok) onDone(false);
+    return result;
+  }, {});
   const err = (key: string) => state.errors?.[key];
 
   return (
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
+      <fieldset disabled={!editing} className="space-y-5">
       <Section title="Data klinik">
         <Field label="Nama klinik" name="clinicName" errors={err("clinicName")} full>
           <Input id="clinicName" name="clinicName" defaultValue={settings.clinicName} required />
@@ -84,10 +95,17 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         ))}
       </Section>
 
+      </fieldset>
+
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Menyimpan…" : "Simpan"}
-        </Button>
+        {editing ? (
+          <>
+            <Button type="submit" disabled={pending}>{pending ? "Menyimpan…" : "Simpan"}</Button>
+            <Button type="button" variant="outline" disabled={pending} onClick={() => onDone(true)}>Batal</Button>
+          </>
+        ) : (
+          <Button type="button" onClick={(e) => { e.preventDefault(); onEdit(); }}>Ubah data klinik</Button>
+        )}
         {state.message && (
           <p role="status" className={`text-sm ${state.ok ? "text-success" : "text-destructive"}`}>
             {state.message}

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { formatDate } from "@/lib/format";
 import { getOpname } from "@/lib/opname";
+import { prisma } from "@/lib/db";
 import { requireCapability } from "@/lib/require-role";
 import { OpnameEditor } from "../opname-editor";
 
@@ -14,6 +15,7 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
   const opname = await getOpname(id);
   if (!opname) notFound();
   const final = opname.status === "FINAL";
+  const noStock = final ? [] : await prisma.item.findMany({ where: { type: "PRODUCT", active: true, deletedAt: null, stockBatches: { none: { qtyOnHand: { gt: 0 } } } }, select: { name: true }, orderBy: { name: "asc" } });
 
   const rows = opname.items.map((i) => ({
     id: i.id,
@@ -35,7 +37,8 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
         meta={
           <>
             <p>{opname.user.name}{opname.note && ` · ${opname.note}`}</p>
-            {!final && <p>Isi hitung fisik per batch. Batch yang tidak diubah dianggap sesuai. Selisih memerlukan alasan sebelum difinalkan.</p>}
+            {!final && <p>Isi hitung fisik per batch. Stok tercatat adalah jumlah menurut sistem saat sesi dibuat. Batch yang tidak diubah dianggap sesuai. Selisih memerlukan alasan sebelum difinalkan.</p>}
+            {noStock.length > 0 && <p className="text-warning">{noStock.length} produk tidak ikut dihitung karena belum punya stok di sistem (belum pernah Stok Masuk): {noStock.map((i) => i.name).join(", ")}. Catat lewat Stok Masuk dulu bila barangnya ada.</p>}
           </>
         }
       />
@@ -46,7 +49,7 @@ export default async function OpnameSessionPage({ params }: { params: Promise<{ 
             <thead>
               <tr className="border-b text-left text-[12.5px] text-muted-foreground">
                 <th className="px-4 py-2.5 font-normal">Produk / batch</th>
-                <th className="px-4 py-2.5 text-right font-normal">Sistem</th>
+                <th className="px-4 py-2.5 text-right font-normal">Stok tercatat</th>
                 <th className="px-4 py-2.5 text-right font-normal">Hitung fisik</th>
                 <th className="px-4 py-2.5 text-right font-normal">Selisih</th>
                 <th className="px-4 py-2.5 font-normal">Alasan</th>

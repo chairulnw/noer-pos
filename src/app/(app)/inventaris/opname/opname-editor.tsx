@@ -35,7 +35,7 @@ export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial:
             <tr className="border-b text-left text-[12.5px] text-muted-foreground">
               <th className="px-4 py-2.5 font-normal">Produk / batch</th>
               <th className="px-4 py-2.5 font-normal">Expired</th>
-              <th className="px-4 py-2.5 text-right font-normal">Sistem</th>
+              <th className="px-4 py-2.5 text-right font-normal">Stok tercatat</th>
               <th className="px-4 py-2.5 font-normal">Hitung fisik</th>
               <th className="px-4 py-2.5 text-right font-normal">Selisih</th>
               <th className="px-4 py-2.5 font-normal">Alasan</th>
@@ -51,7 +51,7 @@ export function OpnameEditor({ opnameId, initial }: { opnameId: string; initial:
                     <div className="text-[12.5px] text-muted-foreground">Batch {r.batchNo}</div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{r.expiry ?? "—"}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{fmt(r.system)} {r.unit}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{fmt(r.system)} <span className="text-muted-foreground">{r.unit}</span></td>
                   <td className="px-4 py-3">
                     <input
                       type="number"
