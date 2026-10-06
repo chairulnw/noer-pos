@@ -23,7 +23,7 @@ export default async function NotificationsPage() {
         actions={unread > 0 && <form action={markAllReadAction}><Button type="submit" variant="outline">Tandai Dibaca</Button></form>}
       />
       <section className="overflow-hidden rounded-[10px] border bg-card">
-        {notices.length === 0 && <p className="p-10 text-center text-sm text-muted-foreground">Tidak ada pemberitahuan. Stok, jadwal vaksin, dan janji temu yang perlu perhatian akan muncul di sini.</p>}
+        {notices.length === 0 && <p className="p-10 text-center text-sm text-muted-foreground">Tidak ada pemberitahuan. Stok dan jadwal vaksin yang perlu perhatian akan muncul di sini.</p>}
         {notices.map((n) => (
           <Link key={n.key} href={n.href} className={cn("flex items-start gap-3 border-b px-5 py-3.5 last:border-0 hover:bg-muted/50", n.unread && "bg-accent/40")}>
             <span className={cn("mt-2 size-2 shrink-0 rounded-full", DOT[n.tone])} />

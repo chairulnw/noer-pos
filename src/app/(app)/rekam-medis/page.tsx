@@ -5,7 +5,7 @@ import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
-import { parseYmd } from "@/lib/appointment-calc";
+import { parseYmd } from "@/lib/date";
 import { formatDate } from "@/lib/format";
 import { parsePaging, type PagingParams } from "@/lib/paging";
 import { listRecords } from "@/lib/records";

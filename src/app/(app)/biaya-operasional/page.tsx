@@ -4,7 +4,7 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
 import { EmptyState } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { parseYmd } from "@/lib/appointment-calc";
+import { parseYmd } from "@/lib/date";
 import { pageCosts } from "@/lib/costs";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { parsePaging, type PagingParams } from "@/lib/paging";

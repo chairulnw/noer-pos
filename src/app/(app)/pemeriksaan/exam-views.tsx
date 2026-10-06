@@ -9,7 +9,7 @@ import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { parseYmd } from "@/lib/appointment-calc";
+import { parseYmd } from "@/lib/date";
 import { todayJakarta } from "@/lib/date";
 import { EXAM, type ExaminationType } from "@/lib/examination-schema";
 import { getExamination, listExaminations, listRecordOptions } from "@/lib/examinations";

@@ -4,7 +4,7 @@ import { Chips, ListHeader, ListPage, ListToolbar, TableCard } from "@/component
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
-import { parseYmd } from "@/lib/appointment-calc";
+import { parseYmd } from "@/lib/date";
 import { todayJakarta } from "@/lib/date";
 import { formatDate } from "@/lib/format";
 import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";

@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/db";
-import { jakartaYmd } from "@/lib/appointment-calc";
-import { listAppointmentsOn } from "@/lib/appointments";
 import { todayJakarta } from "@/lib/date";
-import { formatDate, formatTime } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { getStockAlerts } from "@/lib/inventory";
 import { can, type Role } from "@/lib/permissions";
 import { listDueVaccinations } from "@/lib/records";
@@ -10,11 +8,9 @@ import { listDueVaccinations } from "@/lib/records";
 export type Notice = { key: string; title: string; detail: string; href: string; tone: "danger" | "warning" | "info" };
 
 export async function collectNotices(role: Role): Promise<Notice[]> {
-  const today = jakartaYmd(new Date());
-  const [stock, due, appointments] = await Promise.all([
+  const [stock, due] = await Promise.all([
     can(role, "manage_stock") ? getStockAlerts() : null,
     can(role, "view_medical_record") ? listDueVaccinations(7) : [],
-    can(role, "create_visit") ? listAppointmentsOn(today) : [],
   ]);
   const notices: Notice[] = [];
 
@@ -28,9 +24,6 @@ export async function collectNotices(role: Role): Promise<Notice[]> {
   for (const d of due) {
     const patient = d.record.visit.patient;
     notices.push({ key: `vaksin:${d.id}`, title: `Vaksin ulang ${patient.name}`, detail: `${d.item.name}, jatuh tempo ${formatDate(d.nextDue!)} · Pemilik ${patient.owner.name}`, href: "/vaksin?tampilan=jatuh-tempo", tone: d.nextDue!.getTime() < now ? "danger" : "info" });
-  }
-  for (const a of appointments.filter((x) => x.status === "TERJADWAL")) {
-    notices.push({ key: `janji:${a.id}`, title: `Janji temu ${formatTime(a.scheduledAt)}: ${a.patient.name}`, detail: `${a.purpose} · ${a.doctor.name}`, href: "/janji-temu", tone: "info" });
   }
   return notices;
 }

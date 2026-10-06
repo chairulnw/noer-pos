@@ -5,8 +5,6 @@ import { EmptyState } from "@/components/page-header";
 import { TrendChart } from "@/components/trend-chart";
 import { getCashierQueue, getDashboardSummary, getDoctorQueue } from "@/lib/dashboard";
 import { todayJakarta } from "@/lib/date";
-import { jakartaYmd } from "@/lib/appointment-calc";
-import { listAppointmentsOn } from "@/lib/appointments";
 import { getStockAlerts } from "@/lib/inventory";
 import { daysBetween, fillDays, resolveRange, sumRows, trendRange, TREND_DAYS } from "@/lib/report";
 import { getSalesByDay, getVisitStats } from "@/lib/reports";
@@ -22,7 +20,6 @@ const QUICK = [
   { href: "/pet-hotel/check-in", label: "Check-in hotel", capability: "manage_admission" },
   { href: "/grooming/baru", label: "Grooming baru", capability: "create_visit" },
   { href: "/operasi/baru", label: "Jadwal operasi", capability: "edit_medical_record" },
-  { href: "/janji-temu/baru", label: "Janji temu baru", capability: "create_visit" },
 ] as const;
 
 const DOT = { danger: "bg-destructive", warning: "bg-warning", info: "bg-info" };
@@ -85,7 +82,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const alerts = can(user.role, "manage_stock") ? await getStockAlerts() : null;
   const doctorQueue = user.role === "DOKTER" ? await getDoctorQueue(user.id) : null;
   const cashierQueue = user.role === "KASIR" ? await getCashierQueue() : null;
-  const todayAppointments = can(user.role, "create_visit") ? (await listAppointmentsOn(jakartaYmd(new Date()))).filter((a) => a.status === "TERJADWAL").length : null;
   const total = alerts ? alerts.low.length + alerts.expiring.length : 0;
 
   return (
@@ -102,7 +98,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
         {summary.revenue && <Stat label="Omzet hari ini (tanpa PPN)" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final`} />}
-        {todayAppointments !== null && <Stat label="Janji temu hari ini" value={String(todayAppointments)} href="/janji-temu" />}
         <Stat label="Kunjungan hari ini" value={String(summary.visits)} href={can(user.role, "create_visit") ? "/kunjungan" : undefined} />
         <Stat label="Rawat inap aktif" value={String(summary.rawatInap)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
         <Stat label="Hotel aktif" value={String(summary.hotel)} href={can(user.role, "monitor_admission") ? "/pet-hotel" : undefined} />
