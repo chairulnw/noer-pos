@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Trash2, UserRound, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, UserRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { formatRupiah } from "@/lib/format";
@@ -149,13 +149,24 @@ export function PosCart({ invoiceId, lines, editable, canDiscount, customerName,
     });
 
   return (
-    <section aria-label="Keranjang" className={`space-y-3 rounded-[10px] border bg-card p-5 ${pending ? "opacity-70" : ""}`}>
+    <section aria-label="Keranjang" className={`flex flex-col gap-3 rounded-[10px] border bg-card p-5 md:min-h-0 md:flex-1 ${pending ? "opacity-70" : ""}`}>
+      <div className="flex items-center gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"><ShoppingCart className="size-5" /></span>
+        <div>
+          <h2 className="text-base leading-tight font-semibold">Keranjang</h2>
+          <p className="text-[13px] text-muted-foreground">{lines.length} item</p>
+        </div>
+      </div>
       <Customer invoiceId={invoiceId} name={customerName} locked={customerLocked} editable={editable} run={run} />
       <div className="border-t" />
       {lines.length === 0 || !invoiceId ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">Keranjang kosong. Pilih produk atau layanan di sebelah kiri.</p>
+        <div className="flex min-h-56 flex-1 flex-col items-center justify-center gap-2 text-center">
+          <span className="flex size-16 items-center justify-center rounded-2xl bg-muted/70 text-muted-foreground"><ShoppingCart className="size-7" /></span>
+          <p className="font-semibold">Keranjang Kosong</p>
+          <p className="max-w-56 text-sm text-muted-foreground">Pilih produk atau layanan dari katalog di sebelah kiri untuk menambahkan ke pesanan.</p>
+        </div>
       ) : (
-        <ul>
+        <ul className="min-h-0 flex-1 overflow-y-auto">
           {lines.map((line) => (
             <Line key={line.id} invoiceId={invoiceId} line={line} editable={editable} canDiscount={canDiscount} run={run} />
           ))}

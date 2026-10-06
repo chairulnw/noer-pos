@@ -33,7 +33,7 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
   const lastPayment = invoice?.payments.filter((p) => !p.voided).at(-1);
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5 md:h-[calc(100dvh-3.5rem)]">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-semibold leading-11">Kasir (POS)</h1>
@@ -86,11 +86,11 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
           </div>
         </section>
       ) : (
-        <div className="flex flex-wrap items-start gap-5">
-          <div className="min-w-0 flex-[999] basis-[460px]">
+        <div className="flex flex-wrap items-stretch gap-5 md:min-h-0 md:flex-1 md:flex-nowrap">
+          <div className="min-w-0 flex-[999] basis-[460px] md:overflow-y-auto">
             <PosCatalog items={items} invoiceId={invoice?.id ?? null} editable={editable} />
           </div>
-          <div className="min-w-0 flex-1 basis-[360px] space-y-4 lg:sticky lg:top-4 lg:max-w-md">
+          <div className="flex min-w-0 flex-1 basis-[360px] flex-col gap-4 md:min-h-0 lg:max-w-md">
             <PosCart
               invoiceId={invoice?.id ?? null}
               editable={editable}
