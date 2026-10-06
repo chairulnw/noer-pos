@@ -42,7 +42,7 @@ Kolom **Status**: ✅ sudah ada (hanya dipindah atau diganti nama), 🟡 sudah a
 | **Ikhtisar** | Dasbor | 🟡 | Beranda sekarang + aksi cepat, janji temu hari ini, pengeluaran |
 | **Penjualan** | Kasir (POS) | 🟡 | Satu layar: katalog + keranjang + bayar (lihat 4.1) |
 | | Transaksi (Lunas) | ✅ | Riwayat Pembayaran sekarang |
-| | Tagihan / Invoice | ✅ | Tagihan belum lunas dan semua invoice |
+| | Tagihan | ✅ | Hanya tagihan belum lunas (draft, DP) dan yang dibatalkan; yang lunas pindah ke Transaksi (Lunas) |
 | | Tutup Kas | ✅ | Tetap ada (tidak ada di referensi, sudah dibangun di 2.5) |
 | **Operasional Klinik** | Janji Temu | 🆕 | 4.2 |
 | | Rekam Medis | 🟡 | Daftar semua rekam medis + template cepat SOAP (4.3) |

@@ -12,7 +12,7 @@ import { listInvoices } from "@/lib/invoices";
 import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
-const STATUSES = ["DRAFT", "FINAL", "VOID"] as const;
+const STATUSES = ["DRAFT", "VOID"] as const;
 
 export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string } & PagingParams> }) {
   await requireCapability("manage_invoice_payment");
@@ -24,7 +24,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
 
   return (
     <ListPage>
-      <ListHeader icon={FileText} title="Daftar Tagihan (Invoice)" subtitle="Tagihan rekam medis, rawat inap, dan transaksi kasir beserta status pembayarannya" actions={<Button asChild><Link href="/kasir">Ke Kasir (POS)</Link></Button>} />
+      <ListHeader icon={FileText} title="Tagihan" subtitle="Tagihan yang belum lunas dari kunjungan, rawat inap, dan kasir. Yang sudah lunas pindah ke Transaksi (Lunas)" actions={<Button asChild><Link href="/kasir">Ke Kasir (POS)</Link></Button>} />
       <ListToolbar base="/invoice" params={keep} placeholder="Cari no. invoice, pasien, atau pemilik…" total={total} />
       <Chips items={[{ value: "", label: "Semua" }, ...STATUSES.map((s) => ({ value: s, label: INVOICE_STATUS[s].label }))]} active={active ?? ""} hrefFor={(v) => buildHref("/invoice", keep, { status: v || undefined, hal: undefined })} />
       <TableCard
