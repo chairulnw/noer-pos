@@ -125,3 +125,18 @@ export function profitSeries(rows: DayRow[], opex: Record<string, number>, from:
 
 export const sumProfit = (points: ProfitPoint[]) =>
   points.reduce((t, p) => ({ sales: t.sales + p.sales, cost: t.cost + p.cost, opex: t.opex + p.opex, net: t.net + p.net }), { sales: 0, cost: 0, opex: 0, net: 0 });
+
+export const TREND_PERIODS = ["bulan", "tahun"] as const;
+export type TrendPeriod = (typeof TREND_PERIODS)[number];
+
+export function periodRange(period: TrendPeriod, today: Date) {
+  const to = ymd(today);
+  return { from: period === "tahun" ? `${to.slice(0, 4)}-01-01` : `${to.slice(0, 7)}-01`, to };
+}
+
+export function periodSeries(daily: Record<string, number>, from: string, to: string, period: TrendPeriod) {
+  if (period === "bulan") return daysBetween(from, to).map((key) => ({ key, value: daily[key] ?? 0 }));
+  const months = new Map<string, number>();
+  for (const key of daysBetween(from, to)) months.set(key.slice(0, 7), (months.get(key.slice(0, 7)) ?? 0) + (daily[key] ?? 0));
+  return [...months].map(([key, value]) => ({ key, value }));
+}

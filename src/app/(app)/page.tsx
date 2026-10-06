@@ -3,37 +3,76 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { EmptyState } from "@/components/page-header";
 import { TrendChart } from "@/components/trend-chart";
-import { getCashierQueue, getDashboardSummary, getDoctorQueue } from "@/lib/dashboard";
+import { BedDouble, Hotel, LayoutGrid, PawPrint, Receipt, ShoppingCart, Stethoscope, Scissors, TrendingDown, TrendingUp, UserRound, Users, Wallet, type LucideIcon } from "lucide-react";
+import { getCashierQueue, getDashboardCounts, getDashboardSummary, getDoctorQueue } from "@/lib/dashboard";
 import { todayJakarta } from "@/lib/date";
 import { getStockAlerts } from "@/lib/inventory";
-import { daysBetween, fillDays, resolveRange, sumRows, trendRange, TREND_DAYS } from "@/lib/report";
+import { periodRange, periodSeries, resolveRange, type TrendPeriod } from "@/lib/report";
+import { getCostsByDay } from "@/lib/costs";
 import { getSalesByDay, getVisitStats } from "@/lib/reports";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatRupiah, formatTime } from "@/lib/format";
-import { can } from "@/lib/permissions";
+import { can, type Capability } from "@/lib/permissions";
 import { requireUser } from "@/lib/require-role";
 import { cn } from "@/lib/utils";
 
-const QUICK = [
-  { href: "/kasir", label: "Kasir (POS)", capability: "manage_invoice_payment" },
-  { href: "/pemilik/baru", label: "Pasien baru", capability: "manage_patients" },
-  { href: "/pet-hotel/check-in", label: "Check-in hotel", capability: "manage_admission" },
-  { href: "/grooming/baru", label: "Grooming baru", capability: "create_visit" },
-  { href: "/operasi/baru", label: "Jadwal operasi", capability: "edit_medical_record" },
+const TONE = {
+  success: "bg-success/10 text-success",
+  info: "bg-info/10 text-info",
+  warning: "bg-warning/10 text-warning",
+  primary: "bg-accent text-primary",
+  danger: "bg-destructive/10 text-destructive",
+} as const;
+
+const TILES = [
+  { href: "/kasir", label: "Kasir (POS)", icon: ShoppingCart, tone: "success", capability: "manage_invoice_payment" },
+  { href: "/rekam-medis", label: "Rekam Medis", icon: Stethoscope, tone: "info", capability: "view_medical_record" },
+  { href: "/pembayaran", label: "Transaksi (Lunas)", icon: Receipt, tone: "warning", capability: "manage_invoice_payment" },
+  { href: "/pet-hotel", label: "Pet Hotel", icon: Hotel, tone: "info", capability: "manage_admission" },
+  { href: "/grooming", label: "Grooming", icon: Scissors, tone: "success", capability: "create_visit" },
+] as const satisfies readonly { href: string; label: string; icon: LucideIcon; tone: keyof typeof TONE; capability: Capability }[];
+
+const METRICS = [
+  { id: "pendapatan", label: "Pendapatan", money: true },
+  { id: "kunjungan", label: "Kunjungan", money: false },
+  { id: "pengeluaran", label: "Pengeluaran", money: true },
 ] as const;
 
-const DOT = { danger: "bg-destructive", warning: "bg-warning", info: "bg-info" };
+function Tile({ href, label, icon: Icon, tone }: { href: string; label: string; icon: LucideIcon; tone: keyof typeof TONE }) {
+  return (
+    <Link href={href} className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-3 py-5 text-center text-[15px] font-semibold hover:border-primary/40">
+      <span className={cn("grid size-14 place-items-center rounded-2xl", TONE[tone])}><Icon className="size-6" /></span>
+      {label}
+    </Link>
+  );
+}
 
-function Stat({ label, value, hint, href }: { label: string; value: string; hint?: string; href?: string }) {
+function BigStat({ label, value, hint, icon: Icon, tone, href }: { label: string; value: string; hint: string; icon: LucideIcon; tone: keyof typeof TONE; href?: string }) {
   const body = (
-    <div className="h-full rounded-[10px] border bg-card p-4">
-      <div className="text-[13px] text-muted-foreground">{label}</div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
-      {hint && <div className="mt-0.5 text-[13px] text-muted-foreground">{hint}</div>}
+    <div className="h-full rounded-2xl border bg-card p-5">
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+        <span className={cn("grid size-10 place-items-center rounded-xl", TONE[tone])}><Icon className="size-5" /></span>
+      </div>
+      <div className="mt-4 text-[28px] font-bold leading-none tabular-nums">{value}</div>
+      <div className="mt-2 text-sm text-muted-foreground">{hint}</div>
     </div>
   );
   return href ? <Link href={href} className="block h-full">{body}</Link> : body;
 }
+
+function MiniStat({ label, value, icon: Icon, tone, danger, href }: { label: string; value: string; icon: LucideIcon; tone: keyof typeof TONE; danger?: boolean; href?: string }) {
+  const body = (
+    <div className="flex h-full flex-col items-center gap-2 rounded-2xl border bg-card px-3 py-5 text-center">
+      <span className={cn("grid size-12 place-items-center rounded-xl", TONE[tone])}><Icon className="size-5" /></span>
+      <span className={cn("text-2xl font-bold tabular-nums", danger && "text-destructive")}>{value}</span>
+      <span className="text-[12.5px] font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
+    </div>
+  );
+  return href ? <Link href={href} className="block h-full">{body}</Link> : body;
+}
+
+const DOT = { danger: "bg-destructive", warning: "bg-warning", info: "bg-info" };
 
 function AlertRow({ tone, title, detail, href, action }: { tone: keyof typeof DOT; title: string; detail: string; href: string; action: string }) {
   return (
@@ -69,39 +108,64 @@ function QueueRow({ title, detail, href, action }: { title: React.ReactNode; det
   );
 }
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ tren?: string }> }) {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ metrik?: string; periode?: string }> }) {
   const user = await requireUser();
-  const trend = trendRange(Number((await searchParams).tren), todayJakarta());
-  const range = resolveRange({ from: trend.from, to: trend.to }, todayJakarta());
-  if ("error" in range) throw new Error(range.error);
+  const params = await searchParams;
   const showRevenue = can(user.role, "view_revenue_reports");
-  const [sales, visits] = await Promise.all([showRevenue ? getSalesByDay(range) : [], getVisitStats(range)]);
-  const visitByDay = new Map(visits.perDay.map((d) => [d.day, d.count]));
-  const dayLabel = (ymd: string) => formatDate(new Date(`${ymd}T00:00:00+07:00`));
-  const summary = await getDashboardSummary(can(user.role, "view_revenue_reports"));
+  const metrics = METRICS.filter((m) => !m.money || showRevenue);
+  const metric = metrics.find((m) => m.id === params.metrik) ?? metrics.find((m) => m.id === "kunjungan")!;
+  const period: TrendPeriod = params.periode === "tahun" ? "tahun" : "bulan";
+  const today = todayJakarta();
+  const { from, to } = periodRange(period, today);
+  const range = resolveRange({ from, to }, today);
+  if ("error" in range) throw new Error(range.error);
+
+  const [summary, counts, series] = await Promise.all([
+    getDashboardSummary(showRevenue),
+    getDashboardCounts(showRevenue),
+    (async () => {
+      if (metric.id === "kunjungan") return Object.fromEntries((await getVisitStats(range)).perDay.map((d) => [d.day, d.count]));
+      if (metric.id === "pengeluaran") return getCostsByDay(from, to);
+      return Object.fromEntries((await getSalesByDay(range)).map((d) => [d.day, d.sales]));
+    })(),
+  ]);
   const alerts = can(user.role, "manage_stock") ? await getStockAlerts() : null;
   const doctorQueue = user.role === "DOKTER" ? await getDoctorQueue(user.id) : null;
   const cashierQueue = user.role === "KASIR" ? await getCashierQueue() : null;
   const total = alerts ? alerts.low.length + alerts.expiring.length : 0;
 
+  const points = periodSeries(series, from, to, period);
+  const sum = points.reduce((t, p) => t + p.value, 0);
+  const fmt = (n: number) => (metric.money ? formatRupiah(n) : n.toLocaleString("id-ID"));
+  const label = (key: string) => (period === "tahun" ? new Date(`${key}-01T00:00:00+07:00`).toLocaleDateString("id-ID", { month: "short", year: "numeric", timeZone: "Asia/Jakarta" }) : formatDate(new Date(`${key}T00:00:00+07:00`)));
+  const tiles = TILES.filter((t) => can(user.role, t.capability)).slice(0, 3);
+  const staying = summary.rawatInap + summary.hotel;
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {(doctorQueue || cashierQueue) && <AutoRefresh seconds={15} />}
-      <div className="space-y-1">
-        <h1 className="text-[22px] font-semibold leading-11">Beranda</h1>
-        <p className="text-sm text-muted-foreground">Halo, {user.name}.</p>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {tiles.map((t) => <Tile key={t.href} {...t} />)}
+        <Tile href="/pasien" label="Lainnya" icon={LayoutGrid} tone="primary" />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {QUICK.filter((a) => can(user.role, a.capability)).map((a) => <Button key={a.href} asChild variant="outline"><Link href={a.href}>{a.label}</Link></Button>)}
-      </div>
-
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
-        {summary.revenue && <Stat label="Omzet hari ini (tanpa PPN)" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final`} />}
-        <Stat label="Kunjungan hari ini" value={String(summary.visits)} href={can(user.role, "create_visit") ? "/kunjungan" : undefined} />
-        <Stat label="Rawat inap aktif" value={String(summary.rawatInap)} href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
-        <Stat label="Hotel aktif" value={String(summary.hotel)} href={can(user.role, "monitor_admission") ? "/pet-hotel" : undefined} />
-      </div>
+      <section className="space-y-3">
+        <h2 className="text-xl font-bold">Statistik Operasional Klinik</h2>
+        <div className={cn("grid gap-3", summary.revenue && "lg:grid-cols-2")}>
+          {summary.revenue && <BigStat label="Omzet hari ini" value={formatRupiah(summary.revenue.total)} hint={`${summary.revenue.invoices} invoice final, tanpa PPN`} icon={Wallet} tone="success" />}
+          <BigStat label="Rawat inap & hotel" value={`${staying} Pasien`} hint={`${summary.rawatInap} rawat inap · ${summary.hotel} hotel`} icon={BedDouble} tone="warning" href={can(user.role, "monitor_admission") ? "/rawat-inap" : undefined} />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <MiniStat label="Pasien" value={counts.patients.toLocaleString("id-ID")} icon={PawPrint} tone="info" href={can(user.role, "manage_patients") ? "/pasien" : undefined} />
+          <MiniStat label="Pemilik" value={counts.owners.toLocaleString("id-ID")} icon={Users} tone="primary" href={can(user.role, "manage_patients") ? "/pemilik" : undefined} />
+          {counts.opex !== null ? (
+            <MiniStat label="Operasional bulan ini" value={formatRupiah(counts.opex)} icon={TrendingDown} tone="danger" danger href="/biaya-operasional" />
+          ) : (
+            <MiniStat label="Kunjungan hari ini" value={String(summary.visits)} icon={UserRound} tone="danger" />
+          )}
+        </div>
+      </section>
 
       {doctorQueue && (
         <Queue title="Pasien menunggu diperiksa" count={doctorQueue.length}>
@@ -147,30 +211,31 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </>
       )}
 
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold">Tren</h2>
-        <div className="flex gap-1.5">
-          {TREND_DAYS.map((n) => (
-            <Link key={n} href={`/?tren=${n}`} className={cn("flex h-11 items-center rounded-lg border px-4 text-sm font-medium", n === trend.days ? "border-primary bg-accent text-primary" : "bg-card")}>{n} hari</Link>
+      <section className="space-y-4 rounded-2xl border bg-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-xl font-bold"><TrendingUp className="size-5 text-info" /> Tren Statistik</h2>
+          <div className="flex rounded-xl bg-muted/60 p-1 text-sm font-medium">
+            {(["bulan", "tahun"] as const).map((p) => (
+              <Link key={p} href={`/?metrik=${metric.id}&periode=${p}`} className={cn("rounded-lg px-4 py-1.5", p === period ? "bg-card text-primary shadow-sm" : "text-muted-foreground")}>{p === "bulan" ? "Bulan Ini" : "Tahun Ini"}</Link>
+            ))}
+          </div>
+        </div>
+        <div className={cn("grid gap-2", metrics.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-1")}>
+          {metrics.map((m) => (
+            <Link key={m.id} href={`/?metrik=${m.id}&periode=${period}`} className={cn("rounded-xl border px-4 py-2.5 text-center text-[15px] font-semibold", m.id === metric.id ? "border-primary bg-accent text-primary" : "bg-card text-muted-foreground")}>{m.label}</Link>
           ))}
         </div>
-      </div>
-      <div className="grid gap-3 lg:grid-cols-2">
-        {showRevenue && (
-          <TrendChart
-            title="Omzet harian"
-            total={formatRupiah(sumRows(sales).sales)}
-            maxText={formatRupiah(Math.max(0, ...sales.map((d) => d.sales)))}
-            points={fillDays(sales, trend.from, trend.to).map((d) => ({ label: dayLabel(d.day), value: d.sales, text: formatRupiah(d.sales) }))}
-          />
-        )}
+        <div className="flex flex-wrap gap-2 text-sm font-semibold">
+          <span className="rounded-lg border border-primary/30 bg-accent px-3 py-1.5 text-primary">Total: {fmt(sum)}</span>
+          <span className="rounded-lg bg-muted/60 px-3 py-1.5 text-muted-foreground">Rata-rata: {fmt(points.length ? Math.round(sum / points.length) : 0)}</span>
+        </div>
         <TrendChart
-          title="Kunjungan harian"
-          total={`${visits.perDay.reduce((t, d) => t + d.count, 0)} kunjungan`}
-          maxText={String(Math.max(0, ...visits.perDay.map((d) => d.count)))}
-          points={daysBetween(trend.from, trend.to).map((d) => ({ label: dayLabel(d), value: visitByDay.get(d) ?? 0, text: `${visitByDay.get(d) ?? 0} kunjungan` }))}
+          title={`${metric.label} ${period === "tahun" ? "bulanan" : "harian"}`}
+          total={fmt(sum)}
+          maxText={fmt(Math.max(0, ...points.map((p) => p.value)))}
+          points={points.map((p) => ({ label: label(p.key), value: p.value, text: fmt(p.value) }))}
         />
-      </div>
+      </section>
 
       {alerts && (
         <section className="rounded-[10px] border bg-card p-5">

@@ -1,3 +1,4 @@
+import { getCostsByDay } from "@/lib/costs";
 import { prisma } from "@/lib/db";
 import { todayJakarta } from "@/lib/date";
 
@@ -55,4 +56,14 @@ export async function getCashierQueue() {
     prisma.cashClosing.findUnique({ where: { closingDate: todayJakarta() }, select: { id: true } }),
   ]);
   return { waiting, drafts, cashClosed: Boolean(closed) };
+}
+
+export async function getDashboardCounts(withMoney: boolean) {
+  const from = `${todayJakarta().toISOString().slice(0, 7)}-01`;
+  const [patients, owners, costs] = await Promise.all([
+    prisma.patient.count({ where: { deletedAt: null } }),
+    prisma.owner.count({ where: { deletedAt: null } }),
+    withMoney ? getCostsByDay(from, todayJakarta().toISOString().slice(0, 10)) : null,
+  ]);
+  return { patients, owners, opex: costs && Object.values(costs).reduce((a, b) => a + b, 0) };
 }

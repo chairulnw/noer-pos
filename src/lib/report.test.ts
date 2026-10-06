@@ -100,3 +100,13 @@ describe("laba rugi", () => {
     expect(points.find((p) => p.key === "2026-08")!.net).toBe(100);
   });
 });
+
+describe("periodSeries", () => {
+  it("bulan: satu titik per hari; tahun: dijumlah per bulan", async () => {
+    const { periodRange, periodSeries } = await import("./report");
+    const daily = { "2026-01-05": 100, "2026-01-20": 50, "2026-03-02": 7 };
+    expect(periodRange("tahun", new Date("2026-03-10T00:00:00Z"))).toEqual({ from: "2026-01-01", to: "2026-03-10" });
+    expect(periodSeries(daily, "2026-01-01", "2026-03-10", "tahun")).toEqual([{ key: "2026-01", value: 150 }, { key: "2026-02", value: 0 }, { key: "2026-03", value: 7 }]);
+    expect(periodSeries(daily, "2026-03-01", "2026-03-03", "bulan")).toEqual([{ key: "2026-03-01", value: 0 }, { key: "2026-03-02", value: 7 }, { key: "2026-03-03", value: 0 }]);
+  });
+});
