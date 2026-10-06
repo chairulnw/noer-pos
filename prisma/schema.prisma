@@ -45,6 +45,13 @@ enum SurgeryStatus {
   BATAL
 }
 
+enum GroomingStatus {
+  MENUNGGU
+  PROSES
+  SELESAI
+  BATAL
+}
+
 enum VisitStatus {
   DILAYANI
   MENUNGGU_BAYAR
@@ -147,6 +154,7 @@ model User {
   examinationsCreated  Examination[]
   appointmentsAsDoctor Appointment[]       @relation("AppointmentDoctor")
   appointmentsCreated  Appointment[]       @relation("AppointmentCreatedBy")
+  groomings            Grooming[]
 
   @@map("user")
 }
@@ -201,6 +209,7 @@ model Patient {
   surgeries    Surgery[]
   examinations Examination[]
   admissions   Admission[]
+  groomings    Grooming[]
 
   @@index([microchip])
   @@map("patient")
@@ -347,6 +356,7 @@ model Item {
   prescriptionItems PrescriptionItem[]
   vaccinations      Vaccination[]
   admissions        Admission[]
+  groomings         Grooming[]
 
   @@map("item")
 }
@@ -515,6 +525,7 @@ model Invoice {
   payments           Payment[]
   walletTransactions WalletTransaction[]
   surgery            Surgery?
+  grooming           Grooming?
 
   @@map("invoice")
 }
@@ -725,6 +736,29 @@ model SurgeryAddendum {
   user    User    @relation(fields: [userId], references: [id])
 
   @@map("surgery_addendum")
+}
+
+model Grooming {
+  id            String         @id @default(uuid()) @db.Uuid
+  patientId     String         @map("patient_id") @db.Uuid
+  serviceItemId String?        @map("service_item_id") @db.Uuid
+  groomingDate  DateTime       @map("grooming_date") @db.Date
+  status        GroomingStatus @default(MENUNGGU)
+  notes         String?
+  finishedAt    DateTime?      @map("finished_at")
+  invoiceId     String?        @unique @map("invoice_id") @db.Uuid
+  createdById   String         @map("created_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  serviceItem Item?    @relation(fields: [serviceItemId], references: [id])
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
+
+  @@index([groomingDate])
+  @@map("grooming")
 }
 
 model CashClosing {

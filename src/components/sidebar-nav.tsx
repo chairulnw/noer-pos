@@ -29,7 +29,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/hasil-lab", label: "Hasil Lab", icon: FileText, capability: "view_medical_record" },
       { href: "/radiologi", label: "Radiologi", icon: ImageIcon, capability: "view_medical_record" },
       { href: "/operasi", label: "Operasi", icon: HeartPulse, capability: "view_medical_record" },
-      { href: "/grooming", label: "Grooming", icon: Scissors, capability: "create_visit", soon: true },
+      { href: "/grooming", label: "Grooming", icon: Scissors, capability: "create_visit" },
     ],
   },
   {
