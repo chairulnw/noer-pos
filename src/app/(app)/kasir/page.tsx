@@ -9,9 +9,9 @@ import { getInvoice, lineView, listOpenDrafts, listSellableItems } from "@/lib/i
 import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 import { getSettings } from "@/lib/settings";
-import { PayPanel } from "../invoice/pay-panel";
 import { PosCart } from "./pos-cart";
 import { PosCatalog } from "./pos-catalog";
+import { PosCheckout } from "./pos-checkout";
 
 export default async function PosPage({ searchParams }: { searchParams: Promise<{ inv?: string }> }) {
   const user = await requireCapability("manage_invoice_payment");
@@ -87,10 +87,10 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
         </section>
       ) : (
         <div className="flex flex-wrap items-stretch gap-5 md:min-h-0 md:flex-1 md:flex-nowrap">
-          <div className="min-w-0 flex-[999] basis-[460px] md:overflow-y-auto">
-            <PosCatalog items={items} invoiceId={invoice?.id ?? null} editable={editable} />
+          <div className="flex min-w-0 flex-[999] basis-[460px] flex-col md:min-h-0">
+            <PosCatalog items={items} invoiceId={invoice?.id ?? null} editable={editable} clinicName={settings.clinicName} />
           </div>
-          <div className="flex min-w-0 flex-1 basis-[360px] flex-col gap-4 md:min-h-0 lg:max-w-md">
+          <div className="flex min-w-0 flex-1 basis-[360px] flex-col md:min-h-0 lg:max-w-md">
             <PosCart
               invoiceId={invoice?.id ?? null}
               editable={editable}
@@ -107,24 +107,30 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
                 discountAmount: lineView(item).discount,
                 total: item.lineTotal,
               }))}
+              footer={
+                <PosCheckout
+                  invoiceId={invoice?.id ?? null}
+                  qty={invoice?.items.reduce((sum, i) => sum + Number(i.qty), 0) ?? 0}
+                  hasItems={Boolean(invoice && invoice.items.length > 0)}
+                  pay={
+                    invoice
+                      ? {
+                          invoiceId: invoice.id,
+                          editable,
+                          canPay,
+                          paid,
+                          hasPayments: invoice.payments.some((p) => !p.voided),
+                          canDiscount: can(user.role, "apply_discount"),
+                          hasQris: Boolean(settings.qris),
+                          wallet: invoice.owner ? { owner: invoice.owner.name, balance: invoice.owner.walletBalance } : null,
+                          discount: { type: invoice.discountType, value: invoice.discountValue },
+                          totals: { subtotal: invoice.subtotal, discountTotal: invoice.discountTotal, taxTotal: invoice.taxTotal, grandTotal: invoice.grandTotal, taxRate: invoice.taxRate, taxIncluded: invoice.taxIncluded },
+                        }
+                      : null
+                  }
+                />
+              }
             />
-            {invoice && invoice.items.length > 0 && (
-              <PayPanel
-                invoiceId={invoice.id}
-                editable={editable}
-                canPay={canPay}
-                paid={paid}
-                hasPayments={invoice.payments.some((p) => !p.voided)}
-                canDiscount={can(user.role, "apply_discount")}
-                hasQris={Boolean(settings.qris)}
-                wallet={invoice.owner ? { owner: invoice.owner.name, balance: invoice.owner.walletBalance } : null}
-                discount={{ type: invoice.discountType, value: invoice.discountValue }}
-                totals={{ subtotal: invoice.subtotal, discountTotal: invoice.discountTotal, taxTotal: invoice.taxTotal, grandTotal: invoice.grandTotal, taxRate: invoice.taxRate, taxIncluded: invoice.taxIncluded }}
-              />
-            )}
-            {invoice && (
-              <Link href={`/invoice/${invoice.id}`} className="block text-center text-sm font-medium text-primary">Rincian tagihan, pembatalan, dan koreksi DP</Link>
-            )}
           </div>
         </div>
       )}

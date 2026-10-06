@@ -137,7 +137,7 @@ function Customer({ invoiceId, name, locked, editable, run }: { invoiceId: strin
   );
 }
 
-export function PosCart({ invoiceId, lines, editable, canDiscount, customerName, customerLocked }: { invoiceId: string | null; lines: CartLine[]; editable: boolean; canDiscount: boolean; customerName: string | null; customerLocked: boolean }) {
+export function PosCart({ invoiceId, lines, editable, canDiscount, customerName, customerLocked, footer }: { footer: React.ReactNode; invoiceId: string | null; lines: CartLine[]; editable: boolean; canDiscount: boolean; customerName: string | null; customerLocked: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -166,13 +166,14 @@ export function PosCart({ invoiceId, lines, editable, canDiscount, customerName,
           <p className="max-w-56 text-sm text-muted-foreground">Pilih produk atau layanan dari katalog di sebelah kiri untuk menambahkan ke pesanan.</p>
         </div>
       ) : (
-        <ul className="min-h-0 flex-1 overflow-y-auto">
+        <ul className="min-h-40 flex-1 overflow-y-auto">
           {lines.map((line) => (
             <Line key={line.id} invoiceId={invoiceId} line={line} editable={editable} canDiscount={canDiscount} run={run} />
           ))}
         </ul>
       )}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      {footer}
     </section>
   );
 }

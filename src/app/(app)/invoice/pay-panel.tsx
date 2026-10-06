@@ -36,9 +36,11 @@ type Props = {
   paid: number;
   hasPayments: boolean;
   wallet?: { owner: string; balance: number } | null;
+  bare?: boolean;
+  showDiscount?: boolean;
 };
 
-export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, editable, canPay, paid, hasPayments, wallet = null }: Props) {
+export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, editable, canPay, paid, hasPayments, wallet = null, bare = false, showDiscount = true }: Props) {
   const [method, setMethod] = useState<(typeof METHODS)[number]["id"]>("TUNAI");
   const methods = METHODS.filter((m) => m.id !== "WALLET" || wallet !== null);
   const [received, setReceived] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
   const pay = () => run(() => payAction(invoiceId, { method, cashReceived: total > 0 && method === "TUNAI" ? cash : null, reference }), "Pembayaran tersimpan");
 
   return (
-    <section aria-label="Pembayaran" className="space-y-4 rounded-[10px] border bg-card p-5">
+    <section aria-label="Pembayaran" className={bare ? "space-y-4" : "space-y-4 rounded-[10px] border bg-card p-5"}>
       <div className="space-y-2 text-[14.5px]">
         <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">{formatRupiah(totals.subtotal)}</span></div>
         {totals.discountTotal > 0 && (
@@ -79,12 +81,12 @@ export function PayPanel({ invoiceId, totals, discount, canDiscount, hasQris, ed
             <span className="tabular-nums">{formatRupiah(totals.taxTotal)}</span>
           </div>
         )}
-        {editable && canDiscount && (
+        {showDiscount && editable && canDiscount && (
           <button type="button" onClick={() => setDiscOpen(!discOpen)} className="min-h-11 text-sm font-medium text-primary">
             {discount.type ? "Ubah diskon invoice" : "+ Diskon invoice"}
           </button>
         )}
-        {discOpen && (
+        {showDiscount && discOpen && (
           <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 p-3">
             <select aria-label="Jenis diskon invoice" value={dType} onChange={(e) => setDType(e.target.value as typeof dType)} className="h-10 rounded-lg border border-input bg-card px-2 text-sm">
               <option value="">Tanpa diskon</option>
