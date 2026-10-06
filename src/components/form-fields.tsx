@@ -25,7 +25,7 @@ export function Field({
   name: string;
   errors?: string[];
   full?: boolean;
-  hint?: string;
+  hint?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (

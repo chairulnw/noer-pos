@@ -19,7 +19,7 @@ export async function CheckInView({ searchParams, type }: { searchParams: Promis
   const patient = patientId && z.guid().safeParse(patientId).success ? await getPatient(patientId) : null;
 
   if (!patient) {
-    const results = q.trim() ? (await searchPatients(q)).patients : [];
+    const results = (await searchPatients(q)).patients;
     return (
       <div className="space-y-5">
         <h1 className="text-[22px] font-semibold leading-11">{heading}: pilih pasien</h1>
@@ -28,8 +28,7 @@ export async function CheckInView({ searchParams, type }: { searchParams: Promis
           <Button type="submit" variant="outline">Cari</Button>
         </form>
         <div className="overflow-hidden rounded-[10px] border bg-card">
-          {q.trim() && results.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Tidak ada pasien ditemukan.</p>}
-          {!q.trim() && <p className="p-6 text-center text-sm text-muted-foreground">Cari pasien terlebih dahulu.</p>}
+          {results.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Tidak ada pasien ditemukan.</p>}
           {results.map((p) => (
             <Link key={p.id} href={`${base}/check-in?patient=${p.id}`} className="flex flex-col gap-1 border-b px-4 py-3.5 last:border-0">
               <span className="flex flex-wrap items-center gap-1.5">

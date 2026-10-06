@@ -10,7 +10,7 @@ import { saveRoomAction, type RoomFormState } from "./actions";
 
 type Room = { id: string; name: string; type: "RAWAT_INAP" | "HOTEL"; active: boolean; defaultRateId: string | null; suitableFor: string | null };
 
-export function RoomForm({ room, rates }: { room: Room | null; rates: { id: string; name: string }[] }) {
+export function RoomForm({ room, rates, defaultType = "RAWAT_INAP" }: { room: Room | null; rates: { id: string; name: string }[]; defaultType?: "RAWAT_INAP" | "HOTEL" }) {
   const [state, formAction, pending] = useActionState<RoomFormState, FormData>(
     saveRoomAction.bind(null, room?.id ?? null),
     {},
@@ -24,7 +24,7 @@ export function RoomForm({ room, rates }: { room: Room | null; rates: { id: stri
           <Input id="name" name="name" defaultValue={room?.name} placeholder="mis. K-01" required />
         </Field>
         <Field label="Jenis" name="type" errors={err("type")}>
-          <select id="type" name="type" defaultValue={room?.type ?? "RAWAT_INAP"} className={selectClass}>
+          <select id="type" name="type" defaultValue={room?.type ?? defaultType} className={selectClass}>
             <option value="RAWAT_INAP">Rawat inap</option>
             <option value="HOTEL">Hotel</option>
           </select>

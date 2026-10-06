@@ -47,7 +47,7 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
         <Field label="Waktu masuk" name="checkIn" errors={err("checkIn")}>
           <Input id="checkIn" name="checkIn" type="datetime-local" defaultValue={defaultCheckIn} required />
         </Field>
-        <Field label="Kandang / ruangan" name="roomId" errors={err("roomId")} hint={roomOptions.length === 0 ? "Tidak ada kandang kosong untuk jenis ini." : undefined}>
+        <Field label="Kandang / ruangan" name="roomId" errors={err("roomId")} hint={roomOptions.length === 0 ? <>Belum ada kandang kosong untuk jenis ini. <Link href={`/master-data/kandang/baru?jenis=${type}`} className="font-medium text-primary">Tambah kandang</Link></> : undefined}>
           <select id="roomId" name="roomId" value={roomId} onChange={(e) => { const room = roomOptions.find((r) => r.id === e.target.value); setRoomId(e.target.value); if (room?.defaultRateId && rateOptions.some((r) => r.id === room.defaultRateId)) setRateId(room.defaultRateId); }} className={selectClass} required>
             <option value="" disabled>Pilih kandang</option>
             {roomOptions.map((r) => (
@@ -55,7 +55,7 @@ export function CheckInForm({ patientId, patientName, defaultCheckIn, rooms, rat
             ))}
           </select>
         </Field>
-        <Field label="Tarif harian" name="rateItemId" errors={err("rateItemId")} hint={rateOptions.length === 0 ? "Belum ada layanan tarif per hari untuk jenis ini (Master Data)." : undefined}>
+        <Field label="Tarif harian" name="rateItemId" errors={err("rateItemId")} hint={rateOptions.length === 0 ? <>Belum ada layanan tarif per hari untuk jenis ini. <Link href="/master-data/item/baru" className="font-medium text-primary">Tambah di Produk</Link> (kategori {type === "HOTEL" ? "Pet Hotel" : "Rawat Inap"}, satuan per hari).</> : undefined}>
           <select id="rateItemId" name="rateItemId" value={rateId} onChange={(e) => setRateId(e.target.value)} className={selectClass} required>
             <option value="" disabled>Pilih tarif</option>
             {rateOptions.map((r) => (
