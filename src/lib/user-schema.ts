@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-const password = z.string().min(8, "Minimal 8 karakter.").max(72, "Maksimal 72 karakter.");
+const COMMON = ["password", "password123", "1234567890", "qwertyuiop", "admin12345", "klinik123", "petshop123", "1q2w3e4r5t"];
+
+const password = z
+  .string()
+  .min(10, "Minimal 10 karakter.")
+  .max(72, "Maksimal 72 karakter.")
+  .refine((v) => !COMMON.includes(v.toLowerCase()), "Password terlalu umum, pilih yang lain.")
+  .refine((v) => /[a-zA-Z]/.test(v) && /\d/.test(v), "Gunakan kombinasi huruf dan angka.");
 
 export const userCreateSchema = z.object({
   name: z.string().trim().min(1, "Nama wajib diisi.").max(100),
@@ -20,11 +27,6 @@ export const userUpdateSchema = z.object({
 });
 
 export const passwordResetSchema = z.object({ password });
-
-export const passwordChangeSchema = z
-  .object({ current: z.string().min(1, "Password saat ini wajib diisi."), next: password, confirm: z.string() })
-  .refine((v) => v.next === v.confirm, { path: ["confirm"], message: "Konfirmasi tidak sama." })
-  .refine((v) => v.next !== v.current, { path: ["next"], message: "Password baru harus berbeda." });
 
 export type UserCreateInput = z.infer<typeof userCreateSchema>;
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;

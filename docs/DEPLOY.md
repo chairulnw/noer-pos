@@ -122,3 +122,29 @@ docker compose exec -T db dropdb -U pos pos_restore && rm -rf uploads-restored
 | Disk penuh | Cek `docker system df` dan `du -sh backups/` |
 
 Catatan keamanan: DB tidak punya port publik, hanya Caddy (80/443) yang terbuka. Aktifkan firewall (`ufw allow 22,80,443/tcp && ufw enable`) dan update OS berkala.
+
+## 8. Keamanan tambahan (disarankan sebelum go-live)
+
+### Cloudflare (gratis): perlindungan DDoS dan batas login per IP
+1. Daftar di cloudflare.com, tambahkan domain, ganti nameserver domain ke milik Cloudflare.
+2. DNS: A record `pos` → IP VPS dengan **Proxy (awan oranye) aktif**.
+3. SSL/TLS → mode **Full (strict)** (Caddy sudah punya sertifikat sendiri).
+4. Security → WAF → Rate limiting rules: jika URI path berisi `/api/auth/callback`, lebih dari **10 permintaan / 1 menit** per IP → Block 10 menit.
+5. Di `.env` VPS tambahkan `TRUST_CLOUDFLARE=1` lalu `docker compose up -d app`, agar penguncian login per perangkat memakai IP asli pengunjung. **Jangan** isi ini bila tidak memakai Cloudflare (header IP bisa dipalsukan).
+6. Opsional paling aman: firewall VPS hanya menerima port 80/443 dari [rentang IP Cloudflare](https://www.cloudflare.com/ips/).
+
+### Firewall dan SSH VPS
+```bash
+sudo ufw default deny incoming && sudo ufw default allow outgoing
+sudo ufw allow OpenSSH && sudo ufw allow 80,443/tcp && sudo ufw enable
+# login SSH pakai kunci, matikan login password:
+sudo sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config && sudo systemctl restart ssh
+sudo apt install -y unattended-upgrades   # update keamanan otomatis
+```
+
+### Akun
+- Buat Admin dengan `scripts/create-admin.ts` (password min. 10 karakter, huruf + angka). Jangan pakai seed di produksi.
+- Pantau **Pengguna → Sesi Login**; keluarkan sesi asing lalu ganti password.
+- Login gagal 10 kali dari satu perangkat/IP diblokir 15 menit (username tidak dikunci, jadi orang lain tidak bisa mengunci akun Admin).
+
+

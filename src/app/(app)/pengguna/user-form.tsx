@@ -39,7 +39,7 @@ export function CreateUserForm() {
           <Input id="username" name="username" autoCapitalize="none" required />
         </Field>
         <Field label="Role" name="role" errors={err("role")}><RoleSelect /></Field>
-        <Field label="Password awal" name="password" errors={err("password")} hint="Minimal 8 karakter. Pengguna bisa menggantinya sendiri.">
+        <Field label="Password awal" name="password" errors={err("password")} hint="Minimal 10 karakter, kombinasi huruf dan angka. Hanya Admin yang bisa menggantinya.">
           <Input id="password" name="password" type="password" autoComplete="new-password" required />
         </Field>
       </Section>

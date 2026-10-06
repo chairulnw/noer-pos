@@ -11,7 +11,7 @@ async function main() {
     password: process.env.ADMIN_PASSWORD,
   });
   if (!parsed.success) {
-    console.error("ADMIN_NAME, ADMIN_USERNAME, ADMIN_PASSWORD wajib valid (password min. 8 karakter).");
+    console.error("ADMIN_NAME, ADMIN_USERNAME, ADMIN_PASSWORD wajib valid (password min. 10 karakter, huruf + angka, bukan password umum).");
     process.exit(1);
   }
   const { name, username, password } = parsed.data;

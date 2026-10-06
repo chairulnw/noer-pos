@@ -1,23 +1,25 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 import { signIn } from "@/lib/auth";
 import { getLogo } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const MESSAGES: Record<string, string> = {
+  rate: "Terlalu banyak percobaan gagal dari perangkat ini. Coba lagi dalam 15 menit.",
+};
+
 async function login(formData: FormData) {
   "use server";
+  const username = String(formData.get("username") ?? "");
   try {
-    await signIn("credentials", {
-      username: formData.get("username"),
-      password: formData.get("password"),
-      redirectTo: "/",
-    });
+    await signIn("credentials", { username, password: formData.get("password"), redirectTo: "/" });
   } catch (err) {
     if (err instanceof AuthError) {
-      redirect(`/login?error=${encodeURIComponent(err.message || "Username atau password salah")}`);
+      const code = err instanceof CredentialsSignin ? err.code : "";
+      redirect(`/login?error=${encodeURIComponent(MESSAGES[code] ?? "Username atau password salah")}&u=${encodeURIComponent(username)}`);
     }
     throw err;
   }
@@ -26,9 +28,11 @@ async function login(formData: FormData) {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; code?: string; u?: string }>;
 }) {
-  const [{ error }, logo] = await Promise.all([searchParams, getLogo()]);
+  const [params, logo] = await Promise.all([searchParams, getLogo()]);
+  const { u } = params;
+  const error = params.error === "CredentialsSignin" ? (MESSAGES[params.code ?? ""] ?? "Username atau password salah") : params.error;
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
@@ -41,11 +45,11 @@ export default async function LoginPage({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" name="username" autoComplete="username" required autoFocus className="h-12" />
+            <Input id="username" name="username" autoComplete="username" required autoFocus={!u} defaultValue={u} className="h-12" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" autoComplete="current-password" required className="h-12" />
+            <Input id="password" name="password" type="password" autoComplete="current-password" required autoFocus={Boolean(u)} className="h-12" />
           </div>
           {error && <p className="-mt-2 text-[12.5px] text-destructive">{error}</p>}
           <Button type="submit" className="h-12 text-base">
