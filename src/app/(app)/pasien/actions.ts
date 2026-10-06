@@ -42,7 +42,7 @@ export async function saveOwnerAction(id: string | null, _prev: PatientFormState
   revalidatePath("/pasien");
   revalidatePath("/pemilik");
   await flash("Owner tersimpan");
-  redirect(`/pemilik/${result.id}`);
+  redirect(formData.get("next") === "hewan" ? `/pasien/baru?owner=${result.id}` : `/pemilik/${result.id}`);
 }
 
 export async function savePatientAction(

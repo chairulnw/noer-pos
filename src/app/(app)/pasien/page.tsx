@@ -19,7 +19,7 @@ async function PatientTable({ params }: { params: { q?: string } & PagingParams 
   const sort = parseSort(params, { nama: (d) => ({ name: d }), jenis: (d) => ({ species: d }), kelamin: (d) => ({ sex: d }), pemilik: (d) => ({ owner: { name: d } }), berat: (d) => ({ lastWeightKg: { sort: d, nulls: "last" as const } }) });
   const { rows, total } = await pagePatients(params.q ?? "", skip, take, sort.orderBy);
   const keep = { q: params.q, baris: params.baris, ...sort.keep };
-  const add = <Button asChild><Link href="/pemilik/baru">+ Pasien Baru</Link></Button>;
+  const add = <Button asChild><Link href="/pasien/baru">+ Pasien Baru</Link></Button>;
 
   return (
     <ListPage>

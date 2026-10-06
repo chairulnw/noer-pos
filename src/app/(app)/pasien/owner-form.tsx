@@ -11,7 +11,7 @@ import { saveOwnerAction, type PatientFormState } from "./actions";
 
 type Owner = { id: string; name: string; whatsapp: string; address: string; notes: string | null };
 
-export function OwnerForm({ owner }: { owner: Owner | null }) {
+export function OwnerForm({ owner, thenPet = false }: { owner: Owner | null; thenPet?: boolean }) {
   const [state, formAction, pending] = useActionState<PatientFormState, FormData>(
     saveOwnerAction.bind(null, owner?.id ?? null),
     {},
@@ -20,6 +20,7 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
 
   return (
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
+      {thenPet && <input type="hidden" name="next" value="hewan" />}
       <Section title="Data owner">
         <Field label="Nama" name="name" errors={err("name")}>
           <Input id="name" name="name" defaultValue={owner?.name} required autoFocus />
