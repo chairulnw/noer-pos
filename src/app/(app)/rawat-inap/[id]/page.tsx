@@ -36,6 +36,14 @@ export default async function AdmissionPage({ params }: { params: Promise<{ id: 
         <ClinicalNotes allergyNote={patient.allergyNote} aggressive={patient.aggressive} behaviorNote={patient.behaviorNote} />
       </PageHeader>
 
+      {(admission.feedingInstructions || admission.notes || admission.expectedCheckOut) && (
+        <section className="grid gap-4 rounded-[10px] border bg-card p-5 md:grid-cols-2">
+          {admission.expectedCheckOut && <div><div className="text-[13px] text-muted-foreground">Estimasi check-out</div><div className="text-[15px]">{formatDate(admission.expectedCheckOut)}</div></div>}
+          {admission.feedingInstructions && <div className="md:col-span-2"><div className="text-[13px] text-muted-foreground">Instruksi pakan & jadwal makan</div><div className="whitespace-pre-wrap text-[15px]">{admission.feedingInstructions}</div></div>}
+          {admission.notes && <div className="md:col-span-2"><div className="text-[13px] text-muted-foreground">Catatan khusus / obat bawaan</div><div className="whitespace-pre-wrap text-[15px]">{admission.notes}</div></div>}
+        </section>
+      )}
+
       {active && admission.type === "RAWAT_INAP" && (
         <section className="space-y-3.5 rounded-[10px] border bg-card p-5">
           <h2 className="text-base font-semibold">Tambah monitoring</h2>

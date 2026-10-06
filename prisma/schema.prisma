@@ -442,10 +442,12 @@ model Room {
   type   RoomType
   active Boolean  @default(true)
 
-  capacity      Int     @default(1)
-  needsCleaning Boolean @default(false) @map("needs_cleaning")
-  defaultRateId String? @map("default_rate_id") @db.Uuid
-  suitableFor   String? @map("suitable_for")
+  capacity      Int       @default(1)
+  needsCleaning Boolean   @default(false) @map("needs_cleaning")
+  defaultRateId String?   @map("default_rate_id") @db.Uuid
+  suitableFor   String?   @map("suitable_for")
+  dimensions    String?
+  deletedAt     DateTime? @map("deleted_at")
 
   defaultRate Item?       @relation("RoomDefaultRate", fields: [defaultRateId], references: [id])
   admissions  Admission[]
@@ -454,17 +456,19 @@ model Room {
 }
 
 model Admission {
-  id         String          @id @default(uuid()) @db.Uuid
-  patientId  String          @map("patient_id") @db.Uuid
-  roomId     String          @map("room_id") @db.Uuid
-  visitId    String?         @map("visit_id") @db.Uuid
-  rateItemId String          @map("rate_item_id") @db.Uuid
-  type       AdmissionType
-  checkIn    DateTime        @map("check_in")
-  checkOut   DateTime?       @map("check_out")
-  billedDays Int?            @map("billed_days")
-  status     AdmissionStatus @default(AKTIF)
-  notes      String?
+  id                  String          @id @default(uuid()) @db.Uuid
+  patientId           String          @map("patient_id") @db.Uuid
+  roomId              String          @map("room_id") @db.Uuid
+  visitId             String?         @map("visit_id") @db.Uuid
+  rateItemId          String          @map("rate_item_id") @db.Uuid
+  type                AdmissionType
+  checkIn             DateTime        @map("check_in")
+  checkOut            DateTime?       @map("check_out")
+  billedDays          Int?            @map("billed_days")
+  status              AdmissionStatus @default(AKTIF)
+  notes               String?
+  expectedCheckOut    DateTime?       @map("expected_check_out") @db.Date
+  feedingInstructions String?         @map("feeding_instructions")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -9,17 +9,18 @@ export const roomSchema = z.object({
   capacity: z.number({ error: "Kapasitas wajib diisi" }).int("Harus bilangan bulat").min(1, "Minimal 1").max(50, "Maksimal 50"),
   dailyRate: z.number({ error: "Tarif tidak valid" }).int("Harus bilangan bulat").min(0, "Tidak boleh negatif").max(100_000_000, "Terlalu besar"),
   suitableFor: z.string().trim().max(80, "Maksimal 80 karakter"),
+  dimensions: z.string().trim().max(80, "Maksimal 80 karakter"),
 });
 
 export type RoomInput = z.infer<typeof roomSchema>;
 
-export const listRooms = () => prisma.room.findMany({ include: { defaultRate: { select: { sellPrice: true } } }, orderBy: [{ type: "asc" }, { name: "asc" }] });
+export const listRooms = () => prisma.room.findMany({ where: { deletedAt: null }, include: { defaultRate: { select: { sellPrice: true } } }, orderBy: [{ type: "asc" }, { name: "asc" }] });
 
 export const getRoom = (id: string) => prisma.room.findUnique({ where: { id }, include: { defaultRate: { select: { sellPrice: true } } } });
 
 export async function saveRoom(userId: string, id: string | null, data: RoomInput) {
   const duplicate = await prisma.room.findFirst({
-    where: { name: { equals: data.name, mode: "insensitive" }, ...(id && { NOT: { id } }) },
+    where: { deletedAt: null, name: { equals: data.name, mode: "insensitive" }, ...(id && { NOT: { id } }) },
     select: { id: true },
   });
   if (duplicate) return { error: "Nama kandang sudah dipakai." };
@@ -46,32 +47,49 @@ export async function saveRoom(userId: string, id: string | null, data: RoomInpu
       }
     }
 
-    const row = { name: data.name, type: data.type, active: data.active, capacity: data.capacity, defaultRateId, suitableFor: data.suitableFor || null };
+    const row = { name: data.name, type: data.type, active: data.active, capacity: data.capacity, defaultRateId, suitableFor: data.suitableFor || null, dimensions: data.dimensions || null };
     if (id === null) await tx.room.create({ data: row });
     else await tx.room.update({ where: { id }, data: row });
     return {};
   });
 }
 
-export const listDailyRates = () =>
-  prisma.item.findMany({ where: { type: "SERVICE", billingUnit: "PER_DAY", active: true, deletedAt: null, category: { in: ["rawat inap", "hotel"] } }, select: { id: true, name: true, sellPrice: true }, orderBy: { name: "asc" } });
+export async function setRoomCleaning(id: string, needsCleaning: boolean) {
+  const active = await prisma.admission.count({ where: { roomId: id, status: "AKTIF" } });
+  if (needsCleaning && active > 0) return { error: "Kandang masih terisi." };
+  const { count } = await prisma.room.updateMany({ where: { id, deletedAt: null, needsCleaning: !needsCleaning }, data: { needsCleaning } });
+  return count === 1 ? {} : { error: "Status kandang sudah berubah." };
+}
 
-export const listHotelBoard = () =>
-  prisma.room.findMany({
-    where: { type: "HOTEL", active: true },
-    select: {
-      id: true,
-      name: true,
-      needsCleaning: true,
-      capacity: true,
-      suitableFor: true,
-      defaultRate: { select: { name: true, sellPrice: true } },
-      admissions: { where: { status: "AKTIF" }, select: { id: true, patient: { select: { name: true, species: true } } } },
-    },
-    orderBy: { name: "asc" },
+export async function deleteRoom(userId: string, id: string) {
+  return prisma.$transaction(async (tx) => {
+    const room = await tx.room.findFirst({ where: { id, deletedAt: null }, select: { name: true } });
+    if (!room) return { error: "Kandang tidak ditemukan." };
+    if ((await tx.admission.count({ where: { roomId: id, status: "AKTIF" } })) > 0) return { error: "Kandang masih terisi, tidak bisa dihapus." };
+    await tx.room.update({ where: { id }, data: { deletedAt: new Date(), active: false } });
+    await logAudit(tx, { userId, action: "room.delete", entity: "room", entityId: id, before: { name: room.name } });
+    return {};
   });
+}
 
-export async function markRoomClean(id: string) {
-  const { count } = await prisma.room.updateMany({ where: { id, needsCleaning: true }, data: { needsCleaning: false } });
-  return count === 1;
+export async function getHotelOverview() {
+  const [rooms, stays, history] = await Promise.all([
+    prisma.room.findMany({
+      where: { type: "HOTEL", deletedAt: null, active: true },
+      select: { id: true, name: true, capacity: true, needsCleaning: true, suitableFor: true, dimensions: true, defaultRate: { select: { sellPrice: true } }, admissions: { where: { status: "AKTIF" }, select: { id: true } } },
+      orderBy: { name: "asc" },
+    }),
+    prisma.admission.findMany({
+      where: { type: "HOTEL", status: "AKTIF" },
+      select: { id: true, checkIn: true, expectedCheckOut: true, patient: { select: { name: true, species: true, owner: { select: { name: true } } } }, room: { select: { name: true } }, rateItem: { select: { sellPrice: true } } },
+      orderBy: { checkIn: "asc" },
+    }),
+    prisma.admission.findMany({
+      where: { type: "HOTEL", status: "SELESAI" },
+      select: { id: true, checkOut: true, patient: { select: { name: true, owner: { select: { name: true } } } }, room: { select: { name: true } }, invoices: { where: { status: { not: "VOID" } }, select: { id: true }, take: 1 } },
+      orderBy: { checkOut: "desc" },
+      take: 50,
+    }),
+  ]);
+  return { rooms, stays, history };
 }

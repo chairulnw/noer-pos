@@ -13,7 +13,7 @@ export async function createAdmission(userId: string, input: CheckInInput) {
 
   const [patient, room, rate, visit, busy] = await Promise.all([
     prisma.patient.findFirst({ where: { id: input.patientId, deletedAt: null, owner: { deletedAt: null } }, select: { ownerId: true } }),
-    prisma.room.findFirst({ where: { id: input.roomId, active: true, type: input.type }, select: { id: true, needsCleaning: true, name: true, capacity: true } }),
+    prisma.room.findFirst({ where: { id: input.roomId, active: true, deletedAt: null, type: input.type }, select: { id: true, needsCleaning: true, name: true, capacity: true } }),
     prisma.item.findFirst({
       where: { id: input.rateItemId, type: "SERVICE", billingUnit: "PER_DAY", category: RATE_CATEGORY[input.type], active: true, deletedAt: null },
       select: { id: true },
@@ -39,6 +39,7 @@ export async function createAdmission(userId: string, input: CheckInInput) {
           data: {
             patientId: input.patientId, roomId: room.id, rateItemId: rate.id, visitId: visit?.id ?? null,
             type: input.type, checkIn, notes: input.notes || null,
+            expectedCheckOut: input.expectedCheckOut ? new Date(`${input.expectedCheckOut}T00:00:00Z`) : null, feedingInstructions: input.feedingInstructions || null,
           },
           select: { id: true },
         });
@@ -73,7 +74,7 @@ export const listActiveAdmissions = (type?: "RAWAT_INAP" | "HOTEL") =>
 
 export async function getCheckInOptions() {
   const [rooms, rates, occupied] = await Promise.all([
-    prisma.room.findMany({ where: { active: true, needsCleaning: false }, select: { id: true, name: true, type: true, capacity: true, defaultRateId: true, suitableFor: true }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
+    prisma.room.findMany({ where: { active: true, deletedAt: null, needsCleaning: false }, select: { id: true, name: true, type: true, capacity: true, defaultRateId: true, suitableFor: true }, orderBy: [{ type: "asc" }, { name: "asc" }] }),
     prisma.item.findMany({
       where: { type: "SERVICE", billingUnit: "PER_DAY", active: true, deletedAt: null, category: { in: ["rawat inap", "hotel"] } },
       select: { id: true, name: true, category: true },
@@ -113,6 +114,8 @@ export const getAdmission = (id: string) =>
       checkIn: true,
       checkOut: true,
       notes: true,
+      expectedCheckOut: true,
+      feedingInstructions: true,
       patient: { select: { id: true, name: true, rmNo: true, species: true, allergyNote: true, aggressive: true, behaviorNote: true } },
       room: { select: { name: true } },
       rateItem: { select: { name: true } },
