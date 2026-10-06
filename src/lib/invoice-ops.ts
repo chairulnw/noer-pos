@@ -101,6 +101,20 @@ export const setInvoiceCustomer = (invoiceId: string, ownerId: string | null) =>
     return {};
   });
 
+export async function createOwnerDraftTx(tx: Tx, userId: string, p: { ownerId: string; label: string; itemId: string | null }) {
+  const tax = await taxFromSettings();
+  const invoice = await tx.invoice.create({
+    data: { invoiceNo: await nextInvoiceNoFor(tx), createdById: userId, ownerId: p.ownerId, customerName: p.label },
+    select: { id: true },
+  });
+  const item = p.itemId ? await tx.item.findFirst({ where: { id: p.itemId, active: true, deletedAt: null }, select: { id: true, name: true, sellPrice: true, buyPrice: true } }) : null;
+  if (item) {
+    await tx.invoiceItem.create({ data: { invoiceId: invoice.id, itemId: item.id, nameSnapshot: item.name, qty: 1, unitPriceSnapshot: item.sellPrice, unitCostSnapshot: item.buyPrice, position: 0, lineTotal: 0 } });
+    await recomputeInvoice(tx, invoice.id, tax);
+  }
+  return invoice.id;
+}
+
 export async function createRetailInvoice(userId: string, customerName: string) {
   for (let attempt = 1; ; attempt++) {
     try {

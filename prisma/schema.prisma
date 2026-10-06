@@ -38,6 +38,13 @@ enum WalletTxType {
   ADJUST
 }
 
+enum SurgeryStatus {
+  DIJADWALKAN
+  BERJALAN
+  SELESAI
+  BATAL
+}
+
 enum VisitStatus {
   DILAYANI
   MENUNGGU_BAYAR
@@ -131,6 +138,9 @@ model User {
   paymentsReceived     Payment[]
   auditLogs            AuditLog[]
   cashClosings         CashClosing[]
+  surgeriesAsDoctor    Surgery[]           @relation("SurgeryDoctor")
+  surgeriesCreated     Surgery[]           @relation("SurgeryCreatedBy")
+  surgeryAddenda       SurgeryAddendum[]
   notificationReads    NotificationRead[]
   operationalCosts     OperationalCost[]
   walletTransactions   WalletTransaction[]
@@ -188,6 +198,7 @@ model Patient {
   owner        Owner         @relation(fields: [ownerId], references: [id])
   visits       Visit[]
   appointments Appointment[]
+  surgeries    Surgery[]
   examinations Examination[]
   admissions   Admission[]
 
@@ -331,6 +342,7 @@ model Item {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   invoiceItems      InvoiceItem[]
+  surgeries         Surgery[]
   stockBatches      StockBatch[]
   prescriptionItems PrescriptionItem[]
   vaccinations      Vaccination[]
@@ -502,6 +514,7 @@ model Invoice {
   items              InvoiceItem[]
   payments           Payment[]
   walletTransactions WalletTransaction[]
+  surgery            Surgery?
 
   @@map("invoice")
 }
@@ -670,6 +683,48 @@ model NotificationRead {
 
   @@id([userId, key])
   @@map("notification_read")
+}
+
+model Surgery {
+  id            String        @id @default(uuid()) @db.Uuid
+  patientId     String        @map("patient_id") @db.Uuid
+  doctorId      String        @map("doctor_id") @db.Uuid
+  serviceItemId String?       @map("service_item_id") @db.Uuid
+  procedure     String
+  anesthesia    String?
+  surgeryDate   DateTime      @map("surgery_date") @db.Date
+  status        SurgeryStatus @default(DIJADWALKAN)
+  preNotes      String?       @map("pre_notes")
+  postNotes     String?       @map("post_notes")
+  finishedAt    DateTime?     @map("finished_at")
+  invoiceId     String?       @unique @map("invoice_id") @db.Uuid
+  createdById   String        @map("created_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  patient     Patient           @relation(fields: [patientId], references: [id])
+  doctor      User              @relation("SurgeryDoctor", fields: [doctorId], references: [id])
+  createdBy   User              @relation("SurgeryCreatedBy", fields: [createdById], references: [id])
+  serviceItem Item?             @relation(fields: [serviceItemId], references: [id])
+  invoice     Invoice?          @relation(fields: [invoiceId], references: [id])
+  addenda     SurgeryAddendum[]
+
+  @@index([surgeryDate])
+  @@map("surgery")
+}
+
+model SurgeryAddendum {
+  id        String   @id @default(uuid()) @db.Uuid
+  surgeryId String   @map("surgery_id") @db.Uuid
+  note      String
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  surgery Surgery @relation(fields: [surgeryId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("surgery_addendum")
 }
 
 model CashClosing {
