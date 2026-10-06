@@ -4,7 +4,8 @@ import { Chips, ListHeader, ListPage, ListToolbar, TableCard } from "@/component
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
-import { parseYmd } from "@/lib/date";
+import { periodToRange, PERIODS } from "@/lib/date";
+import { FilterSelect } from "@/components/filter-select";
 import { todayJakarta } from "@/lib/date";
 import { formatDate } from "@/lib/format";
 import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
@@ -12,10 +13,9 @@ import { formatWhatsapp } from "@/lib/patient-schema";
 import { listDueVaccinations, listVaccinations } from "@/lib/records";
 import { requireCapability } from "@/lib/require-role";
 
-type Params = { tampilan?: string; hari?: string; q?: string; dari?: string; sampai?: string } & PagingParams;
+type Params = { tampilan?: string; hari?: string; q?: string; periode?: string } & PagingParams;
 
 const RANGES = [7, 14, 30];
-const field = "h-11 rounded-lg border border-input bg-card px-3 text-sm";
 
 export default async function VaccinesPage({ searchParams }: { searchParams: Promise<Params> }) {
   await requireCapability("view_medical_record");
@@ -65,19 +65,16 @@ export default async function VaccinesPage({ searchParams }: { searchParams: Pro
     );
   }
 
-  const from = parseYmd(params.dari) ?? undefined;
-  const to = parseYmd(params.sampai) ?? undefined;
+  const { period, from, to } = periodToRange(params.periode);
   const { rows, total } = await listVaccinations({ q: params.q, from, to }, skip, take);
-  const keep = { q: params.q, dari: from, sampai: to, baris: params.baris };
+  const keep = { q: params.q, periode: period || undefined, baris: params.baris };
 
   return (
     <ListPage>
       {header}
       {tabs$}
       <ListToolbar base="/vaksin" params={{ q: params.q, baris: params.baris }} placeholder="Cari pasien, pemilik, vaksin, atau no. batch…" total={total}>
-        <input type="date" name="dari" defaultValue={from ?? ""} aria-label="Dari tanggal" className={field} />
-        <input type="date" name="sampai" defaultValue={to ?? ""} aria-label="Sampai tanggal" className={field} />
-        <Button type="submit" variant="outline">Terapkan</Button>
+        <FilterSelect name="periode" defaultValue={period} aria-label="Periode">{PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
         columns={[{ label: "Tgl diberikan" }, { label: "Pasien & pemilik" }, { label: "Nama vaksin & batch" }, { label: "Vaksin ulang (due)" }, { label: "Aksi", align: "right" }]}

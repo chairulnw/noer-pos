@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { FilterSelect } from "@/components/filter-select";
 import { FileText } from "lucide-react";
 import { ClinicalTags } from "@/components/clinical-flags";
-import { Chips, ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
+import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { paymentStatus } from "@/lib/billing";
 import { formatDate, formatRupiah } from "@/lib/format";
 import { INVOICE_STATUS } from "@/lib/invoice-status";
 import { listInvoices } from "@/lib/invoices";
-import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, type PagingParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
 const STATUSES = ["DRAFT", "VOID"] as const;
@@ -25,8 +26,9 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
   return (
     <ListPage>
       <ListHeader icon={FileText} title="Tagihan" subtitle="Tagihan yang belum lunas dari kunjungan, rawat inap, dan kasir. Yang sudah lunas pindah ke Transaksi (Lunas)" actions={<Button asChild><Link href="/kasir">Ke Kasir (POS)</Link></Button>} />
-      <ListToolbar base="/invoice" params={keep} placeholder="Cari no. invoice, pasien, atau pemilik…" total={total} />
-      <Chips items={[{ value: "", label: "Semua" }, ...STATUSES.map((s) => ({ value: s, label: INVOICE_STATUS[s].label }))]} active={active ?? ""} hrefFor={(v) => buildHref("/invoice", keep, { status: v || undefined, hal: undefined })} />
+      <ListToolbar base="/invoice" params={{ q: params.q, baris: params.baris }} placeholder="Cari no. invoice, pasien, atau pemilik…" total={total}>
+        <FilterSelect name="status" defaultValue={active ?? ""} aria-label="Status"><option value="">Semua status</option>{STATUSES.map((s) => <option key={s} value={s}>{INVOICE_STATUS[s].label}</option>)}</FilterSelect>
+      </ListToolbar>
       <TableCard
         columns={[{ label: "No. invoice" }, { label: "Klien / pasien" }, { label: "Tanggal tagihan" }, { label: "Total", align: "right" }, { label: "Sisa tagihan", align: "right" }, { label: "Status" }]}
         total={total}

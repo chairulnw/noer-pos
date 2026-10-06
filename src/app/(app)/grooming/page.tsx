@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { FilterSelect } from "@/components/filter-select";
 import { Scissors } from "lucide-react";
 import { ClinicalTags } from "@/components/clinical-flags";
-import { Chips, ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
+import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { GROOMING_STATUS, type GroomingStatus } from "@/lib/grooming-schema";
 import { pageGroomings } from "@/lib/groomings";
-import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, type PagingParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 
 const STATUSES = Object.keys(GROOMING_STATUS) as GroomingStatus[];
@@ -25,8 +26,9 @@ export default async function GroomingPage({ searchParams }: { searchParams: Pro
   return (
     <ListPage>
       <ListHeader icon={Scissors} title="Grooming & Salon" subtitle="Antrean perawatan hewan, status pengerjaan, dan tagihan otomatis saat selesai" actions={add} />
-      <ListToolbar base="/grooming" params={keep} placeholder="Cari pasien, pemilik, atau layanan…" total={total} />
-      <Chips items={[{ value: "", label: "Semua" }, ...STATUSES.map((s) => ({ value: s, label: GROOMING_STATUS[s].label }))]} active={active ?? ""} hrefFor={(v) => buildHref("/grooming", keep, { status: v || undefined, hal: undefined })} />
+      <ListToolbar base="/grooming" params={{ q: params.q, baris: params.baris }} placeholder="Cari pasien, pemilik, atau layanan…" total={total}>
+        <FilterSelect name="status" defaultValue={active ?? ""} aria-label="Status"><option value="">Semua status</option>{STATUSES.map((s) => <option key={s} value={s}>{GROOMING_STATUS[s].label}</option>)}</FilterSelect>
+      </ListToolbar>
       <TableCard
         columns={[{ label: "Tanggal" }, { label: "Pasien" }, { label: "Layanan" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
         total={total}

@@ -5,16 +5,15 @@ import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
-import { parseYmd } from "@/lib/date";
+import { periodToRange, PERIODS } from "@/lib/date";
+import { FilterSelect } from "@/components/filter-select";
 import { formatDate } from "@/lib/format";
 import { parsePaging, type PagingParams } from "@/lib/paging";
 import { listRecords } from "@/lib/records";
 import { requireCapability } from "@/lib/require-role";
 import { listDoctors } from "@/lib/visits";
 
-type Params = { q?: string; status?: string; dokter?: string; dari?: string; sampai?: string } & PagingParams;
-
-const field = "h-11 rounded-lg border border-input bg-card px-3 text-sm";
+type Params = { q?: string; status?: string; dokter?: string; periode?: string } & PagingParams;
 
 export default async function RecordsPage({ searchParams }: { searchParams: Promise<Params> }) {
   await requireCapability("view_medical_record");
@@ -22,21 +21,18 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
   const doctors = await listDoctors();
   const status = params.status === "BELUM" || params.status === "DRAFT" || params.status === "FINAL" ? params.status : undefined;
   const doctorId = doctors.some((d) => d.id === params.dokter) ? params.dokter : undefined;
-  const from = parseYmd(params.dari) ?? undefined;
-  const to = parseYmd(params.sampai) ?? undefined;
+  const { period, from, to } = periodToRange(params.periode);
   const { page, size, skip, take } = parsePaging(params);
   const { rows, total } = await listRecords({ q: params.q, status, doctorId, from, to }, skip, take);
-  const keep = { q: params.q, status, dokter: doctorId, dari: from, sampai: to, baris: params.baris };
+  const keep = { q: params.q, status, dokter: doctorId, periode: period || undefined, baris: params.baris };
 
   return (
     <ListPage>
       <ListHeader icon={Stethoscope} title="Rekam Medis (EMR)" subtitle="Riwayat pemeriksaan SOAP, catatan klinis, dan diagnosis pasien" actions={<Button asChild><Link href="/pasien">+ Rekam Medis Baru</Link></Button>} />
       <ListToolbar base="/rekam-medis" params={{ q: params.q, baris: params.baris }} placeholder="Cari pasien, pemilik, no. RM, keluhan, diagnosis…" total={total}>
-        <select name="dokter" defaultValue={doctorId ?? ""} aria-label="Dokter" className={field}><option value="">Semua dokter</option>{doctors.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
-        <select name="status" defaultValue={status ?? ""} aria-label="Status" className={field}><option value="">Semua status</option><option value="BELUM">Belum diisi</option><option value="DRAFT">Draft</option><option value="FINAL">Final</option></select>
-        <input type="date" name="dari" defaultValue={from ?? ""} aria-label="Dari tanggal" className={field} />
-        <input type="date" name="sampai" defaultValue={to ?? ""} aria-label="Sampai tanggal" className={field} />
-        <Button type="submit" variant="outline">Terapkan</Button>
+        <FilterSelect name="status" defaultValue={status ?? ""} aria-label="Status"><option value="">Semua status</option><option value="BELUM">Belum diisi</option><option value="DRAFT">Draft</option><option value="FINAL">Final</option></FilterSelect>
+        {doctors.length > 1 && <FilterSelect name="dokter" defaultValue={doctorId ?? ""} aria-label="Dokter"><option value="">Semua dokter</option>{doctors.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</FilterSelect>}
+        <FilterSelect name="periode" defaultValue={period} aria-label="Periode">{PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
         columns={[{ label: "Tanggal" }, { label: "Pasien & pemilik" }, { label: "Dokter" }, { label: "Keluhan & diagnosis" }, { label: "Status" }, { label: "Aksi", align: "right" }]}

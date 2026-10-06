@@ -9,7 +9,8 @@ import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { parseYmd } from "@/lib/date";
+import { periodToRange, PERIODS } from "@/lib/date";
+import { FilterSelect } from "@/components/filter-select";
 import { todayJakarta } from "@/lib/date";
 import { EXAM, type ExaminationType } from "@/lib/examination-schema";
 import { getExamination, listExaminations, listRecordOptions } from "@/lib/examinations";
@@ -22,28 +23,24 @@ import { deleteExamAction } from "./actions";
 import { ExamFileForm } from "./exam-file-form";
 import { ExamForm } from "./exam-form";
 
-const field = "h-11 rounded-lg border border-input bg-card px-3 text-sm";
 const today = () => todayJakarta().toISOString().slice(0, 10);
 
-export async function ExamList({ type, searchParams }: { type: ExaminationType; searchParams: Promise<{ q?: string; dari?: string; sampai?: string } & PagingParams> }) {
+export async function ExamList({ type, searchParams }: { type: ExaminationType; searchParams: Promise<{ q?: string; periode?: string } & PagingParams> }) {
   const user = await requireCapability("view_medical_record");
   const params = await searchParams;
   const config = EXAM[type];
-  const from = parseYmd(params.dari) ?? undefined;
-  const to = parseYmd(params.sampai) ?? undefined;
+  const { period, from, to } = periodToRange(params.periode);
   const { page, size, skip, take } = parsePaging(params);
   const { rows, total } = await listExaminations(type, { q: params.q, from, to }, skip, take);
   const canEdit = can(user.role, "edit_medical_record");
-  const keep = { q: params.q, dari: from, sampai: to, baris: params.baris };
+  const keep = { q: params.q, periode: period || undefined, baris: params.baris };
   const add = canEdit ? <Button asChild><Link href={`${config.path}/baru`}>+ {type === "LAB" ? "Uji Lab Baru" : "Radiologi Baru"}</Link></Button> : undefined;
 
   return (
     <ListPage>
       <ListHeader icon={type === "LAB" ? FileText : ImageIcon} title={config.title} subtitle={type === "LAB" ? "Kelola riwayat pemeriksaan darah, urine, parasit, dan tes laboratorium pasien" : "Kelola hasil rontgen (X-Ray), USG, dan rekam pencitraan diagnostik pasien"} actions={add} />
       <ListToolbar base={config.path} params={{ q: params.q, baris: params.baris }} placeholder="Cari pasien, pemilik, pemeriksaan, atau hasil…" total={total}>
-        <input type="date" name="dari" defaultValue={from ?? ""} aria-label="Dari tanggal" className={field} />
-        <input type="date" name="sampai" defaultValue={to ?? ""} aria-label="Sampai tanggal" className={field} />
-        <Button type="submit" variant="outline">Terapkan</Button>
+        <FilterSelect name="periode" defaultValue={period} aria-label="Periode">{PERIODS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}</FilterSelect>
       </ListToolbar>
       <TableCard
         columns={[{ label: "Tanggal" }, { label: "Pasien & pemilik" }, { label: config.nameLabel }, { label: type === "LAB" ? "Hasil / nilai uji" : "Temuan / interpretasi" }, { label: "Lampiran" }, { label: "Aksi", align: "right" }]}

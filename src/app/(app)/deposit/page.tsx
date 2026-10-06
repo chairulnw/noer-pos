@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { WalletCards } from "lucide-react";
 import { z } from "zod";
+import { FilterSelect } from "@/components/filter-select";
 import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
@@ -19,10 +20,11 @@ export default async function DepositPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const ownerId = params.pemilik && z.guid().safeParse(params.pemilik).success ? params.pemilik : undefined;
   const { page, size, skip, take } = parsePaging(params);
-  const [{ rows, total }, summary, owner] = await Promise.all([
+  const [{ rows, total }, summary, owner, owners] = await Promise.all([
     pageWalletTransactions({ ownerId, q: params.q }, skip, take),
     walletSummary(),
     ownerId ? prisma.owner.findFirst({ where: { id: ownerId, deletedAt: null }, select: { name: true, walletBalance: true } }) : null,
+    prisma.owner.findMany({ where: { deletedAt: null, walletTransactions: { some: {} } }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
   const keep = { q: params.q, pemilik: ownerId, baris: params.baris };
 
@@ -34,7 +36,7 @@ export default async function DepositPage({ searchParams }: { searchParams: Prom
         subtitle="Saldo titipan klien untuk pembayaran. Saldo tidak bisa ditarik tunai"
         actions={<>{can(user.role, "correct_deposit") && <Button asChild variant="outline"><Link href="/deposit/koreksi">Koreksi Saldo</Link></Button>}<Button asChild><Link href="/deposit/top-up">Top-Up Saldo Klien</Link></Button></>}
       />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3">
         <div className="rounded-[10px] border bg-card p-4">
           <div className="text-[12.5px] font-semibold tracking-wide text-muted-foreground uppercase">Total saldo titipan klien</div>
           <div className="mt-1 text-3xl font-semibold tabular-nums">{formatRupiah(summary.total)}</div>
@@ -48,7 +50,9 @@ export default async function DepositPage({ searchParams }: { searchParams: Prom
           </div>
         )}
       </div>
-      <ListToolbar base="/deposit" params={keep} placeholder="Cari pemilik, catatan, atau no. invoice…" total={total} />
+      <ListToolbar base="/deposit" params={{ q: params.q, baris: params.baris }} placeholder="Cari pemilik, catatan, atau no. invoice…" total={total}>
+        <FilterSelect name="pemilik" defaultValue={ownerId ?? ""} aria-label="Pemilik"><option value="">Semua pemilik</option>{owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</FilterSelect>
+      </ListToolbar>
       <TableCard
         columns={[{ label: "Waktu" }, { label: "Pemilik" }, { label: "Jenis" }, { label: "Nominal", align: "right" }, { label: "Saldo sesudah", align: "right" }, { label: "Keterangan" }, { label: "Oleh" }]}
         total={total}

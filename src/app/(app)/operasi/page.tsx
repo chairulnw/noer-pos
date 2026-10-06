@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { FilterSelect } from "@/components/filter-select";
 import { Scissors } from "lucide-react";
 import { ClinicalTags } from "@/components/clinical-flags";
-import { Chips, ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
+import { ListHeader, ListPage, ListToolbar, TableCard } from "@/components/data-table";
 import { EmptyState } from "@/components/page-header";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
-import { buildHref, parsePaging, type PagingParams } from "@/lib/paging";
+import { parsePaging, type PagingParams } from "@/lib/paging";
 import { requireCapability } from "@/lib/require-role";
 import { pageSurgeries } from "@/lib/surgeries";
 import { SURGERY_STATUS, type SurgeryStatus } from "@/lib/surgery-schema";
@@ -25,8 +26,9 @@ export default async function SurgeriesPage({ searchParams }: { searchParams: Pr
   return (
     <ListPage>
       <ListHeader icon={Scissors} title="Bedah & Operasi" subtitle="Jadwal tindakan bedah, catatan pra dan pasca-operasi, serta tagihan otomatis" actions={add} />
-      <ListToolbar base="/operasi" params={keep} placeholder="Cari prosedur, pasien, atau pemilik…" total={total} />
-      <Chips items={[{ value: "", label: "Semua" }, ...STATUSES.map((s) => ({ value: s, label: SURGERY_STATUS[s].label }))]} active={active ?? ""} hrefFor={(v) => buildHref("/operasi", keep, { status: v || undefined, hal: undefined })} />
+      <ListToolbar base="/operasi" params={{ q: params.q, baris: params.baris }} placeholder="Cari prosedur, pasien, atau pemilik…" total={total}>
+        <FilterSelect name="status" defaultValue={active ?? ""} aria-label="Status"><option value="">Semua status</option>{STATUSES.map((s) => <option key={s} value={s}>{SURGERY_STATUS[s].label}</option>)}</FilterSelect>
+      </ListToolbar>
       <TableCard
         columns={[{ label: "Tanggal" }, { label: "Pasien" }, { label: "Prosedur" }, { label: "Dokter operator" }, { label: "Status" }, { label: "Aksi", align: "right" }]}
         total={total}
