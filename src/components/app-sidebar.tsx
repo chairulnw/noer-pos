@@ -44,10 +44,10 @@ export async function AppSidebar({ user, logo }: { user: { id: string; name?: st
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-[12.5px] font-semibold text-accent-foreground">
           {initials(name)}
         </div>
-        <Link href="/akun" title="Akun saya" className="min-w-0 flex-1 rounded-lg py-1 hover:bg-muted md:group-data-[collapsed=true]/side:hidden">
+        <div className="min-w-0 flex-1 py-1 md:group-data-[collapsed=true]/side:hidden">
           <div className="truncate text-sm font-medium">{name}</div>
           <div className="text-[12.5px] text-muted-foreground">{ROLE_LABEL[user.role]}</div>
-        </Link>
+        </div>
         <form
           action={async () => {
             "use server";

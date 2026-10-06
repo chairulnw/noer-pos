@@ -65,13 +65,3 @@ export async function resetPassword(adminId: string, id: string, password: strin
   });
 }
 
-export async function changeOwnPassword(userId: string, current: string, next: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { passwordHash: true } });
-  if (!user || !(await bcrypt.compare(current, user.passwordHash))) return { error: "Password saat ini salah." };
-  const passwordHash = await bcrypt.hash(next, 10);
-  await prisma.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: userId }, data: { passwordHash } });
-    await logAudit(tx, { userId, action: "user.change_password", entity: "user", entityId: userId });
-  });
-  return {};
-}
