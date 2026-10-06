@@ -14,6 +14,8 @@ const LIST_SELECT = {
   breed: true,
   allergyNote: true,
   aggressive: true,
+  sex: true,
+  photoPath: true,
   owner: { select: { id: true, name: true, whatsapp: true } },
 } satisfies Prisma.PatientSelect;
 
@@ -230,3 +232,21 @@ export async function getPatientPhoto(id: string) {
   const row = await prisma.patient.findFirst({ where: { id, deletedAt: null }, select: { photoPath: true } });
   return row?.photoPath ? { data: await readStoredFile(row.photoPath), mime: row.photoPath.endsWith(".png") ? "image/png" : "image/jpeg" } : null;
 }
+
+export const listOwnerPurchases = (ownerId: string) =>
+  prisma.invoice.findMany({
+    where: { status: { not: "DRAFT" }, OR: [{ ownerId }, { visit: { patient: { ownerId } } }, { admission: { patient: { ownerId } } }] },
+    select: {
+      id: true,
+      invoiceNo: true,
+      status: true,
+      grandTotal: true,
+      finalizedAt: true,
+      createdAt: true,
+      visit: { select: { patient: { select: { name: true } } } },
+      admission: { select: { type: true, patient: { select: { name: true } } } },
+      items: { select: { id: true, nameSnapshot: true, qty: true, item: { select: { type: true } } }, orderBy: { position: "asc" } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });

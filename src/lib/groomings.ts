@@ -69,3 +69,5 @@ export async function changeGroomingStatus(userId: string, id: string, to: Groom
   });
 }
 
+
+export const listPatientGroomings = (patientId: string) => prisma.grooming.findMany({ where: { patientId }, select: SELECT, orderBy: { groomingDate: "desc" }, take: 20 });

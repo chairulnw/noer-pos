@@ -1,171 +1,184 @@
 import Link from "next/link";
+import { BedDouble, FlaskConical, HeartPulse, PawPrint, Printer, Scissors, Stethoscope, Syringe, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
+import { ClinicalTags } from "@/components/clinical-flags";
+import { StatusChip } from "@/components/status-chip";
 import { todayJakarta } from "@/lib/date";
 import { formatDate, formatTime } from "@/lib/format";
-import { StatusChip } from "@/components/status-chip";
 import type { getPatient, getPatientHistory } from "@/lib/patients";
 import type { latestRawatInapLogs, listPatientAdmissions } from "@/lib/admissions";
+import type { listPatientGroomings } from "@/lib/groomings";
+import type { listPatientSurgeries } from "@/lib/surgeries";
 import { EXAM } from "@/lib/examination-schema";
+import { GROOMING_STATUS } from "@/lib/grooming-schema";
+import { SURGERY_STATUS } from "@/lib/surgery-schema";
 import { formatAge, formatWhatsapp } from "@/lib/patient-schema";
+import { cn } from "@/lib/utils";
 
 type Patient = NonNullable<Awaited<ReturnType<typeof getPatient>>>;
 type History = Awaited<ReturnType<typeof getPatientHistory>>;
 type Admissions = Awaited<ReturnType<typeof listPatientAdmissions>>;
 type Monitoring = Awaited<ReturnType<typeof latestRawatInapLogs>>;
+type Surgeries = Awaited<ReturnType<typeof listPatientSurgeries>>;
+type Groomings = Awaited<ReturnType<typeof listPatientGroomings>>;
+type Activity = { key: string; date: Date; icon: LucideIcon; tone: string; title: string; detail?: string; href?: string; chip?: { label: string; tone: "info" | "success" | "warning" | "neutral" | "danger" } };
 
 const SEX = { JANTAN: "Jantan", BETINA: "Betina" };
+const TABS = { info: "Info Medis", rekam: "Rekam Medis", aktivitas: "Riwayat Aktivitas" } as const;
+export type ProfileTab = keyof typeof TABS;
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Box({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1 rounded-[10px] border bg-card px-4 py-3.5">
-      <span className="text-[12.5px] text-muted-foreground">{label}</span>
-      <span className="text-xl font-semibold tabular-nums">{value}</span>
+    <div className="rounded-xl bg-muted/50 px-4 py-3 text-center">
+      <div className="text-[11.5px] font-bold tracking-wide text-muted-foreground uppercase">{label}</div>
+      <div className="mt-0.5 truncate text-[15px] font-semibold">{children}</div>
     </div>
   );
 }
 
-export function PatientProfile({ patient, history, admissions, monitoring }: { patient: Patient; history: History | null; admissions: Admissions; monitoring: Monitoring }) {
-  const details = [
-    patient.species,
-    patient.breed,
-    `${SEX[patient.sex]}${patient.neutered ? " (steril)" : ""}`,
-    patient.birthDate && formatAge(patient.birthDate, todayJakarta()),
-    patient.microchip && `Microchip ${patient.microchip}`,
-  ].filter(Boolean);
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border bg-card p-5">
+      <h3 className="mb-2 text-[12.5px] font-bold tracking-wide text-muted-foreground uppercase">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+const Row = ({ href, children }: { href?: string; children: React.ReactNode }) =>
+  href ? <Link href={href} className="flex items-center gap-3 border-b py-3 last:border-0 hover:bg-accent/40">{children}</Link> : <div className="flex items-center gap-3 border-b py-3 last:border-0">{children}</div>;
+
+export function PatientProfile({ patient, tab, history, admissions, monitoring, surgeries, groomings, canMedical }: {
+  patient: Patient;
+  tab: ProfileTab;
+  history: History | null;
+  admissions: Admissions;
+  monitoring: Monitoring;
+  surgeries: Surgeries;
+  groomings: Groomings;
+  canMedical: boolean;
+}) {
+  const age = patient.birthDate ? formatAge(patient.birthDate, todayJakarta()) : null;
+  const activities: Activity[] = [
+    ...(history?.visits ?? []).map((v) => ({ key: `v${v.id}`, date: v.visitDate, icon: Stethoscope, tone: "bg-info/10 text-info", title: `Kunjungan · ${v.medicalRecord?.diagnosis || v.complaint}`, detail: `${v.doctor.name}${v.medicalRecord?.diagnosis ? ` · Keluhan: ${v.complaint}` : ""}`, href: `/rekam-medis/${v.id}`, chip: v.medicalRecord?.finalized ? { label: "Final", tone: "info" as const } : { label: v.medicalRecord ? "Draft" : "Belum diisi", tone: "neutral" as const } })),
+    ...(history?.vaccinations ?? []).map((v) => ({ key: `x${v.id}`, date: v.givenAt, icon: Syringe, tone: "bg-success/10 text-success", title: `Vaksin ${v.item.name}`, detail: [v.batchNo && `Batch ${v.batchNo}`, v.nextDue && `ulang ${formatDate(v.nextDue)}`].filter(Boolean).join(" · ") })),
+    ...(history?.examinations ?? []).map((e) => ({ key: `e${e.id}`, date: e.performedAt, icon: FlaskConical, tone: "bg-accent text-primary", title: `${e.type === "LAB" ? "Hasil lab" : "Radiologi"} · ${e.name}`, detail: e.findings ?? undefined, href: `${EXAM[e.type].path}/${e.id}` })),
+    ...(canMedical ? surgeries : []).map((s) => ({ key: `s${s.id}`, date: s.surgeryDate, icon: HeartPulse, tone: "bg-destructive/10 text-destructive", title: `Operasi · ${s.procedure}`, detail: s.doctor.name, href: `/operasi/${s.id}`, chip: { label: SURGERY_STATUS[s.status].label, tone: SURGERY_STATUS[s.status].tone } })),
+    ...groomings.map((g) => ({ key: `g${g.id}`, date: g.groomingDate, icon: Scissors, tone: "bg-warning/10 text-warning", title: `Grooming · ${g.serviceItem?.name ?? "Layanan"}`, detail: g.notes ?? undefined, href: `/grooming/${g.id}`, chip: { label: GROOMING_STATUS[g.status].label, tone: GROOMING_STATUS[g.status].tone } })),
+    ...admissions.map((a) => ({ key: `a${a.id}`, date: a.checkIn, icon: BedDouble, tone: "bg-info/10 text-info", title: `${a.type === "HOTEL" ? "Pet Hotel" : "Rawat inap"} · Kandang ${a.room.name}`, detail: `${formatDate(a.checkIn)}${a.checkOut ? ` – ${formatDate(a.checkOut)}` : " – sekarang"}${a.billedDays !== null ? ` · ${a.billedDays} hari` : ""}`, href: `${a.type === "HOTEL" ? "/pet-hotel" : "/rawat-inap"}/${a.id}`, chip: a.status === "AKTIF" ? { label: "Menginap", tone: "warning" as const } : { label: "Selesai", tone: "neutral" as const } })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+  const visible = (Object.keys(TABS) as ProfileTab[]).filter((t) => t !== "rekam" || canMedical);
+  const recordCount = (history?.visits.length ?? 0) + (history?.examinations.length ?? 0);
+  const staying = admissions.find((a) => a.status === "AKTIF");
 
   return (
     <section aria-label="Profil pasien" className="flex min-w-0 flex-col gap-4">
-      <div className="overflow-hidden rounded-[10px] border bg-card">
-        <div className="flex flex-wrap items-center gap-4 p-5">
+      <div className="rounded-2xl border bg-card p-5">
+        <div className="flex flex-wrap items-start gap-5">
           {patient.photoPath ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/api/foto-hewan/${patient.id}`} alt={`Foto ${patient.name}`} className="size-20 shrink-0 rounded-2xl border object-cover" />
+            <img src={`/api/foto-hewan/${patient.id}`} alt={`Foto ${patient.name}`} className="size-32 shrink-0 rounded-2xl border object-cover" />
           ) : (
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent text-[20px] font-semibold leading-11 text-accent-foreground">
-              {patient.name[0]?.toUpperCase()}
-            </div>
+            <div className="grid size-32 shrink-0 place-items-center rounded-2xl bg-accent text-primary"><PawPrint className="size-12" /></div>
           )}
-          <div className="flex min-w-60 flex-1 flex-col gap-1">
-            <div className="flex flex-wrap items-baseline gap-2.5">
-              <h2 className="text-xl font-semibold">{patient.name}</h2>
+          <div className="min-w-60 flex-1 space-y-1">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="text-[26px] leading-tight font-bold">{patient.name}</h2>
               <span className="text-sm text-muted-foreground tabular-nums">{patient.rmNo}</span>
-              <span className="flex gap-1.5">
-                <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
-              </span>
+              <ClinicalTags allergyNote={patient.allergyNote} aggressive={patient.aggressive} />
+              {staying && <StatusChip tone="warning">{staying.type === "HOTEL" ? "Di Pet Hotel" : "Rawat inap"}</StatusChip>}
             </div>
-            <div className="text-[13.5px] text-muted-foreground">{details.join(" · ")}</div>
-            <div className="text-[13.5px] text-muted-foreground">
-              Owner{" "}
-              <Link href={`/pemilik/${patient.owner.id}`} className="font-medium text-primary">
-                {patient.owner.name}
-              </Link>{" "}
-              · WA {formatWhatsapp(patient.owner.whatsapp)}
-            </div>
+            <div className="text-[15px] text-muted-foreground">{patient.species} • {patient.breed || "-"}</div>
+            <div className="text-[13px] text-muted-foreground">Terdaftar {formatDate(patient.createdAt)}</div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href={`/pasien/${patient.id}/ubah`}>Ubah</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href={`/rawat-inap/check-in?patient=${patient.id}`}>Check-in</Link>
-            </Button>
-            <Button asChild>
-              <Link href={`/kunjungan/baru?patient=${patient.id}`}>+ Buat kunjungan</Link>
-            </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild><Link href={`/pasien/${patient.id}/ubah`}>Ubah</Link></Button>
+            <Button variant="outline" asChild><Link href={`/pasien/${patient.id}/cetak`} target="_blank"><Printer className="size-4" /> Cetak PDF</Link></Button>
+            <Button asChild><Link href={`/kunjungan/baru?patient=${patient.id}`}>+ Buat kunjungan</Link></Button>
           </div>
         </div>
-        <ClinicalNotes allergyNote={patient.allergyNote} aggressive={patient.aggressive} behaviorNote={patient.behaviorNote} />
+        <div className="mt-5 grid grid-cols-2 gap-3 border-t pt-5 md:grid-cols-3 xl:grid-cols-6">
+          <Box label="Kelamin">{SEX[patient.sex]}{patient.neutered ? " (steril)" : ""}</Box>
+          <Box label="Umur">{age ?? "-"}</Box>
+          <Box label="Berat">{patient.lastWeightKg === null ? "-" : `${patient.lastWeightKg.toLocaleString("id-ID")} kg`}</Box>
+          <Box label="Warna">{patient.color || "-"}</Box>
+          <Box label="Microchip">{patient.microchip || "-"}</Box>
+          <Box label="Pemilik"><Link href={`/pemilik/${patient.owner.id}`} className="text-primary">{patient.owner.name}</Link></Box>
+        </div>
+        <div className="mt-3 text-[13px] text-muted-foreground">WA pemilik {formatWhatsapp(patient.owner.whatsapp)}</div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3">
-        <Stat label="Berat terakhir" value={patient.lastWeightKg === null ? "—" : `${patient.lastWeightKg.toLocaleString("id-ID")} kg`} />
-        <Stat label="Terdaftar" value={formatDate(patient.createdAt)} />
-      </div>
+      <nav className="flex gap-1 rounded-2xl bg-muted/70 p-1" aria-label="Bagian profil">
+        {visible.map((t) => (
+          <Link key={t} href={`/pasien/${patient.id}${t === "info" ? "" : `?tab=${t}`}`} aria-current={t === tab ? "page" : undefined} className={cn("flex-1 rounded-xl px-4 py-2.5 text-center text-[14px] font-semibold", t === tab ? "bg-card text-primary shadow-sm" : "text-muted-foreground")}>
+            {TABS[t]}{t === "rekam" ? ` (${recordCount})` : t === "aktivitas" ? ` (${activities.length})` : ""}
+          </Link>
+        ))}
+      </nav>
 
-      {admissions.length > 0 && (
-        <div className="overflow-hidden rounded-[10px] border bg-card">
-          <h3 className="border-b px-5 py-3 text-base font-semibold">Rawat inap & hotel</h3>
-          {admissions.map((a) => (
-            <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3.5 last:border-0">
-              <div>
-                <div className="text-[13.5px] font-medium">{a.type === "HOTEL" ? "Hotel" : "Rawat inap"} · {a.room.name}</div>
-                <div className="text-[13px] text-muted-foreground">
-                  {formatDate(a.checkIn)}{a.checkOut && ` – ${formatDate(a.checkOut)}`}{a.billedDays !== null && ` · ${a.billedDays} hari`}
-                </div>
-              </div>
-              <StatusChip tone={a.status === "AKTIF" ? "warning" : "neutral"}>{a.status === "AKTIF" ? "Menginap" : "Selesai"}</StatusChip>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {monitoring && monitoring.logs.length > 0 && (
-        <div className="overflow-hidden rounded-[10px] border bg-card">
-          <div className="flex items-center justify-between border-b px-5 py-3">
-            <h3 className="text-base font-semibold">Monitoring rawat inap · {monitoring.admission.room.name}</h3>
-            <Link href={`/rawat-inap/${monitoring.admission.id}`} className="text-sm font-medium text-primary">Semua</Link>
-          </div>
-          {monitoring.logs.map((log) => (
-            <div key={log.id} className="grid grid-cols-[130px_minmax(0,1fr)] gap-4 border-b px-5 py-3 text-[13.5px] last:border-0">
-              <span className="text-muted-foreground tabular-nums">{formatDate(log.loggedAt)} · {formatTime(log.loggedAt)}</span>
-              <span>
-                {log.tempC !== null && <span className="font-medium tabular-nums">{Number(log.tempC).toLocaleString("id-ID")} °C </span>}
-                {[log.intake, log.note].filter(Boolean).join(" · ")}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {history && (
+      {tab === "info" && (
         <>
-          <div className="overflow-hidden rounded-[10px] border bg-card">
-            <h3 className="border-b px-5 py-3 text-base font-semibold">Riwayat kunjungan</h3>
-            {history.visits.length === 0 && <p className="p-5 text-sm text-muted-foreground">Belum ada kunjungan.</p>}
-            {history.visits.map((v) => (
-              <Link key={v.id} href={`/rekam-medis/${v.id}`} className="grid grid-cols-[116px_minmax(0,1fr)_auto] items-center gap-4 border-b px-5 py-3.5 last:border-0">
-                <div>
-                  <div className="text-[13.5px] font-medium">{formatDate(v.visitDate)}</div>
-                  <div className="text-[12.5px] text-muted-foreground">{v.doctor.name}</div>
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-[13.5px] font-medium">{v.medicalRecord?.diagnosis || v.complaint}</div>
-                  {v.medicalRecord?.diagnosis && <div className="truncate text-[13px] text-muted-foreground">{v.complaint}</div>}
-                </div>
-                <StatusChip tone={v.medicalRecord?.finalized ? "info" : "neutral"}>{v.medicalRecord?.finalized ? "Final" : "Draft"}</StatusChip>
-              </Link>
-            ))}
-          </div>
-          <div className="overflow-hidden rounded-[10px] border bg-card">
-            <h3 className="border-b px-5 py-3 text-base font-semibold">Hasil lab & radiologi</h3>
-            {history.examinations.length === 0 && <p className="p-5 text-sm text-muted-foreground">Belum ada hasil lab atau radiologi.</p>}
-            {history.examinations.map((e) => (
-              <Link key={e.id} href={`${EXAM[e.type].path}/${e.id}`} className="grid grid-cols-[116px_minmax(0,1fr)_auto] items-center gap-4 border-b px-5 py-3.5 last:border-0">
-                <div className="text-[13.5px] font-medium">{formatDate(e.performedAt)}</div>
-                <div className="min-w-0">
-                  <div className="truncate text-[13.5px] font-medium">{e.name}</div>
-                  {e.findings && <div className="truncate text-[13px] text-muted-foreground">{e.findings}</div>}
-                </div>
-                <StatusChip tone="info">{e.type === "LAB" ? "Lab" : "Radiologi"}</StatusChip>
-              </Link>
-            ))}
-          </div>
-          <div className="overflow-hidden rounded-[10px] border bg-card">
-            <h3 className="border-b px-5 py-3 text-base font-semibold">Vaksinasi</h3>
-            {history.vaccinations.length === 0 && <p className="p-5 text-sm text-muted-foreground">Belum ada vaksinasi.</p>}
-            {history.vaccinations.map((v) => (
-              <div key={v.id} className="border-b px-5 py-3.5 last:border-0">
-                <div className="text-[13.5px] font-medium">{v.item.name}</div>
-                <div className="text-[13px] text-muted-foreground">
-                  {formatDate(v.givenAt)}
-                  {v.batchNo && ` · Batch ${v.batchNo}`}
-                  {v.nextDue && ` · berikutnya ${formatDate(v.nextDue)}`}
-                </div>
-              </div>
-            ))}
-          </div>
+          <Card title="Riwayat alergi"><p className={cn("text-[15px]", patient.allergyNote && "font-medium text-destructive")}>{patient.allergyNote || "Tidak ada catatan alergi"}</p></Card>
+          <Card title="Catatan khusus / perilaku"><p className="text-[15px]">{[patient.aggressive && "Agresif, perlu penanganan khusus.", patient.behaviorNote].filter(Boolean).join(" ") || "Tidak ada catatan riwayat khusus"}</p></Card>
+          {canMedical && (
+            <Card title="Vaksinasi">
+              {(history?.vaccinations.length ?? 0) === 0 ? <p className="text-[15px] text-muted-foreground">Belum ada vaksinasi.</p> : history!.vaccinations.map((v) => (
+                <Row key={v.id}><Syringe className="size-4 text-success" /><span className="flex-1"><b className="font-semibold">{v.item.name}</b><span className="block text-[13px] text-muted-foreground">{formatDate(v.givenAt)}{v.batchNo && ` · Batch ${v.batchNo}`}</span></span>{v.nextDue && <StatusChip tone={v.nextDue < todayJakarta() ? "danger" : "info"}>Ulang {formatDate(v.nextDue)}</StatusChip>}</Row>
+              ))}
+            </Card>
+          )}
+          {monitoring && monitoring.logs.length > 0 && (
+            <Card title={`Monitoring rawat inap · ${monitoring.admission.room.name}`}>
+              {monitoring.logs.map((log) => (
+                <Row key={log.id}><span className="w-32 text-[13px] text-muted-foreground tabular-nums">{formatDate(log.loggedAt)} {formatTime(log.loggedAt)}</span><span className="text-[14px]">{log.tempC !== null && <b className="tabular-nums">{Number(log.tempC).toLocaleString("id-ID")} °C </b>}{[log.intake, log.note].filter(Boolean).join(" · ")}</span></Row>
+              ))}
+              <Link href={`/rawat-inap/${monitoring.admission.id}`} className="mt-2 inline-block text-sm font-medium text-primary">Semua monitoring</Link>
+            </Card>
+          )}
         </>
+      )}
+
+      {tab === "rekam" && canMedical && (
+        <>
+          <Card title="Rekam medis kunjungan">
+            {history!.visits.length === 0 && <p className="text-[15px] text-muted-foreground">Belum ada rekam medis.</p>}
+            {history!.visits.map((v) => (
+              <Row key={v.id} href={`/rekam-medis/${v.id}`}>
+                <span className="w-28 shrink-0"><b className="block text-[13.5px]">{formatDate(v.visitDate)}</b><span className="text-[12.5px] text-muted-foreground">{v.doctor.name}</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate font-medium">{v.medicalRecord?.diagnosis || v.complaint}</span>{v.medicalRecord?.diagnosis && <span className="block truncate text-[13px] text-muted-foreground">Keluhan: {v.complaint}</span>}</span>
+                <StatusChip tone={v.medicalRecord?.finalized ? "info" : "neutral"}>{v.medicalRecord?.finalized ? "Final" : v.medicalRecord ? "Draft" : "Belum diisi"}</StatusChip>
+              </Row>
+            ))}
+          </Card>
+          <Card title="Hasil lab & radiologi">
+            {history!.examinations.length === 0 && <p className="text-[15px] text-muted-foreground">Belum ada hasil lab atau radiologi.</p>}
+            {history!.examinations.map((e) => (
+              <Row key={e.id} href={`${EXAM[e.type].path}/${e.id}`}>
+                <b className="w-28 shrink-0 text-[13.5px]">{formatDate(e.performedAt)}</b>
+                <span className="min-w-0 flex-1"><span className="block truncate font-medium">{e.name}</span>{e.findings && <span className="block truncate text-[13px] text-muted-foreground">{e.findings}</span>}</span>
+                <StatusChip tone="info">{e.type === "LAB" ? "Lab" : "Radiologi"}</StatusChip>
+              </Row>
+            ))}
+          </Card>
+        </>
+      )}
+
+      {tab === "aktivitas" && (
+        <Card title="Riwayat aktivitas (terbaru di atas)">
+          {activities.length === 0 && <p className="text-[15px] text-muted-foreground">Belum ada aktivitas.</p>}
+          <ol className="relative">
+            {activities.map((a) => (
+              <li key={a.key}>
+                <Row href={a.href}>
+                  <span className={cn("grid size-9 shrink-0 place-items-center rounded-xl", a.tone)}><a.icon className="size-4" /></span>
+                  <span className="w-24 shrink-0 text-[13px] text-muted-foreground tabular-nums">{formatDate(a.date)}</span>
+                  <span className="min-w-0 flex-1"><span className="block truncate font-medium">{a.title}</span>{a.detail && <span className="block truncate text-[13px] text-muted-foreground">{a.detail}</span>}</span>
+                  {a.chip && <StatusChip tone={a.chip.tone}>{a.chip.label}</StatusChip>}
+                </Row>
+              </li>
+            ))}
+          </ol>
+        </Card>
       )}
     </section>
   );
