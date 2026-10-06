@@ -1,58 +1,54 @@
 "use client";
 
-import { useState } from "react";
-import { barHeights } from "@/lib/report";
+import { useId, useState } from "react";
 
 type Point = { label: string; value: number; text: string };
 
+const W = 1000;
+const H = 220;
+const PAD = { l: 8, r: 8, t: 14, b: 8 };
+
 export function TrendChart({ title, points, total, maxText }: { title: string; points: Point[]; total: string; maxText: string }) {
-  const heights = barHeights(points.map((p) => p.value));
+  const gradient = useId();
   const [picked, setPicked] = useState<number>();
-  const shown = picked === undefined ? undefined : points[picked];
+  const max = Math.max(0, ...points.map((p) => p.value));
+  const step = points.length > 1 ? (W - PAD.l - PAD.r) / (points.length - 1) : 0;
+  const xy = points.map((p, i) => [points.length > 1 ? PAD.l + i * step : W / 2, max === 0 ? H - PAD.b : PAD.t + (1 - p.value / max) * (H - PAD.t - PAD.b)] as const);
+  const line = xy.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const area = xy.length ? `${line} L${xy.at(-1)![0].toFixed(1)},${H - PAD.b} L${xy[0][0].toFixed(1)},${H - PAD.b} Z` : "";
+  const shown = picked === undefined ? points.at(-1) : points[picked];
 
   return (
-    <section className="rounded-[10px] border bg-card p-5">
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 className="text-base font-semibold">{title}</h2>
-        <span className="text-sm text-muted-foreground tabular-nums">{total}</span>
+    <div>
+      <div className="mb-2 flex items-baseline justify-between gap-3 text-sm tabular-nums" aria-live="polite">
+        <span className="text-muted-foreground">Maks. {maxText}</span>
+        {shown && <span className="text-muted-foreground">{shown.label}: <b className="font-bold text-foreground">{shown.text}</b></span>}
       </div>
-      <p className="mb-2 h-5 text-sm tabular-nums" aria-live="polite">
-        {shown ? <><b className="font-semibold">{shown.label}</b> · {shown.text}</> : <span className="text-muted-foreground">Ketuk batang untuk melihat nilai.</span>}
-      </p>
-      <div className="flex gap-2">
-        <div className="flex h-40 flex-col justify-between text-right text-[12px] leading-none text-muted-foreground tabular-nums" aria-hidden>
-          <span>{maxText}</span>
-          <span>0</span>
-        </div>
-        <div className="relative min-w-0 flex-1">
-          <div className="pointer-events-none absolute inset-0 flex flex-col justify-between" aria-hidden>
-            <div className="border-t border-dashed" />
-            <div className="border-t border-dashed" />
-            <div className="border-t" />
-          </div>
-          <div role="group" aria-label={`${title}: ${points.map((p) => `${p.label} ${p.text}`).join(", ")}`} className="relative flex h-40 items-end gap-[3px]">
-            {points.map((p, i) => (
-              <button
-                key={p.label}
-                type="button"
-                title={`${p.label}: ${p.text}`}
-                aria-label={`${p.label}: ${p.text}`}
-                onClick={() => setPicked(i)}
-                className="flex h-full min-w-0 flex-1 items-end outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div
-                  className={`w-full rounded-t-sm ${i === picked ? "bg-info" : p.value > 0 ? "bg-primary" : "bg-muted"}`}
-                  style={{ height: `${Math.max(heights[i] * 100, p.value > 0 ? 2 : 1)}%` }}
-                />
-              </button>
-            ))}
-          </div>
+      <div className="relative" role="img" aria-label={`${title}, total ${total}: ${points.map((p) => `${p.label} ${p.text}`).join(", ")}`}>
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-52 w-full">
+          <defs>
+            <linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          {[0.25, 0.5, 0.75].map((f) => <line key={f} x1="0" x2={W} y1={PAD.t + f * (H - PAD.t - PAD.b)} y2={PAD.t + f * (H - PAD.t - PAD.b)} stroke="var(--border)" strokeDasharray="4 6" vectorEffect="non-scaling-stroke" />)}
+          <line x1="0" x2={W} y1={H - PAD.b} y2={H - PAD.b} stroke="var(--border)" vectorEffect="non-scaling-stroke" />
+          {area && <path d={area} fill={`url(#${gradient})`} />}
+          {line && <path d={line} fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />}
+          {picked !== undefined && xy[picked] && <line x1={xy[picked][0]} x2={xy[picked][0]} y1={PAD.t} y2={H - PAD.b} stroke="var(--primary)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
+        </svg>
+        {picked !== undefined && xy[picked] && <span className="pointer-events-none absolute size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-primary bg-card" style={{ left: `${(xy[picked][0] / W) * 100}%`, top: `${(xy[picked][1] / H) * 100}%` }} />}
+        <div className="absolute inset-0 flex">
+          {points.map((p, i) => (
+            <button key={p.label} type="button" aria-label={`${p.label}: ${p.text}`} onMouseEnter={() => setPicked(i)} onFocus={() => setPicked(i)} onClick={() => setPicked(i)} className="h-full min-w-0 flex-1 outline-none" />
+          ))}
         </div>
       </div>
-      <div className="mt-2 flex justify-between pl-[calc(2.5rem+0.5rem)] text-[12.5px] text-muted-foreground">
+      <div className="mt-2 flex justify-between text-[12.5px] text-muted-foreground">
         <span>{points[0]?.label}</span>
         <span>{points.at(-1)?.label}</span>
       </div>
-    </section>
+    </div>
   );
 }

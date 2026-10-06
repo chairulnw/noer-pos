@@ -2,8 +2,9 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ClinicalTags } from "@/components/clinical-flags";
 import { EmptyState } from "@/components/page-header";
+import { ModulesDialog } from "@/components/modules-dialog";
 import { TrendChart } from "@/components/trend-chart";
-import { BedDouble, Hotel, LayoutGrid, PawPrint, Receipt, ShoppingCart, Stethoscope, Scissors, TrendingDown, TrendingUp, UserRound, Users, Wallet, type LucideIcon } from "lucide-react";
+import { BedDouble, Hotel, PawPrint, Receipt, ShoppingCart, Stethoscope, Scissors, TrendingDown, TrendingUp, UserRound, Users, Wallet, type LucideIcon } from "lucide-react";
 import { getCashierQueue, getDashboardCounts, getDashboardSummary, getDoctorQueue } from "@/lib/dashboard";
 import { todayJakarta } from "@/lib/date";
 import { getStockAlerts } from "@/lib/inventory";
@@ -147,7 +148,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tiles.map((t) => <Tile key={t.href} {...t} />)}
-        <Tile href="/pasien" label="Lainnya" icon={LayoutGrid} tone="primary" />
+        <ModulesDialog role={user.role} />
       </div>
 
       <section className="space-y-3">

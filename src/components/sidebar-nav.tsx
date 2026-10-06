@@ -7,9 +7,9 @@ import { Banknote, BarChart3, BedDouble, Bell, Building2, Cat, ChevronDown, Clip
 import { can, type Capability, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; capability?: Capability; roleLabel?: Partial<Record<Role, string>>; soon?: boolean };
+export type NavItem = { href: string; label: string; icon: LucideIcon; capability?: Capability; roleLabel?: Partial<Record<Role, string>>; soon?: boolean };
 
-const GROUPS: { title: string; items: NavItem[] }[] = [
+export const GROUPS: { title: string; items: NavItem[] }[] = [
   { title: "Ikhtisar", items: [{ href: "/", label: "Dasbor", icon: LayoutDashboard }] },
   {
     title: "Penjualan",
