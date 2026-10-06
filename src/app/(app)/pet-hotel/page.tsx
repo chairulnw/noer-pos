@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 
 const TABS = ["menginap", "grid", "riwayat"] as const;
 const STATE = {
-  free: { label: "Tersedia", card: "border-success/40 bg-success/5 text-success", dot: "bg-success" },
-  busy: { label: "Terisi", card: "border-destructive/40 bg-destructive/5 text-destructive", dot: "bg-destructive" },
-  dirty: { label: "Dibersihkan", card: "border-warning/40 bg-warning/5 text-warning", dot: "bg-warning" },
+  free: { label: "Tersedia", card: "border-primary/30 bg-accent text-primary", dot: "bg-primary" },
+  busy: { label: "Terisi", card: "border-primary bg-primary text-primary-foreground", dot: "bg-primary-foreground" },
+  dirty: { label: "Dibersihkan", card: "border-dashed border-input bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
 } as const;
 
 export default async function PetHotelPage({ searchParams }: { searchParams: Promise<{ tab?: string; q?: string }> }) {
@@ -51,9 +51,9 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stat("Total kandang", rooms.length, "bg-card")}
-        {stat("Kandang tersedia", count("free"), "border-success/40 bg-success/5 text-success")}
-        {stat("Sedang terisi", count("busy"), "border-destructive/40 bg-destructive/5 text-destructive")}
-        {stat("Perlu sanitasi", count("dirty"), "border-warning/40 bg-warning/5 text-warning")}
+        {stat("Kandang tersedia", count("free"), "border-primary/30 bg-accent text-primary")}
+        {stat("Sedang terisi", count("busy"), "border-primary bg-primary text-primary-foreground")}
+        {stat("Perlu sanitasi", count("dirty"), "border-dashed border-input bg-muted text-muted-foreground")}
       </div>
 
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-3">
@@ -84,17 +84,17 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
                       <div className="text-base font-bold">{a.patient.name}</div>
                       <div className="text-[12.5px] text-muted-foreground">Owner: {a.patient.owner.name}</div>
                     </div>
-                    <span className="rounded-full border border-warning/40 bg-warning/10 px-2.5 py-0.5 text-[12px] font-bold text-warning">Kandang {a.room.name}</span>
+                    <span className="rounded-full border border-primary/30 bg-accent px-2.5 py-0.5 text-[12px] font-bold text-primary">Kandang {a.room.name}</span>
                   </div>
                   <dl className="space-y-1 rounded-xl bg-muted/50 p-3 text-[13px]">
                     <div className="flex justify-between"><dt className="text-muted-foreground">Tgl Masuk:</dt><dd className="font-semibold">{formatDate(a.checkIn)}</dd></div>
                     {a.expectedCheckOut && <div className="flex justify-between"><dt className="text-muted-foreground">Estimasi Keluar:</dt><dd className="font-semibold">{formatDate(a.expectedCheckOut)}</dd></div>}
-                    <div className="flex justify-between"><dt className="text-muted-foreground">Durasi Berjalan:</dt><dd className="font-semibold text-warning">{days} Hari ({formatRupiah(a.rateItem.sellPrice)}/hari)</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Durasi Berjalan:</dt><dd className="font-semibold text-primary">{days} Hari ({formatRupiah(a.rateItem.sellPrice)}/hari)</dd></div>
                     <div className="flex justify-between border-t pt-1.5"><dt className="font-semibold">Estimasi Tagihan:</dt><dd className="font-bold tabular-nums">{formatRupiah(days * a.rateItem.sellPrice)}</dd></div>
                   </dl>
                   <div className="grid grid-cols-2 gap-2">
                     <Button asChild variant="outline"><Link href={`/pet-hotel/${a.id}`}>Edit Detail</Link></Button>
-                    <Button asChild className="bg-success text-white hover:bg-success/90"><Link href={`/pet-hotel/${a.id}/check-out`}>Check-Out & Kasir</Link></Button>
+                    <Button asChild><Link href={`/pet-hotel/${a.id}/check-out`}>Check-Out & Kasir</Link></Button>
                   </div>
                 </div>
               );
@@ -112,8 +112,8 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
                 <div key={r.id} className={cn("space-y-1.5 rounded-2xl border p-4", STATE[state].card)}>
                   <div className="flex items-center justify-between"><span className="text-xl font-bold">{r.name}</span><span className={cn("size-2.5 rounded-full", STATE[state].dot)} /></div>
                   <div className="text-[13.5px] font-semibold text-foreground">{r.suitableFor ?? "Umum"}{r.capacity > 1 && ` · ${r.admissions.length}/${r.capacity}`}</div>
-                  <div className="text-[12.5px] text-muted-foreground">{r.defaultRate ? `${formatRupiah(r.defaultRate.sellPrice)} / hari` : "Tarif belum diisi"}</div>
-                  <div className="flex items-center justify-between border-t pt-2 text-[12px] font-bold tracking-wide uppercase">
+                  <div className="text-[12.5px] opacity-80">{r.defaultRate ? `${formatRupiah(r.defaultRate.sellPrice)} / hari` : "Tarif belum diisi"}</div>
+                  <div className="flex items-center justify-between border-t border-current/20 pt-2 text-[12px] font-bold tracking-wide uppercase">
                     {STATE[state].label}
                     {state === "dirty" && (
                       <form action={setCleaningAction.bind(null, r.id, false)}><Button type="submit" size="sm" variant="outline" className="h-8 normal-case"><CheckCircle2 className="size-3.5" /> Tandai bersih</Button></form>
@@ -131,7 +131,7 @@ export default async function PetHotelPage({ searchParams }: { searchParams: Pro
           <div className="space-y-2.5">
             {shownHistory.map((a) => (
               <div key={a.id} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
-                <CheckCircle2 className="size-5 text-success" />
+                <CheckCircle2 className="size-5 text-primary" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[13.5px] font-semibold">{a.patient.name} • Kandang {a.room.name}</div>
                   <div className="text-[12.5px] text-muted-foreground">Check-Out: {a.checkOut ? formatDate(a.checkOut) : "—"} · Owner {a.patient.owner.name}</div>

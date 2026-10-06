@@ -89,7 +89,7 @@ export function HotelCheckInForm({ slots, patients, today }: { slots: SlotOption
             const disabled = s.state !== "free" || s.rate === null;
             return (
               <button key={s.id} type="button" role="radio" aria-checked={slot === s.id} disabled={disabled} onClick={() => setSlot(s.id)} className={cn("rounded-xl border p-3.5 text-left", slot === s.id ? "border-primary bg-accent shadow-[inset_0_0_0_1px_var(--color-primary)]" : "bg-card", disabled && "cursor-not-allowed bg-muted/50 opacity-60")}>
-                <span className="flex items-center justify-between gap-2"><b className="text-lg">{s.name}</b><span className={cn("text-[11px] font-bold uppercase", s.state === "free" ? "text-success" : "text-muted-foreground")}>{s.rate === null && s.state === "free" ? "Tanpa tarif" : LABEL[s.state]}</span></span>
+                <span className="flex items-center justify-between gap-2"><b className="text-lg">{s.name}</b><span className={cn("text-[11px] font-bold uppercase", s.state === "free" ? "text-primary" : "text-muted-foreground")}>{s.rate === null && s.state === "free" ? "Tanpa tarif" : LABEL[s.state]}</span></span>
                 <span className="block text-[12.5px] text-muted-foreground">{s.category ?? "Umum"}</span>
                 <span className="block text-[12.5px] font-bold text-primary">{s.rate === null ? "Tarif belum diisi" : `${formatRupiah(s.rate)}/hari`}</span>
               </button>

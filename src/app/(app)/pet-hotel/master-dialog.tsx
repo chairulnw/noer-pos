@@ -16,7 +16,7 @@ import { deleteRoomAction, saveHotelRoomAction, setCleaningAction, type HotelFor
 export type MasterRoom = { id: string; name: string; suitableFor: string | null; dimensions: string | null; rate: number | null; capacity: number; state: "free" | "busy" | "dirty" };
 
 const CATEGORIES = ["Kucing", "Anjing Kecil", "Anjing Sedang", "Anjing Besar"];
-const STATE = { free: ["Tersedia", "border-success/30 bg-success/10 text-success"], busy: ["Terisi", "border-destructive/30 bg-destructive/10 text-destructive"], dirty: ["Dibersihkan", "border-warning/30 bg-warning/10 text-warning"] } as const;
+const STATE = { free: ["Tersedia", "border-primary/30 bg-accent text-primary"], busy: ["Terisi", "border-primary bg-primary text-primary-foreground"], dirty: ["Dibersihkan", "border-input bg-muted text-muted-foreground"] } as const;
 
 function RoomForm({ onDone }: { onDone: () => void }) {
   const [category, setCategory] = useState(CATEGORIES[0]);
