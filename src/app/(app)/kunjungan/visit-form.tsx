@@ -25,7 +25,7 @@ export function VisitForm({
 
   return (
     <form onSubmit={keepValuesOnError(formAction)} className="space-y-5">
-      <Section title="Kunjungan walk-in">
+      <Section title="Kunjungan baru">
         <Field label="Dokter" name="doctorId" errors={err("doctorId")}>
           <select id="doctorId" name="doctorId" defaultValue={defaultDoctorId ?? ""} className={selectClass} required>
             <option value="" disabled>

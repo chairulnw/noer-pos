@@ -21,7 +21,6 @@ const EXPECTED: Record<Capability, Record<Role, boolean>> = {
   manage_stock: { ADMIN: true, DOKTER: false, KASIR: false },
   view_revenue_reports: { ADMIN: true, DOKTER: false, KASIR: false },
   view_audit_log: { ADMIN: true, DOKTER: false, KASIR: false },
-  close_cash: { ADMIN: true, DOKTER: false, KASIR: true },
 };
 
 describe("permission matrix (SPEC bagian 5)", () => {

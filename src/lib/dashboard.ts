@@ -36,7 +36,7 @@ export const getDoctorQueue = (doctorId: string) =>
   });
 
 export async function getCashierQueue() {
-  const [waiting, drafts, closed] = await Promise.all([
+  const [waiting, drafts] = await Promise.all([
     prisma.visit.findMany({
       where: { status: "MENUNGGU_BAYAR" },
       select: {
@@ -53,9 +53,8 @@ export async function getCashierQueue() {
       orderBy: { createdAt: "asc" },
       take: 10,
     }),
-    prisma.cashClosing.findUnique({ where: { closingDate: todayJakarta() }, select: { id: true } }),
   ]);
-  return { waiting, drafts, cashClosed: Boolean(closed) };
+  return { waiting, drafts };
 }
 
 export async function getDashboardCounts(withMoney: boolean) {

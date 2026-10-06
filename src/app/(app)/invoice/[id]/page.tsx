@@ -63,7 +63,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                     <span className="font-medium text-foreground">{patient.name}</span> ({patient.rmNo})
                   </>
                 ) : (
-                  <span className="font-medium text-foreground">{invoice.customerName ?? "Retail walk-in"}</span>
+                  <span className="font-medium text-foreground">{invoice.customerName ?? "Umum / Walk-in"}</span>
                 )}
                 {invoice.owner && ` · ${invoice.owner.name}`} · {formatDate(invoice.createdAt)}
                 {invoice.visit && ` · ${invoice.visit.doctor.name}`}{invoice.admission && ` · ${invoice.admission.type === "HOTEL" ? "Hotel" : "Rawat inap"} ${invoice.admission.room.name}`}

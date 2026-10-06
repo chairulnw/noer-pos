@@ -7,7 +7,6 @@ import { billedDays, dateToJakartaLocal } from "../src/lib/admission-calc";
 import { getStockAlerts, receiveStock } from "../src/lib/inventory";
 import * as Opname from "../src/lib/opname";
 import { addInvoiceItem, createRetailInvoice, payInvoice, receiveDeposit, voidInvoice } from "../src/lib/invoice-ops";
-import { closeCash } from "../src/lib/cash";
 import { topUp } from "../src/lib/wallet";
 import { createCost, getCostsByDay } from "../src/lib/costs";
 import { getSettings, saveSettings } from "../src/lib/settings";
@@ -103,10 +102,6 @@ async function main() {
   assert.equal(sumProfit(pl.points).net, 360_000 - (30 * 1_200 + 150_000) - 10_000);
   ok("laba rugi: penjualan 360.000 - HPP 186.000 - biaya 10.000 = laba bersih 164.000");
 
-  assert.ok("id" in (await closeCash(kasir.id, { openingCash: 100_000, countedCash: 499_600, note: "" })));
-  const closing = await prisma.cashClosing.findFirstOrThrow();
-  assert.deepEqual([closing.cashSales, closing.difference], [399_600, 0]);
-  ok("tutup kas: modal 100.000 + tunai 399.600 = fisik 499.600, selisih 0");
 
   assert.ok("error" in (await payInvoice(kasir.id, invoice.id, { method: "TUNAI", cashReceived: 9_999_999, reference: "" })));
   const due = await R.listDueVaccinations(400);

@@ -12,7 +12,7 @@ Checklist uji manual seluruh fitur dan alur per peran. Satu poin berisi satu alu
 | 3 | [03-inventaris.md](03-inventaris.md) | Stok masuk, FEFO, expired, riwayat stok, opname | Admin |
 | 4 | [04-pelanggan.md](04-pelanggan.md) | Pemilik, hewan, foto, deposit/wallet | Kasir, Admin |
 | 5 | [05-alur-klinik-dokter.md](05-alur-klinik-dokter.md) | Kunjungan, rekam medis, vaksin, lab, radiologi, operasi | Dokter |
-| 6 | [06-kasir-dan-pembayaran.md](06-kasir-dan-pembayaran.md) | POS, tagihan, metode bayar, DP, saldo, pembatalan, struk/PDF, tutup kas | Kasir, Admin |
+| 6 | [06-kasir-dan-pembayaran.md](06-kasir-dan-pembayaran.md) | POS, tagihan, metode bayar, DP, saldo, pembatalan, struk/PDF | Kasir, Admin |
 | 7 | [07-rawat-inap-pet-hotel-grooming.md](07-rawat-inap-pet-hotel-grooming.md) | Rawat inap, pet hotel, grooming | Semua |
 | 8 | [08-laporan-dasbor-audit.md](08-laporan-dasbor-audit.md) | Dasbor, laporan, laba rugi, biaya, notifikasi, pencarian, audit log | Admin |
 | 9 | [09-tampilan-tabel.md](09-tampilan-tabel.md) | Paginasi, sort, filter, tampilan HP | Semua |

@@ -185,12 +185,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {cashierQueue && (
         <>
-          {!cashierQueue.cashClosed && (
-            <Link href="/tutup-kas" className="flex min-h-11 items-center justify-between gap-3 rounded-[10px] border border-warning/40 bg-card px-4 py-2.5 text-sm">
-              <span><b className="font-semibold text-warning">Kas hari ini belum ditutup.</b> Tutup kas setelah transaksi terakhir.</span>
-              <span className="font-medium text-primary">Tutup kas</span>
-            </Link>
-          )}
           <Queue title="Menunggu pembayaran" count={cashierQueue.waiting.length}>
             {cashierQueue.waiting.length === 0 && <EmptyState>Tidak ada kunjungan di kasir.</EmptyState>}
             {cashierQueue.waiting.map((v) => (
@@ -203,10 +197,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               />
             ))}
           </Queue>
-          <Queue title="Draft retail" count={cashierQueue.drafts.length}>
-            {cashierQueue.drafts.length === 0 && <EmptyState action={<Button asChild variant="outline"><Link href="/retail">Mulai retail walk-in</Link></Button>}>Tidak ada draft retail.</EmptyState>}
+          <Queue title="Belum dibayar di Kasir" count={cashierQueue.drafts.length}>
+            {cashierQueue.drafts.length === 0 && <EmptyState action={<Button asChild variant="outline"><Link href="/kasir">Buka Kasir (POS)</Link></Button>}>Tidak ada transaksi kasir yang tertunda.</EmptyState>}
             {cashierQueue.drafts.map((d) => (
-              <QueueRow key={d.id} title={d.customerName ?? "Tanpa nama"} detail={`${d.invoiceNo} · ${formatRupiah(d.grandTotal)}`} href={`/invoice/${d.id}`} action="Lanjutkan" />
+              <QueueRow key={d.id} title={d.customerName ?? "Umum / Walk-in"} detail={`${d.invoiceNo} · ${formatRupiah(d.grandTotal)}`} href={`/kasir?inv=${d.id}`} action="Lanjutkan di Kasir" />
             ))}
           </Queue>
         </>
