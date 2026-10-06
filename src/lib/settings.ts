@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
@@ -9,11 +10,11 @@ import {
   type Settings,
 } from "@/lib/settings-schema";
 
-export async function getSettings(): Promise<Settings> {
+export const getSettings = cache(async (): Promise<Settings> => {
   const rows = await prisma.settings.findMany();
   const stored = Object.fromEntries(rows.map((row) => [row.key, row.value]));
   return settingsSchema.parse({ ...DEFAULT_SETTINGS, ...stored });
-}
+});
 
 export async function getLogo() {
   const row = await prisma.settings.findUnique({ where: { key: "logo" } });

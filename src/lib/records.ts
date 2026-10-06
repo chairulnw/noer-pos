@@ -186,8 +186,22 @@ export async function getAttachmentFile(id: string) {
 
 export async function listDueVaccinations(days: number) {
   const until = new Date(todayJakarta().getTime() + days * 86_400_000);
-  const rows = await prisma.vaccination.findMany({
-    where: { nextDue: { not: null }, record: { visit: { patient: { deletedAt: null, owner: { deletedAt: null } } } } },
+  // ponytail: DISTINCT ON memindai seluruh riwayat vaksin di DB (~ms per puluhan ribu baris), denormalisasi "vaksin terakhir" jika jadi lambat
+  const latest = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM (
+      SELECT DISTINCT ON (vi.patient_id, v.item_id) v.id, v.next_due
+      FROM vaccination v
+      JOIN medical_record r ON r.id = v.record_id
+      JOIN visit vi ON vi.id = r.visit_id
+      WHERE v.next_due IS NOT NULL
+      ORDER BY vi.patient_id, v.item_id, v.given_at DESC
+    ) t
+    WHERE next_due <= ${until}::date`;
+  if (latest.length === 0) return [];
+
+  return prisma.vaccination.findMany({
+    where: { id: { in: latest.map((r) => r.id) }, record: { visit: { patient: { deletedAt: null, owner: { deletedAt: null } } } } },
+    orderBy: { nextDue: "asc" },
     select: {
       id: true,
       itemId: true,
@@ -197,16 +211,6 @@ export async function listDueVaccinations(days: number) {
       record: { select: { visit: { select: { patient: { select: { id: true, name: true, species: true, owner: { select: { name: true, whatsapp: true } } } } } } } },
     },
   });
-
-  const latest = new Map<string, (typeof rows)[number]>();
-  for (const row of rows) {
-    const key = `${row.record.visit.patient.id}:${row.itemId}`;
-    const current = latest.get(key);
-    if (!current || row.givenAt > current.givenAt) latest.set(key, row);
-  }
-  return [...latest.values()]
-    .filter((row) => row.nextDue! <= until)
-    .sort((a, b) => a.nextDue!.getTime() - b.nextDue!.getTime());
 }
 
 export const listDiagnoses = () => prisma.diagnosisMaster.findMany({ select: { name: true }, orderBy: { name: "asc" } });

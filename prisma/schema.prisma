@@ -179,6 +179,8 @@ model Owner {
   walletTransactions WalletTransaction[]
 
   @@index([whatsapp])
+  @@index([whatsapp(ops: raw("gin_trgm_ops"))], type: Gin, map: "owner_whatsapp_trgm_idx")
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "owner_name_trgm_idx")
   @@map("owner")
 }
 
@@ -213,6 +215,8 @@ model Patient {
   groomings    Grooming[]
 
   @@index([microchip])
+  @@index([ownerId])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "patient_name_trgm_idx")
   @@map("patient")
 }
 
@@ -239,6 +243,8 @@ model Visit {
   appointment   Appointment?
 
   @@index([visitDate, status])
+  @@index([patientId, visitDate])
+  @@index([status])
   @@map("visit")
 }
 
@@ -280,6 +286,7 @@ model RecordAddendum {
   record MedicalRecord @relation(fields: [recordId], references: [id])
   user   User          @relation(fields: [userId], references: [id])
 
+  @@index([recordId])
   @@map("record_addendum")
 }
 
@@ -293,6 +300,7 @@ model PrescriptionItem {
   record MedicalRecord @relation(fields: [recordId], references: [id])
   item   Item          @relation(fields: [itemId], references: [id])
 
+  @@index([recordId])
   @@map("prescription_item")
 }
 
@@ -307,6 +315,9 @@ model Vaccination {
   record MedicalRecord @relation(fields: [recordId], references: [id])
   item   Item          @relation(fields: [itemId], references: [id])
 
+  @@index([recordId])
+  @@index([itemId])
+  @@index([givenAt])
   @@map("vaccination")
 }
 
@@ -324,6 +335,8 @@ model Attachment {
   record      MedicalRecord? @relation(fields: [recordId], references: [id], onDelete: Restrict)
   examination Examination?   @relation(fields: [examinationId], references: [id], onDelete: Restrict)
 
+  @@index([recordId])
+  @@index([examinationId])
   @@map("attachment")
 }
 
@@ -360,6 +373,7 @@ model Item {
   groomings         Grooming[]
   rooms             Room[]             @relation("RoomDefaultRate")
 
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "item_name_trgm_idx")
   @@map("item")
 }
 
@@ -401,6 +415,9 @@ model StockMovement {
   user        User         @relation(fields: [userId], references: [id])
   invoiceItem InvoiceItem? @relation(fields: [invoiceItemId], references: [id])
 
+  @@index([batchId, createdAt])
+  @@index([createdAt])
+  @@index([invoiceItemId])
   @@map("stock_movement")
 }
 
@@ -432,6 +449,7 @@ model OpnameItem {
   opname StockOpname @relation(fields: [opnameId], references: [id])
   batch  StockBatch  @relation(fields: [batchId], references: [id])
 
+  @@index([opnameId])
   @@map("opname_item")
 }
 
@@ -483,6 +501,8 @@ model Admission {
 
   // BR-17: unique index parsial (room_id WHERE status = AKTIF) ada di migrasi SQL
   @@index([roomId, status])
+  @@index([patientId])
+  @@index([status, type])
   @@map("admission")
 }
 
@@ -498,6 +518,7 @@ model AdmissionLog {
   admission Admission @relation(fields: [admissionId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
 
+  @@index([admissionId])
   @@map("admission_log")
 }
 
@@ -539,6 +560,12 @@ model Invoice {
   surgery            Surgery?
   grooming           Grooming?
 
+  @@index([status, finalizedAt])
+  @@index([status, createdAt])
+  @@index([ownerId])
+  @@index([createdAt])
+  @@index([invoiceNo(ops: raw("gin_trgm_ops"))], type: Gin, map: "invoice_no_trgm_idx")
+  @@index([customerName(ops: raw("gin_trgm_ops"))], type: Gin, map: "invoice_customer_name_trgm_idx")
   @@map("invoice")
 }
 
@@ -559,6 +586,8 @@ model InvoiceItem {
   item           Item            @relation(fields: [itemId], references: [id])
   stockMovements StockMovement[]
 
+  @@index([invoiceId])
+  @@index([itemId])
   @@map("invoice_item")
 }
 
@@ -578,6 +607,8 @@ model Payment {
   invoice    Invoice @relation(fields: [invoiceId], references: [id])
   receivedBy User    @relation(fields: [receivedById], references: [id])
 
+  @@index([invoiceId])
+  @@index([paidAt])
   @@map("payment")
 }
 
@@ -601,6 +632,7 @@ model Appointment {
   visit     Visit?  @relation(fields: [visitId], references: [id])
 
   @@index([scheduledAt])
+  @@index([patientId])
   @@map("appointment")
 }
 
@@ -734,6 +766,7 @@ model Surgery {
   addenda     SurgeryAddendum[]
 
   @@index([surgeryDate])
+  @@index([patientId])
   @@map("surgery")
 }
 
@@ -747,6 +780,7 @@ model SurgeryAddendum {
   surgery Surgery @relation(fields: [surgeryId], references: [id])
   user    User    @relation(fields: [userId], references: [id])
 
+  @@index([surgeryId])
   @@map("surgery_addendum")
 }
 
@@ -770,6 +804,7 @@ model Grooming {
   invoice     Invoice? @relation(fields: [invoiceId], references: [id])
 
   @@index([groomingDate])
+  @@index([patientId])
   @@map("grooming")
 }
 
@@ -820,6 +855,9 @@ model AuditLog {
 
   user User @relation(fields: [userId], references: [id])
 
+  @@index([createdAt])
+  @@index([entity, createdAt])
+  @@index([userId, createdAt])
   @@map("audit_log")
 }
 

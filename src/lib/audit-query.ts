@@ -39,7 +39,7 @@ export async function listAudit(filter: AuditFilter) {
 export async function getAuditFilterOptions() {
   const [users, entities] = await Promise.all([
     prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.auditLog.findMany({ select: { entity: true }, distinct: ["entity"], orderBy: { entity: "asc" } }),
+    prisma.auditLog.groupBy({ by: ["entity"], orderBy: { entity: "asc" } }),
   ]);
   return { users, entities: entities.map((e) => e.entity) };
 }

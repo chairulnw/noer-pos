@@ -149,7 +149,7 @@ export async function getStockAlerts() {
   const [items, settings] = await Promise.all([
     prisma.item.findMany({
       where: { type: "PRODUCT", active: true, deletedAt: null },
-      select: { id: true, name: true, baseUnit: true, lowStockThreshold: true, stockBatches: { select: { batchNo: true, expiryDate: true, qtyOnHand: true } } },
+      select: { id: true, name: true, baseUnit: true, lowStockThreshold: true, stockBatches: { where: { qtyOnHand: { gt: 0 } }, select: { batchNo: true, expiryDate: true, qtyOnHand: true } } },
       orderBy: { name: "asc" },
     }),
     getSettings(),

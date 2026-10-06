@@ -28,14 +28,27 @@ export async function collectNotices(role: Role): Promise<Notice[]> {
   return notices;
 }
 
-export async function listNotices(userId: string, role: Role) {
-  const [notices, reads] = await Promise.all([collectNotices(role), prisma.notificationRead.findMany({ where: { userId }, select: { key: true } })]);
+const NOTICE_TTL_MS = 60_000;
+const noticeCache = new Map<Role, { at: number; value: Promise<Notice[]> }>();
+
+// ponytail: cache per proses untuk badge sidebar (maks 60 detik basi), pakai cache bersama jika multi-instance
+function cachedNotices(role: Role) {
+  const hit = noticeCache.get(role);
+  if (hit && Date.now() - hit.at < NOTICE_TTL_MS) return hit.value;
+  const value = collectNotices(role);
+  noticeCache.set(role, { at: Date.now(), value });
+  value.catch(() => noticeCache.delete(role));
+  return value;
+}
+
+export async function listNotices(userId: string, role: Role, notices: Promise<Notice[]> = collectNotices(role)) {
+  const [list, reads] = await Promise.all([notices, prisma.notificationRead.findMany({ where: { userId }, select: { key: true } })]);
   const read = new Set(reads.map((r) => r.key));
-  return notices.map((n) => ({ ...n, unread: !read.has(n.key) }));
+  return list.map((n) => ({ ...n, unread: !read.has(n.key) }));
 }
 
 export async function unreadCount(userId: string, role: Role) {
-  return (await listNotices(userId, role)).filter((n) => n.unread).length;
+  return (await listNotices(userId, role, cachedNotices(role))).filter((n) => n.unread).length;
 }
 
 export async function markAllRead(userId: string, role: Role) {
