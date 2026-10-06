@@ -9,7 +9,7 @@ import { GROUPS } from "@/components/sidebar-nav";
 import { can, type Role } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
-const COLORS = ["bg-success", "bg-info", "bg-warning", "bg-primary", "bg-destructive"];
+const COLORS = ["bg-primary"];
 
 export function ModulesDialog({ role }: { role: Role }) {
   const mounted = useMounted();

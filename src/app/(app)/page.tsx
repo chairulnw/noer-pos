@@ -18,11 +18,11 @@ import { requireUser } from "@/lib/require-role";
 import { cn } from "@/lib/utils";
 
 const TONE = {
-  success: "bg-success/10 text-success",
-  info: "bg-info/10 text-info",
-  warning: "bg-warning/10 text-warning",
+  success: "bg-accent text-primary",
+  info: "bg-accent text-primary",
+  warning: "bg-accent text-primary",
   primary: "bg-accent text-primary",
-  danger: "bg-destructive/10 text-destructive",
+  danger: "bg-accent text-primary",
 } as const;
 
 const TILES = [
@@ -161,7 +161,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <MiniStat label="Pasien" value={counts.patients.toLocaleString("id-ID")} icon={PawPrint} tone="info" href={can(user.role, "manage_patients") ? "/pasien" : undefined} />
           <MiniStat label="Pemilik" value={counts.owners.toLocaleString("id-ID")} icon={Users} tone="primary" href={can(user.role, "manage_patients") ? "/pemilik" : undefined} />
           {counts.opex !== null ? (
-            <MiniStat label="Operasional bulan ini" value={formatRupiah(counts.opex)} icon={TrendingDown} tone="danger" danger href="/biaya-operasional" />
+            <MiniStat label="Operasional bulan ini" value={formatRupiah(counts.opex)} icon={TrendingDown} tone="danger" href="/biaya-operasional" />
           ) : (
             <MiniStat label="Kunjungan hari ini" value={String(summary.visits)} icon={UserRound} tone="danger" />
           )}
@@ -214,7 +214,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <section className="space-y-4 rounded-2xl border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-xl font-bold"><TrendingUp className="size-5 text-info" /> Tren Statistik</h2>
+          <h2 className="flex items-center gap-2 text-xl font-bold"><TrendingUp className="size-5 text-primary" /> Tren Statistik</h2>
           <div className="flex rounded-xl bg-muted/60 p-1 text-sm font-medium">
             {(["bulan", "tahun"] as const).map((p) => (
               <Link key={p} href={`/?metrik=${metric.id}&periode=${p}`} className={cn("rounded-lg px-4 py-1.5", p === period ? "bg-card text-primary shadow-sm" : "text-muted-foreground")}>{p === "bulan" ? "Bulan Ini" : "Tahun Ini"}</Link>
