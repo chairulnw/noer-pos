@@ -1,0 +1,14 @@
+# Opsi PC sendiri: Cloudflare Tunnel menggantikan Caddy (tanpa port terbuka di router).
+# Pakai bersama file produksi: COMPOSE_FILE=docker-compose.prod.yml:docker-compose.tunnel.yml
+services:
+  caddy:
+    profiles: ["disabled"]
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?isi TUNNEL_TOKEN di .env}
+    depends_on:
+      - app

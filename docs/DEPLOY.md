@@ -1,5 +1,7 @@
 # Deploy ke VPS
 
+> Panduan per pilihan server (VPS lokal, Oracle Cloud gratis, PC sendiri + Cloudflare Tunnel), backup ke cloud, dan checklist go-live ada di [deploy/](deploy/README.md). File ini berisi detail teknis bersama.
+
 Panduan dari server kosong sampai sistem berjalan di HTTPS. Semua langkah sudah diuji pada stack Docker Compose dari database kosong (login, PDF, backup, restore).
 
 ## 1. Prasyarat
@@ -123,7 +125,7 @@ docker compose exec -T db dropdb -U pos pos_restore && rm -rf uploads-restored
 
 Catatan keamanan: DB tidak punya port publik, hanya Caddy (80/443) yang terbuka. Aktifkan firewall (`ufw allow 22,80,443/tcp && ufw enable`) dan update OS berkala.
 
-## 8. Keamanan tambahan (disarankan sebelum go-live)
+## 9. Keamanan tambahan (disarankan sebelum go-live)
 
 ### Cloudflare (gratis): perlindungan DDoS dan batas login per IP
 1. Daftar di cloudflare.com, tambahkan domain, ganti nameserver domain ke milik Cloudflare.

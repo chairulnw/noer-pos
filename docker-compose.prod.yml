@@ -39,6 +39,7 @@ services:
       AUTH_URL: https://${DOMAIN:?isi DOMAIN di .env}
       AUTH_TRUST_HOST: "true"
       UPLOAD_DIR: /data/uploads
+      TRUST_CLOUDFLARE: ${TRUST_CLOUDFLARE:-}
     volumes:
       - uploads:/data/uploads
     depends_on:
