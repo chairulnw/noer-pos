@@ -29,5 +29,5 @@ jobs:
     runs-on: [self-hosted, windows]
     steps:
       - name: Deploy ke C:\pos
-        shell: powershell
-        run: C:\pos\scripts\deploy.ps1
+        shell: cmd
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File C:\pos\scripts\deploy.ps1
