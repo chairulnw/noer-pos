@@ -56,7 +56,7 @@ async function main() {
   for (const r of rows) {
     const input: ItemInput = {
       type: r.tipe as ItemInput["type"],
-      category: r.kategori_ibu,
+      category: r.kategori,
       subCategory: r.sub_kategori,
       name: r.nama,
       sku: r.sku,

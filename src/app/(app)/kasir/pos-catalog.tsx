@@ -119,7 +119,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
               return view === "grid" ? (
                 <button key={item.id} type="button" disabled={!editable || out} onClick={() => add(item)} className="flex flex-col gap-3 rounded-2xl border bg-card p-3.5 text-left hover:border-primary/50 disabled:cursor-not-allowed">
                   <span className="flex items-center justify-between gap-2">
-                    <span className="truncate rounded-md bg-muted/70 px-2 py-0.5 font-mono text-[12px] text-muted-foreground">{item.sku ?? item.baseUnit}</span>
+                    <span className="truncate rounded-md bg-muted/70 px-2 py-0.5 text-[12px] text-muted-foreground">{item.category}</span>
                     {stock}
                   </span>
                   <span className="min-h-10 text-[14px] leading-snug font-semibold">{item.name}</span>
@@ -135,7 +135,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
                 <button key={item.id} type="button" disabled={!editable || out} onClick={() => add(item)} className="flex items-center gap-3 rounded-xl border bg-card px-3.5 py-2.5 text-left hover:border-primary/50 disabled:cursor-not-allowed">
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[14px] font-semibold">{item.name}</span>
-                    <span className="text-[12.5px] text-muted-foreground">{item.sku ?? item.baseUnit}</span>
+                    <span className="text-[12.5px] text-muted-foreground">{item.category}</span>
                   </span>
                   {stock}
                   <span className="w-28 text-right font-bold text-primary tabular-nums">{formatRupiah(item.sellPrice)}</span>
