@@ -53,6 +53,9 @@ export function ItemForm({ item }: { item: ItemView | null }) {
             ))}
           </select>
         </Field>
+        <Field label="Sub-kategori (opsional)" name="subCategory" errors={err("subCategory")} hint="Mis. dry food cat, pasir tofu. Ikut dicari di kasir dan master data.">
+          <Input id="subCategory" name="subCategory" defaultValue={item?.subCategory ?? ""} />
+        </Field>
         <Field label="Nama" name="name" errors={err("name")} full>
           <Input id="name" name="name" defaultValue={item?.name} required />
         </Field>

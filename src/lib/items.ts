@@ -12,6 +12,7 @@ const SELECT = {
   id: true,
   type: true,
   category: true,
+  subCategory: true,
   sku: true,
   barcode: true,
   name: true,
@@ -35,7 +36,7 @@ export async function listItems(role: Role, filter: { q?: string; type?: "SERVIC
       ...(type && { type }),
       ...(q && {
         OR: [
-          { name: { contains: q, mode: "insensitive" } },
+          { name: { contains: q, mode: "insensitive" } }, { subCategory: { contains: q, mode: "insensitive" } },
           { sku: { contains: q, mode: "insensitive" } },
           { barcode: { contains: q } },
         ],
@@ -52,7 +53,7 @@ export async function pageItems(role: Role, { q, group, skip, take, orderBy }: {
   const where: Prisma.ItemWhereInput = {
     deletedAt: null,
     ...(categories && { category: { in: categories } }),
-    ...(q && { OR: [{ name: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }, { barcode: { contains: q } }] }),
+    ...(q && { OR: [{ name: { contains: q, mode: "insensitive" } }, { subCategory: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }, { barcode: { contains: q } }] }),
   };
   const [rows, total, settings] = await Promise.all([
     prisma.item.findMany({ where, select: SELECT, orderBy: orderBy ?? [{ type: "asc" }, { category: "asc" }, { name: "asc" }], skip, take }),

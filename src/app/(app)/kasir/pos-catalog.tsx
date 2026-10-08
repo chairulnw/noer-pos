@@ -13,6 +13,7 @@ export type PosItem = {
   name: string;
   type: "SERVICE" | "PRODUCT";
   category: string;
+  subCategory: string | null;
   sellPrice: number;
   baseUnit: string;
   sku: string | null;
@@ -35,7 +36,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
     return [{ value: "", label: "Semua" }, ...ITEM_GROUPS.filter((g) => g.value && present.has(g.value)).map((g) => ({ value: g.value as string, label: g.label as string }))];
   }, [items]);
   const term = query.trim().toLowerCase();
-  const shown = items.filter((i) => (!group || groupOf(i.category) === group) && (!term || `${i.name} ${i.sku ?? ""} ${i.barcode ?? ""}`.toLowerCase().includes(term)));
+  const shown = items.filter((i) => (!group || groupOf(i.category) === group) && (!term || `${i.name} ${i.subCategory ?? ""} ${i.category} ${i.sku ?? ""} ${i.barcode ?? ""}`.toLowerCase().includes(term)));
 
   const add = (item: PosItem) => {
     if (!editable || (item.stock !== null && item.stock <= 0)) return;

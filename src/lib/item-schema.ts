@@ -11,6 +11,7 @@ export const itemSchema = z
   .object({
     type: z.enum(["SERVICE", "PRODUCT"]),
     category: z.string(),
+    subCategory: z.string().trim().max(50, "Maksimal 50 karakter"),
     name: z.string().trim().min(1, "Nama wajib diisi").max(150, "Maksimal 150 karakter"),
     sku: z.string().trim().max(50, "Maksimal 50 karakter"),
     barcode: z.string().trim().max(50, "Maksimal 50 karakter"),
@@ -39,6 +40,7 @@ export function normalizeItem(v: ItemInput) {
   return {
     type: v.type,
     category: v.category,
+    subCategory: v.subCategory || null,
     name: v.name,
     sku: v.sku || null,
     barcode: v.barcode || null,

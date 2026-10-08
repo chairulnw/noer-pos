@@ -4,6 +4,7 @@ import { itemSchema, normalizeItem, toItemView, type ItemInput, type ItemRecord 
 const product: ItemInput = {
   type: "PRODUCT",
   category: "obat",
+  subCategory: "",
   name: "Amoxicillin 100mg",
   sku: " OBT-1 ",
   barcode: "",

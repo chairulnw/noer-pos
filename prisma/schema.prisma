@@ -346,6 +346,7 @@ model Item {
   id                  String      @id @default(uuid()) @db.Uuid
   type                ItemType
   category            String
+  subCategory         String?     @map("sub_category")
   sku                 String?     @unique
   barcode             String?     @unique
   name                String

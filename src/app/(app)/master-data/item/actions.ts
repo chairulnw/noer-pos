@@ -27,6 +27,7 @@ export async function saveItemAction(id: string | null, _prev: FormState, formDa
   const parsed = itemSchema.safeParse({
     type,
     category: text(formData, "category"),
+    subCategory: text(formData, "subCategory"),
     name: text(formData, "name"),
     sku: text(formData, "sku"),
     barcode: text(formData, "barcode"),

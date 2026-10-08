@@ -54,7 +54,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
               </div>
               <div className="text-[12.5px] text-muted-foreground">{item.sku ? `SKU: ${item.sku}` : item.type === "SERVICE" ? "Layanan" : "Produk"}{item.billingUnit === "PER_DAY" && " · per hari"}</div>
             </td>
-            <td className="px-4 py-3 capitalize">{item.category}</td>
+            <td className="px-4 py-3"><div className="capitalize">{item.category}</div>{item.subCategory && <div className="text-[12.5px] text-muted-foreground">{item.subCategory}</div>}</td>
             <td className="px-4 py-3 text-right font-medium tabular-nums">{formatRupiah(item.sellPrice)}</td>
             <td className="px-4 py-3">
               {item.stock ? <StatusChip tone={STOCK_TONE[item.stock.status]}>{item.stock.status === "HABIS" ? "Habis" : `${item.stock.usable.toLocaleString("id-ID")} ${item.baseUnit}${STOCK_LABEL[item.stock.status]}`}</StatusChip> : <span className="text-muted-foreground">—</span>}
