@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/password-input";
 import { CheckField, Field, Section, selectClass } from "@/components/form-fields";
 import { keepValuesOnError } from "@/lib/form";
 import { createUserAction, resetPasswordAction, updateUserAction, type UserFormState } from "./actions";
@@ -40,7 +41,10 @@ export function CreateUserForm() {
         </Field>
         <Field label="Role" name="role" errors={err("role")}><RoleSelect /></Field>
         <Field label="Password awal" name="password" errors={err("password")} hint="Minimal 10 karakter, kombinasi huruf dan angka. Hanya Admin yang bisa menggantinya.">
-          <Input id="password" name="password" type="password" autoComplete="new-password" required />
+          <PasswordInput id="password" name="password" autoComplete="new-password" required />
+        </Field>
+        <Field label="Konfirmasi password" name="confirmPassword" errors={err("confirmPassword")}>
+          <PasswordInput id="confirmPassword" name="confirmPassword" autoComplete="new-password" required />
         </Field>
       </Section>
       <Footer pending={pending} state={state} cancel />
@@ -68,7 +72,10 @@ export function EditUserForm({ user, isSelf }: { user: User; isSelf: boolean }) 
       <form onSubmit={keepValuesOnError(resetAction)} className="space-y-5">
         <Section title="Reset password">
           <Field label="Password baru" name="reset-password" errors={resetState.errors?.password}>
-            <Input id="reset-password" name="password" type="password" autoComplete="new-password" required />
+            <PasswordInput id="reset-password" name="password" autoComplete="new-password" required />
+          </Field>
+          <Field label="Konfirmasi password baru" name="reset-confirm" errors={resetState.errors?.confirmPassword}>
+            <PasswordInput id="reset-confirm" name="confirmPassword" autoComplete="new-password" required />
           </Field>
         </Section>
         <Footer pending={resetPending} state={resetState} />

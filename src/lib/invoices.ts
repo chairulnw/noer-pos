@@ -143,7 +143,7 @@ export const getInvoice = (id: string) =>
 export const listSellableItems = () =>
   prisma.item.findMany({
     where: { active: true, deletedAt: null },
-    select: { id: true, name: true, type: true, category: true, sellPrice: true, baseUnit: true, sku: true, barcode: true },
+    select: { id: true, name: true, type: true, category: true, subCategory: true, sellPrice: true, baseUnit: true, sku: true, barcode: true },
     orderBy: [{ type: "asc" }, { name: "asc" }],
   });
 

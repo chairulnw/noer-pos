@@ -5,6 +5,7 @@ import { signIn } from "@/lib/auth";
 import { getLogo } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/password-input";
 import { Label } from "@/components/ui/label";
 
 const MESSAGES: Record<string, string> = {
@@ -49,7 +50,7 @@ export default async function LoginPage({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" autoComplete="current-password" required autoFocus={Boolean(u)} className="h-12" />
+            <PasswordInput id="password" name="password" autoComplete="current-password" required autoFocus={Boolean(u)} className="h-12" />
           </div>
           {error && <p className="-mt-2 text-[12.5px] text-destructive">{error}</p>}
           <Button type="submit" className="h-12 text-base">

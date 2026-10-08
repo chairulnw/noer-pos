@@ -1,7 +1,9 @@
+import { PETSHOP_CATEGORIES, PETSHOP_MEDICINE_CATEGORIES } from "@/lib/item-schema";
+
 export const ITEM_GROUPS = [
   { value: "", label: "Semua Tipe", categories: [] as string[] },
-  { value: "petshop", label: "PetShop", categories: ["pet food", "aksesoris"] },
-  { value: "obat", label: "Obat & Resep", categories: ["obat"] },
+  { value: "petshop", label: "PetShop", categories: ["pet food", "aksesoris", ...PETSHOP_CATEGORIES] },
+  { value: "obat", label: "Obat & Resep", categories: ["obat", ...PETSHOP_MEDICINE_CATEGORIES] },
   { value: "vaksin", label: "Vaksin", categories: ["vaksin"] },
   { value: "konsultasi", label: "Konsultasi", categories: ["konsultasi"] },
   { value: "tindakan", label: "Tindakan", categories: ["tindakan"] },

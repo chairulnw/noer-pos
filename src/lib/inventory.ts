@@ -64,7 +64,7 @@ export async function listStockSummary(q?: string) {
       where: {
         type: "PRODUCT",
         deletedAt: null,
-        ...(q && { OR: [{ name: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }, { barcode: { contains: q } }] }),
+        ...(q && { OR: [{ name: { contains: q, mode: "insensitive" } }, { subCategory: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }, { barcode: { contains: q } }] }),
       },
       select: {
         id: true, name: true, category: true, baseUnit: true, active: true, lowStockThreshold: true,

@@ -2,7 +2,24 @@ import { z } from "zod";
 import { can, type Capability, type Role } from "@/lib/permissions";
 
 export const SERVICE_CATEGORIES = ["konsultasi", "tindakan", "operasi", "rawat inap", "hotel", "grooming"] as const;
-export const PRODUCT_CATEGORIES = ["obat", "vaksin", "pet food", "aksesoris"] as const;
+// Kategori petshop mengikuti sheet pemilik toko; kelompok "ibu"-nya ada di item-groups.ts
+export const PETSHOP_CATEGORIES = [
+  "accessories",
+  "dry food cat",
+  "dry food dog",
+  "kandang",
+  "pasir gumpal",
+  "pasir tofu",
+  "pewangi/pembersih",
+  "Royal canin vet",
+  "shampoo",
+  "susu cat",
+  "treats cat",
+  "wet food can/box",
+  "wet food pouch",
+] as const;
+export const PETSHOP_MEDICINE_CATEGORIES = ["tetes kutu", "vitamin/obat"] as const;
+export const PRODUCT_CATEGORIES = ["obat", "vaksin", "pet food", "aksesoris", ...PETSHOP_CATEGORIES, ...PETSHOP_MEDICINE_CATEGORIES] as const;
 
 const number = (message = "Isi dengan angka") => z.number({ error: message });
 const rupiah = number().int("Harus bilangan bulat").min(0, "Minimal 0").max(1_000_000_000, "Terlalu besar");
@@ -11,6 +28,7 @@ export const itemSchema = z
   .object({
     type: z.enum(["SERVICE", "PRODUCT"]),
     category: z.string(),
+    subCategory: z.string().trim().max(50, "Maksimal 50 karakter"),
     name: z.string().trim().min(1, "Nama wajib diisi").max(150, "Maksimal 150 karakter"),
     sku: z.string().trim().max(50, "Maksimal 50 karakter"),
     barcode: z.string().trim().max(50, "Maksimal 50 karakter"),
@@ -39,6 +57,7 @@ export function normalizeItem(v: ItemInput) {
   return {
     type: v.type,
     category: v.category,
+    subCategory: v.subCategory || null,
     name: v.name,
     sku: v.sku || null,
     barcode: v.barcode || null,
