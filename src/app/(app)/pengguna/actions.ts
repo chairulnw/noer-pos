@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireCapability } from "@/lib/require-role";
-import { passwordResetSchema, userCreateSchema, userUpdateSchema } from "@/lib/user-schema";
+import { passwordResetSchema, userCreateFormSchema, userUpdateSchema } from "@/lib/user-schema";
 import { createUser, resetPassword, updateUser } from "@/lib/users";
 import { flash } from "@/components/flash";
 
@@ -19,7 +19,7 @@ const invalid = (error: z.ZodError): UserFormState => ({ message: "Periksa kemba
 
 export async function createUserAction(_prev: UserFormState, formData: FormData): Promise<UserFormState> {
   const admin = await requireCapability("manage_users_settings");
-  const parsed = userCreateSchema.safeParse({ name: text(formData, "name"), username: text(formData, "username"), role: text(formData, "role"), password: text(formData, "password") });
+  const parsed = userCreateFormSchema.safeParse({ name: text(formData, "name"), username: text(formData, "username"), role: text(formData, "role"), password: text(formData, "password"), confirmPassword: text(formData, "confirmPassword") });
   if (!parsed.success) return invalid(parsed.error);
 
   const result = await createUser(admin.id, parsed.data);
@@ -43,7 +43,7 @@ export async function updateUserAction(id: string, _prev: UserFormState, formDat
 
 export async function resetPasswordAction(id: string, _prev: UserFormState, formData: FormData): Promise<UserFormState> {
   const admin = await requireCapability("manage_users_settings");
-  const parsed = passwordResetSchema.safeParse({ password: text(formData, "password") });
+  const parsed = passwordResetSchema.safeParse({ password: text(formData, "password"), confirmPassword: text(formData, "confirmPassword") });
   if (!parsed.success) return invalid(parsed.error);
 
   const result = await resetPassword(admin.id, id, parsed.data.password);

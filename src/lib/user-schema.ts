@@ -26,7 +26,15 @@ export const userUpdateSchema = z.object({
   active: z.boolean(),
 });
 
-export const passwordResetSchema = z.object({ password });
+const MISMATCH = "Konfirmasi password tidak sama.";
+
+export const userCreateFormSchema = userCreateSchema
+  .extend({ confirmPassword: z.string() })
+  .refine((v) => v.password === v.confirmPassword, { message: MISMATCH, path: ["confirmPassword"] });
+
+export const passwordResetSchema = z
+  .object({ password, confirmPassword: z.string() })
+  .refine((v) => v.password === v.confirmPassword, { message: MISMATCH, path: ["confirmPassword"] });
 
 export type UserCreateInput = z.infer<typeof userCreateSchema>;
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
