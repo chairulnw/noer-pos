@@ -21,8 +21,8 @@ export async function nextInvoiceNoFor(tx: Tx) {
   return nextInvoiceNo(datePart, last?.invoiceNo ?? null);
 }
 
-export const lineView = (item: { qty: Prisma.Decimal; unitPriceSnapshot: number; discountType: "PERCENT" | "AMOUNT" | null; discountValue: number }) =>
-  lineTotals({ qty: Number(item.qty), unitPrice: item.unitPriceSnapshot, discount: { type: item.discountType, value: item.discountValue } });
+export const lineView = (item: { qty: Prisma.Decimal; unitPriceSnapshot: Prisma.Decimal | number; discountType: "PERCENT" | "AMOUNT" | null; discountValue: number }) =>
+  lineTotals({ qty: Number(item.qty), unitPrice: Number(item.unitPriceSnapshot), discount: { type: item.discountType, value: item.discountValue } });
 
 export async function recomputeInvoice(tx: Tx, invoiceId: string, tax: { rate: number; included: boolean }) {
   const invoice = await tx.invoice.findUniqueOrThrow({
@@ -35,7 +35,7 @@ export async function recomputeInvoice(tx: Tx, invoiceId: string, tax: { rate: n
   }
 
   const totals = invoiceTotals(
-    invoice.items.map((item) => ({ qty: Number(item.qty), unitPrice: item.unitPriceSnapshot, discount: { type: item.discountType, value: item.discountValue } })),
+    invoice.items.map((item) => ({ qty: Number(item.qty), unitPrice: Number(item.unitPriceSnapshot), discount: { type: item.discountType, value: item.discountValue } })),
     { type: invoice.discountType, value: invoice.discountValue } satisfies Discount,
     tax,
   );
@@ -140,12 +140,14 @@ export const getInvoice = (id: string) =>
     },
   });
 
-export const listSellableItems = () =>
-  prisma.item.findMany({
+export const listSellableItems = async () =>
+  (
+    await prisma.item.findMany({
     where: { active: true, deletedAt: null },
     select: { id: true, name: true, type: true, category: true, subCategory: true, sellPrice: true, baseUnit: true, sku: true, barcode: true },
     orderBy: [{ type: "asc" }, { name: "asc" }],
-  });
+    })
+  ).map((item) => ({ ...item, sellPrice: Number(item.sellPrice) }));
 
 export const listRetailDrafts = () =>
   prisma.invoice.findMany({

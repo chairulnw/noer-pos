@@ -6,7 +6,9 @@ export const isExpired = (expiry: Date | null, today: Date) => expiry !== null &
 
 export const toBaseQty = (qty: number, factor: number) => milli(qty) * milli(factor) / 1_000_000;
 
-export const costPerBaseUnit = (pricePerPurchaseUnit: number, factor: number) => Math.round(pricePerPurchaseUnit / factor);
+export const round3 = (n: number) => Math.round(n * 1000) / 1000;
+
+export const costPerBaseUnit = (pricePerPurchaseUnit: number, factor: number) => round3(pricePerPurchaseUnit / factor);
 
 export function fefoAllocate(batches: StockBatchInfo[], needed: number, today: Date) {
   const usable = batches
@@ -53,7 +55,7 @@ export function stockStatus(
 }
 
 export const weightedCost = (oldQty: number, oldCost: number, inQty: number, inCost: number) =>
-  Math.round((oldQty * oldCost + inQty * inCost) / (oldQty + inQty));
+  round3((oldQty * oldCost + inQty * inCost) / (oldQty + inQty));
 
 export const opnameDiff = (system: number, counted: number) => (milli(counted) - milli(system)) / 1000;
 

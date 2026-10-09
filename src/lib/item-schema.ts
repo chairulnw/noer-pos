@@ -19,10 +19,35 @@ export const PETSHOP_CATEGORIES = [
   "wet food pouch",
 ] as const;
 export const PETSHOP_MEDICINE_CATEGORIES = ["tetes kutu", "vitamin/obat"] as const;
-export const PRODUCT_CATEGORIES = ["obat", "vaksin", "pet food", "aksesoris", ...PETSHOP_CATEGORIES, ...PETSHOP_MEDICINE_CATEGORIES] as const;
+// Kategori obat dan alkes mengikuti sheet daftar harga obat
+export const DRUG_CATEGORIES = [
+  "obat injeksi",
+  "antibiotik",
+  "antijamur",
+  "anti radang",
+  "anti muntah",
+  "anti histamin",
+  "anti diare",
+  "anti pendarahan",
+  "diuretica",
+  "infus",
+  "multivitamin",
+  "obat cacing",
+  "obat flu",
+  "obat herbal",
+  "obat kembung",
+  "obat mata",
+  "obat pencernaan",
+  "relaxan otot",
+  "salep kulit",
+  "salep mata",
+] as const;
+export const ALKES_CATEGORIES = ["alkes", "test kit"] as const;
+export const PRODUCT_CATEGORIES = ["obat", "vaksin", "pet food", "aksesoris", ...PETSHOP_CATEGORIES, ...PETSHOP_MEDICINE_CATEGORIES, ...DRUG_CATEGORIES, ...ALKES_CATEGORIES] as const;
 
 const number = (message = "Isi dengan angka") => z.number({ error: message });
-const rupiah = number().int("Harus bilangan bulat").min(0, "Minimal 0").max(1_000_000_000, "Terlalu besar");
+// harga/modal per satuan dasar boleh berpecahan (maks 3 desimal), mis. Rp 53,328 per ml
+export const unitPrice = number().min(0, "Minimal 0").max(1_000_000_000, "Terlalu besar").refine((v) => Math.abs(v * 1000 - Math.round(v * 1000)) < 1e-6, "Maksimal 3 angka desimal");
 
 export const itemSchema = z
   .object({
@@ -32,8 +57,8 @@ export const itemSchema = z
     name: z.string().trim().min(1, "Nama wajib diisi").max(150, "Maksimal 150 karakter"),
     sku: z.string().trim().max(50, "Maksimal 50 karakter"),
     barcode: z.string().trim().max(50, "Maksimal 50 karakter"),
-    sellPrice: rupiah,
-    buyPrice: rupiah,
+    sellPrice: unitPrice,
+    buyPrice: unitPrice,
     baseUnit: z.string().trim().min(1, "Satuan wajib diisi").max(30, "Maksimal 30 karakter"),
     purchaseUnit: z.string().trim().max(30, "Maksimal 30 karakter"),
     conversionFactor: number().gt(0, "Harus lebih dari 0").max(1_000_000, "Terlalu besar"),
@@ -80,7 +105,9 @@ export const capabilityFor = (type: ItemInput["type"]): Capability =>
   type === "SERVICE" ? "manage_service_price" : "manage_product_cost";
 
 type Numeric = number | { toString(): string };
-export type ItemRecord = Omit<NormalizedItem, "conversionFactor" | "lowStockThreshold"> & {
+export type ItemRecord = Omit<NormalizedItem, "conversionFactor" | "lowStockThreshold" | "sellPrice" | "buyPrice"> & {
+  sellPrice: Numeric;
+  buyPrice: Numeric;
   id: string;
   conversionFactor: Numeric;
   lowStockThreshold: Numeric | null;
@@ -93,8 +120,9 @@ export function toItemView(item: ItemRecord, role: Role): ItemView {
   const { buyPrice, ...rest } = item;
   const view = {
     ...rest,
+    sellPrice: Number(item.sellPrice),
     conversionFactor: Number(item.conversionFactor),
     lowStockThreshold: item.lowStockThreshold === null ? null : Number(item.lowStockThreshold),
   };
-  return can(role, "manage_product_cost") ? { ...view, buyPrice } : view;
+  return can(role, "manage_product_cost") ? { ...view, buyPrice: Number(buyPrice) } : view;
 }

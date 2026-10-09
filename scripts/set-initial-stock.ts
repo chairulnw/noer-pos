@@ -41,16 +41,11 @@ async function main() {
   let done = 0;
   const failed: string[] = [];
   for (const i of empty) {
-    // receiveStock menerima jumlah dalam satuan beli bila ada; ubah supaya "qty" berarti satuan dasar
-    const factor = i.purchaseUnit ? Number(i.conversionFactor) : 1;
-    const result = await receiveStock(user.id, {
-      itemId: i.id,
-      qty: qty / factor,
-      batchNo: "STOK-AWAL",
-      expiry: "",
-      price: i.buyPrice * factor,
-      note: `Stok awal ${qty} ${i.baseUnit} (pengisian massal)`,
-    });
+    const result = await receiveStock(
+      user.id,
+      { itemId: i.id, qty, batchNo: "STOK-AWAL", expiry: "", price: Number(i.buyPrice), note: `Stok awal ${qty} ${i.baseUnit} (pengisian massal)` },
+      { inBaseUnit: true },
+    );
     if ("error" in result) failed.push(`${i.sku ?? "-"} ${i.name}: ${result.error}`);
     else done++;
   }

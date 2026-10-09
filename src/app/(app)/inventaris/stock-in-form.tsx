@@ -40,7 +40,7 @@ export function StockInForm({ products, defaultItemId }: { products: Product[]; 
           <Input id="qty" name="qty" type="number" min={0} step="any" value={qty} onChange={(e) => setQty(e.target.value)} required />
         </Field>
         <Field label={`Harga beli per ${unit ?? "satuan beli"} (Rp)`} name="price" errors={err("price")}>
-          <MoneyInput id="price" name="price" className={inputClass} required />
+          <MoneyInput id="price" name="price" decimals={3} className={inputClass} required />
         </Field>
         <Field label="No. batch" name="batchNo" errors={err("batchNo")}>
           <Input id="batchNo" name="batchNo" required />

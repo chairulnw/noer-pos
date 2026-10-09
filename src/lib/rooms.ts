@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Prisma } from "@/generated/prisma/client";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db";
 
@@ -14,9 +15,15 @@ export const roomSchema = z.object({
 
 export type RoomInput = z.infer<typeof roomSchema>;
 
-export const listRooms = () => prisma.room.findMany({ where: { deletedAt: null }, include: { defaultRate: { select: { sellPrice: true } } }, orderBy: [{ type: "asc" }, { name: "asc" }] });
+const rate = (d: { sellPrice: Prisma.Decimal } | null) => (d ? { sellPrice: Number(d.sellPrice) } : null);
 
-export const getRoom = (id: string) => prisma.room.findUnique({ where: { id }, include: { defaultRate: { select: { sellPrice: true } } } });
+export const listRooms = async () =>
+  (await prisma.room.findMany({ where: { deletedAt: null }, include: { defaultRate: { select: { sellPrice: true } } }, orderBy: [{ type: "asc" }, { name: "asc" }] })).map((r) => ({ ...r, defaultRate: rate(r.defaultRate) }));
+
+export const getRoom = async (id: string) => {
+  const room = await prisma.room.findUnique({ where: { id }, include: { defaultRate: { select: { sellPrice: true } } } });
+  return room && { ...room, defaultRate: rate(room.defaultRate) };
+};
 
 export async function saveRoom(userId: string, id: string | null, data: RoomInput) {
   const duplicate = await prisma.room.findFirst({
@@ -33,7 +40,7 @@ export async function saveRoom(userId: string, id: string | null, data: RoomInpu
     let defaultRateId = current?.defaultRateId ?? null;
     if (data.dailyRate > 0) {
       if (defaultRateId) {
-        if (current?.defaultRate?.sellPrice !== data.dailyRate) {
+        if (Number(current?.defaultRate?.sellPrice) !== data.dailyRate) {
           await tx.item.update({ where: { id: defaultRateId }, data: { sellPrice: data.dailyRate } });
           await logAudit(tx, { userId, action: "item.update", entity: "item", entityId: defaultRateId, before: { sellPrice: current?.defaultRate?.sellPrice }, after: { sellPrice: data.dailyRate, via: "kandang" } });
         }
@@ -91,5 +98,9 @@ export async function getHotelOverview() {
       take: 50,
     }),
   ]);
-  return { rooms, stays, history };
+  return {
+    rooms: rooms.map((r) => ({ ...r, defaultRate: rate(r.defaultRate) })),
+    stays: stays.map((s) => ({ ...s, rateItem: { sellPrice: Number(s.rateItem.sellPrice) } })),
+    history,
+  };
 }

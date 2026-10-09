@@ -46,7 +46,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       return {
         name: item.nameSnapshot,
         qty: Number(item.qty),
-        unitPrice: item.unitPriceSnapshot,
+        unitPrice: Number(item.unitPriceSnapshot),
         discountLabel: item.discountType === "PERCENT" ? `${item.discountValue}%` : view.discount > 0 ? view.discount.toLocaleString("id-ID") : "—",
         total: item.lineTotal,
       };

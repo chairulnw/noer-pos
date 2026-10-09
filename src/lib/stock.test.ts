@@ -19,7 +19,8 @@ describe("konversi satuan (BR-8)", () => {
 
   it("harga per satuan beli dibagi faktor = HPP per satuan dasar, integer", () => {
     expect(costPerBaseUnit(120000, 100)).toBe(1200);
-    expect(costPerBaseUnit(100000, 3)).toBe(33333);
+    expect(costPerBaseUnit(100000, 3)).toBe(33333.333);
+    expect(costPerBaseUnit(8888, 500)).toBe(17.776);
   });
 });
 

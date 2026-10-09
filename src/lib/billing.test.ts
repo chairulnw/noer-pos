@@ -5,6 +5,14 @@ const none: Discount = { type: null, value: 0 };
 const line = (qty: number, unitPrice: number, discount: Discount = none): LineInput => ({ qty, unitPrice, discount });
 
 describe("lineTotals", () => {
+  it("harga satuan berpecahan: total baris dibulatkan ke rupiah penuh, bukan harga satuannya", () => {
+    expect(lineTotals(line(500, 53.328)).gross).toBe(26664);
+    expect(lineTotals(line(0.1, 1545.3)).gross).toBe(155);
+    expect(lineTotals(line(3, 1302.9)).gross).toBe(3909);
+    expect(lineTotals(line(0.1, 14544)).gross).toBe(1454);
+    expect(lineTotals(line(2.5, 0.2)).gross).toBe(1);
+  });
+
   it("qty x harga tanpa diskon", () => {
     expect(lineTotals(line(2, 98000))).toEqual({ gross: 196000, discount: 0, total: 196000 });
   });
