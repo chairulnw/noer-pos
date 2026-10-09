@@ -862,6 +862,15 @@ model AuditLog {
   @@map("audit_log")
 }
 
+// Hitungan gagal login per perangkat/IP; di DB agar berlaku lintas instance serverless
+model LoginThrottle {
+  key     String   @id
+  count   Int
+  resetAt DateTime @map("reset_at")
+
+  @@map("login_throttle")
+}
+
 model Settings {
   key       String   @id
   value     Json

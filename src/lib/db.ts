@@ -1,7 +1,8 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+// Serverless: setiap instance membuka koneksi sendiri, jadi pool dibuat kecil (pakai URL pooled dari penyedia DB)
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL, max: Number(process.env.DATABASE_POOL_MAX ?? 10) });
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 

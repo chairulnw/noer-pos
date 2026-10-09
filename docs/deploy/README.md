@@ -26,3 +26,5 @@ Detail teknis bersama (isi `.env`, migrasi, membuat Admin, restore) ada di [../D
 - **Caddy**: penjaga pintu yang memasang HTTPS (gembok) otomatis.
 - **Cloudflare**: layanan gratis di depan server: menyaring serangan, menyembunyikan IP server, membatasi percobaan login.
 - **SSH**: cara mengetik perintah ke server dari laptop Anda.
+
+> **Hanya untuk uji coba/demo:** [07 · Vercel + Neon](07-vercel-demo.md) (branch `vercel`, tidak untuk dipakai usaha di paket gratis).

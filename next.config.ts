@@ -2,7 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   agentRules: false,
-  output: "standalone",
+  // Docker memakai standalone; Vercel membangun outputnya sendiri
+  output: process.env.VERCEL ? undefined : "standalone",
   headers: async () => [
     {
       source: "/:path*",
@@ -17,7 +18,7 @@ const nextConfig: NextConfig = {
   ],
   redirects: async () => [{ source: "/pasien/owner/:path*", destination: "/pemilik/:path*", permanent: true }],
   // upload logo + QRIS lewat server action
-  experimental: { serverActions: { bodySizeLimit: "11mb" } },
+  experimental: { serverActions: { bodySizeLimit: process.env.VERCEL ? "4mb" : "11mb" } },
 };
 
 export default nextConfig;

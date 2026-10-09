@@ -5,21 +5,24 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { authConfig } from "@/lib/auth.config";
 
-// ponytail: hitungan gagal login in-memory per proses, Redis jika multi-instance
-const failures = new Map<string, { count: number; resetAt: number }>();
+// Hitungan gagal login disimpan di DB agar berlaku lintas instance (serverless)
 const MAX_FAILURES = 10;
-const WINDOW_MS = 15 * 60 * 1000;
+const WINDOW_MINUTES = 15;
 
-const blocked = (key: string) => {
-  const entry = failures.get(key);
-  return Boolean(entry && entry.resetAt > Date.now() && entry.count >= MAX_FAILURES);
+const blocked = async (key: string) => {
+  const entry = await prisma.loginThrottle.findUnique({ where: { key } });
+  return Boolean(entry && entry.resetAt > new Date() && entry.count >= MAX_FAILURES);
 };
 
-function recordFailure(key: string) {
-  const entry = failures.get(key);
-  if (!entry || entry.resetAt < Date.now()) failures.set(key, { count: 1, resetAt: Date.now() + WINDOW_MS });
-  else entry.count += 1;
-}
+const recordFailure = (key: string) =>
+  prisma.$executeRaw`
+    INSERT INTO login_throttle ("key", "count", reset_at)
+    VALUES (${key}, 1, now() + make_interval(mins => ${WINDOW_MINUTES}))
+    ON CONFLICT ("key") DO UPDATE SET
+      "count" = CASE WHEN login_throttle.reset_at < now() THEN 1 ELSE login_throttle."count" + 1 END,
+      reset_at = CASE WHEN login_throttle.reset_at < now() THEN now() + make_interval(mins => ${WINDOW_MINUTES}) ELSE login_throttle.reset_at END`;
+
+const clearFailures = (key: string) => prisma.loginThrottle.deleteMany({ where: { key } });
 
 export class LoginError extends CredentialsSignin {
   constructor(code: "rate") {
@@ -68,16 +71,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const username = rawUsername.trim().toLowerCase();
         const device = `ip:${clientIp(request) ?? "unknown"}`;
-        if (blocked(device)) throw new LoginError("rate");
+        if (await blocked(device)) throw new LoginError("rate");
 
         const user = await prisma.user.findUnique({ where: { username } });
         const valid = user?.active ? await bcrypt.compare(password, user.passwordHash) : false;
         if (!user || !valid) {
-          recordFailure(device);
+          await recordFailure(device);
           return null;
         }
 
-        failures.delete(device);
+        await clearFailures(device);
 
         const session = await prisma.userSession.create({
           data: { userId: user.id, userAgent: request?.headers.get("user-agent")?.slice(0, 300) ?? null, ip: clientIp(request) },
