@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { passwordResetSchema, userCreateFormSchema, userCreateSchema } from "./user-schema";
 
-const base = { name: "Rina", username: " Rina.K ", role: "KASIR", password: "rahasia123" };
+const base = { name: "Rina", username: " Rina.K ", role: "KARYAWAN", password: "rahasia123" };
 
 it("username dinormalkan huruf kecil dan divalidasi", () => {
   expect(userCreateSchema.parse(base).username).toBe("rina.k");
@@ -25,3 +25,10 @@ it("konfirmasi password harus sama (buat user dan reset)", () => {
   expect(userCreateFormSchema.safeParse({ ...base, ...bad }).success).toBe(false);
 });
 
+
+it("hanya role ADMIN dan KARYAWAN yang diterima; isDoctor default false", () => {
+  expect(userCreateSchema.safeParse({ ...base, role: "DOKTER" }).success).toBe(false);
+  expect(userCreateSchema.safeParse({ ...base, role: "KASIR" }).success).toBe(false);
+  expect(userCreateSchema.parse(base).isDoctor).toBe(false);
+  expect(userCreateSchema.parse({ ...base, isDoctor: true }).isDoctor).toBe(true);
+});

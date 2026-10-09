@@ -8,7 +8,7 @@ import { parsePaging, parseSort, type PagingParams, type SortParams } from "@/li
 import { requireCapability } from "@/lib/require-role";
 import { pageUsers } from "@/lib/users";
 
-const ROLE = { ADMIN: "Owner / Admin", DOKTER: "Dokter", KASIR: "Kasir" };
+const ROLE = { ADMIN: "Owner / Admin", KARYAWAN: "Karyawan" };
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string } & PagingParams & SortParams> }) {
   await requireCapability("manage_users_settings");

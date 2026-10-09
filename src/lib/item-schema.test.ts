@@ -86,13 +86,13 @@ describe("toItemView (BR-7)", () => {
     expect(toItemView(record, "ADMIN").buyPrice).toBe(1200);
   });
 
-  it.each(["KASIR", "DOKTER"] as const)("%s tidak menerima field buyPrice sama sekali", (role) => {
+  it.each(["KARYAWAN"] as const)("%s tidak menerima field buyPrice sama sekali", (role) => {
     const view = toItemView(record, role);
     expect("buyPrice" in view).toBe(false);
     expect(JSON.stringify(view)).not.toContain("1200");
   });
 
   it("mengubah Decimal jadi number biasa", () => {
-    expect(toItemView(record, "KASIR")).toMatchObject({ conversionFactor: 100, lowStockThreshold: 50, sellPrice: 2000 });
+    expect(toItemView(record, "KARYAWAN")).toMatchObject({ conversionFactor: 100, lowStockThreshold: 50, sellPrice: 2000 });
   });
 });
