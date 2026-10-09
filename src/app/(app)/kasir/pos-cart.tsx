@@ -12,6 +12,7 @@ export type CartLine = {
   id: string;
   name: string;
   qty: number;
+  unit: string;
   unitPrice: number;
   discountType: "PERCENT" | "AMOUNT" | null;
   discountValue: number;
@@ -34,7 +35,7 @@ function Line({ invoiceId, line, editable, canDiscount, run }: { invoiceId: stri
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="text-[13.5px] leading-snug font-medium">{line.name}</div>
-          <div className="text-[12.5px] text-muted-foreground tabular-nums">{formatRupiah(line.unitPrice)}</div>
+          <div className="text-[12.5px] text-muted-foreground tabular-nums">{formatRupiah(line.unitPrice)} / {line.unit}</div>
         </div>
         {editable && (
           <button type="button" aria-label={`Hapus ${line.name}`} onClick={() => run(() => removeItemAction(invoiceId, line.id))} className="-mt-1 -mr-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted">
@@ -44,7 +45,8 @@ function Line({ invoiceId, line, editable, canDiscount, run }: { invoiceId: stri
       </div>
       <div className="flex items-center justify-between gap-2">
         {editable ? (
-          <div className="flex h-11 w-32 items-center overflow-hidden rounded-lg border border-input">
+          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-11 w-32 shrink-0 items-center overflow-hidden rounded-lg border border-input">
             <button type="button" aria-label="Kurangi" disabled={line.qty <= 1} onClick={() => save(line.qty - 1)} className="flex h-11 w-10 items-center justify-center text-muted-foreground disabled:opacity-40">
               <Minus className="size-4" />
             </button>
@@ -62,8 +64,10 @@ function Line({ invoiceId, line, editable, canDiscount, run }: { invoiceId: stri
               <Plus className="size-4" />
             </button>
           </div>
+          <span className="min-w-0 truncate text-[12.5px] text-muted-foreground">{line.unit}</span>
+          </div>
         ) : (
-          <span className="tabular-nums text-muted-foreground">× {line.qty}</span>
+          <span className="tabular-nums text-muted-foreground">× {line.qty} {line.unit}</span>
         )}
         <div className="text-right">
           <div className="font-semibold tabular-nums">{formatRupiah(line.total)}</div>

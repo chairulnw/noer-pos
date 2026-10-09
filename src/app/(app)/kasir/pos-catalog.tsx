@@ -125,7 +125,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
                   <span className="min-h-10 text-[14px] leading-snug font-semibold">{item.name}</span>
                   <span className="flex items-end justify-between gap-2 border-t pt-3">
                     <span>
-                      <span className="block text-[12px] text-muted-foreground">Harga</span>
+                      <span className="block text-[12px] text-muted-foreground">Harga / {item.baseUnit}</span>
                       <span className="text-lg font-bold text-primary tabular-nums">{formatRupiah(item.sellPrice)}</span>
                     </span>
                     {plus}
@@ -138,7 +138,7 @@ export function PosCatalog({ items, invoiceId, editable, clinicName, actions }: 
                     <span className="text-[12.5px] text-muted-foreground">{item.category}</span>
                   </span>
                   {stock}
-                  <span className="w-28 text-right font-bold text-primary tabular-nums">{formatRupiah(item.sellPrice)}</span>
+                  <span className="w-32 text-right font-bold text-primary tabular-nums">{formatRupiah(item.sellPrice)}<span className="block truncate text-[11.5px] font-normal text-muted-foreground">/ {item.baseUnit}</span></span>
                   {plus}
                 </button>
               );

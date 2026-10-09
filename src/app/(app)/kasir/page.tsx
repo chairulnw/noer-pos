@@ -96,6 +96,7 @@ export default async function PosPage({ searchParams }: { searchParams: Promise<
                 id: item.id,
                 name: item.nameSnapshot,
                 qty: Number(item.qty),
+                unit: item.item.baseUnit,
                 unitPrice: Number(item.unitPriceSnapshot),
                 discountType: item.discountType,
                 discountValue: item.discountValue,

@@ -122,7 +122,7 @@ export const getInvoice = (id: string) =>
     where: { id },
     include: {
       items: {
-        select: { id: true, itemId: true, nameSnapshot: true, qty: true, unitPriceSnapshot: true, discountType: true, discountValue: true, lineTotal: true, item: { select: { type: true } } },
+        select: { id: true, itemId: true, nameSnapshot: true, qty: true, unitPriceSnapshot: true, discountType: true, discountValue: true, lineTotal: true, item: { select: { type: true, baseUnit: true } } },
         orderBy: [{ position: "asc" }, { id: "asc" }],
       },
       payments: { select: { id: true, kind: true, method: true, amount: true, cashReceived: true, reference: true, paidAt: true, voided: true, receivedBy: { select: { name: true } } }, orderBy: { paidAt: "asc" } },
