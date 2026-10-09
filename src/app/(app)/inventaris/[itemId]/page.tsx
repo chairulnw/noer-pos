@@ -59,7 +59,7 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
                     ) : "—"}
                   </td>
                   <td className="px-5 py-3 text-right tabular-nums">{Number(b.qtyOnHand).toLocaleString("id-ID")}</td>
-                  <td className="px-5 py-3 text-right tabular-nums">{formatRupiah(b.costPerBaseUnit)}</td>
+                  <td className="px-5 py-3 text-right tabular-nums">{formatRupiah(Number(b.costPerBaseUnit))}</td>
                 </tr>
               ))}
             </tbody>

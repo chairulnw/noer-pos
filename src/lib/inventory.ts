@@ -3,14 +3,15 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import { todayJakarta } from "@/lib/date";
 import { getSettings } from "@/lib/settings";
-import { batchExpiryAlert, costPerBaseUnit, fefoAllocate, isExpired, isLowStock, stockStatus, toBaseQty, weightedCost } from "@/lib/stock";
+import { batchExpiryAlert, costPerBaseUnit, fefoAllocate, isExpired, isLowStock, round3, stockStatus, toBaseQty, weightedCost } from "@/lib/stock";
 import type { StockInInput } from "@/lib/stock-schema";
 
 type Tx = Prisma.TransactionClient;
 
 export class StockConflictError extends Error {}
 
-export async function receiveStock(userId: string, input: StockInInput) {
+// inBaseUnit: jumlah dan harga sudah dalam satuan dasar (tanpa konversi satuan beli), mis. untuk stok awal
+export async function receiveStock(userId: string, input: StockInInput, opts: { inBaseUnit?: boolean } = {}) {
   const item = await prisma.item.findFirst({
     where: { id: input.itemId, type: "PRODUCT", active: true, deletedAt: null },
     select: { trackExpiry: true, purchaseUnit: true, conversionFactor: true },
@@ -22,7 +23,7 @@ export async function receiveStock(userId: string, input: StockInInput) {
   if (item.trackExpiry && !expiry) return { error: "Tanggal expired wajib diisi untuk produk ini." };
   if (expiry && isExpired(expiry, today)) return { error: "Batch ini sudah kedaluwarsa dan tidak bisa dimasukkan." };
 
-  const factor = item.purchaseUnit ? Number(item.conversionFactor) : 1;
+  const factor = item.purchaseUnit && !opts.inBaseUnit ? Number(item.conversionFactor) : 1;
   const qty = toBaseQty(input.qty, factor);
   const cost = costPerBaseUnit(input.price, factor);
 
@@ -35,7 +36,7 @@ export async function receiveStock(userId: string, input: StockInInput) {
     const batch = existing
       ? await tx.stockBatch.update({
           where: { id: existing.id },
-          data: { qtyOnHand: { increment: qty }, costPerBaseUnit: weightedCost(Number(existing.qtyOnHand), existing.costPerBaseUnit, qty, cost) },
+          data: { qtyOnHand: { increment: qty }, costPerBaseUnit: weightedCost(Number(existing.qtyOnHand), Number(existing.costPerBaseUnit), qty, cost) },
           select: { id: true },
         })
       : await tx.stockBatch.create({
@@ -130,7 +131,7 @@ export async function deductForInvoiceItem(tx: Tx, params: { userId: string; inv
   const result = fefoAllocate(rows.map((r) => ({ id: r.id, expiry: r.expiryDate, qty: Number(r.qtyOnHand), createdAt: r.createdAt })), params.qty, todayJakarta());
   if (!result.ok) return { error: "INSUFFICIENT" as const, available: result.available };
 
-  const costOf = new Map(rows.map((r) => [r.id, r.costPerBaseUnit]));
+  const costOf = new Map(rows.map((r) => [r.id, Number(r.costPerBaseUnit)]));
   let totalCost = 0;
   for (const { batchId, qty } of result.allocations) {
     const { count } = await tx.stockBatch.updateMany({ where: { id: batchId, qtyOnHand: { gte: qty } }, data: { qtyOnHand: { decrement: qty } } });
@@ -140,7 +141,7 @@ export async function deductForInvoiceItem(tx: Tx, params: { userId: string; inv
     });
     totalCost += qty * costOf.get(batchId)!;
   }
-  return { unitCost: Math.round(totalCost / params.qty) };
+  return { unitCost: round3(totalCost / params.qty) };
 }
 
 export type StockSummaryRow = Awaited<ReturnType<typeof listStockSummary>>[number];

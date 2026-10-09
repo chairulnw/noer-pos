@@ -68,12 +68,12 @@ export function ItemForm({ item }: { item: ItemView | null }) {
       </Section>
 
       <Section title="Harga & satuan">
-        <Field label="Harga jual (Rp)" name="sellPrice" errors={err("sellPrice")}>
-          <MoneyInput id="sellPrice" name="sellPrice" className={inputClass} defaultValue={item?.sellPrice} required />
+        <Field label="Harga jual (Rp)" name="sellPrice" errors={err("sellPrice")} hint="Per satuan dasar. Boleh berkoma, mis. 53,328.">
+          <MoneyInput id="sellPrice" name="sellPrice" decimals={3} className={inputClass} defaultValue={item?.sellPrice} required />
         </Field>
         {isProduct && (
           <Field label="Harga beli (Rp)" name="buyPrice" errors={err("buyPrice")} hint="Per satuan dasar.">
-            <MoneyInput id="buyPrice" name="buyPrice" className={inputClass} defaultValue={item?.buyPrice} required />
+            <MoneyInput id="buyPrice" name="buyPrice" decimals={3} className={inputClass} defaultValue={item?.buyPrice} required />
           </Field>
         )}
         <Field label="Satuan dasar" name="baseUnit" errors={err("baseUnit")} hint={isProduct ? "Satuan terkecil, mis. tablet, ml, pcs." : "Mis. kali, hari."}>

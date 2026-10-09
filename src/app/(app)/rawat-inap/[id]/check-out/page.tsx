@@ -44,7 +44,7 @@ export default async function CheckOutPage({ params }: { params: Promise<{ id: s
         checkInIso={admission.checkIn.toISOString()}
         defaultCheckOut={dateToJakartaLocal(new Date())}
         rateName={admission.rateItem.name}
-        ratePrice={rate?.rateItem.sellPrice ?? null}
+        ratePrice={rate ? Number(rate.rateItem.sellPrice) : null}
       />
     </div>
   );

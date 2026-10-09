@@ -9,8 +9,12 @@ export const discountAmount = (base: number, { type, value }: Discount) => {
   return 0;
 };
 
+// jumlah x harga satuan (maks 3 desimal) dibulatkan ke rupiah penuh, dihitung dengan bilangan bulat agar tidak ada selisih float
+export const multiplyRound = (qty: number, unitPrice: number) =>
+  Number((BigInt(Math.round(qty * 1000)) * BigInt(Math.round(unitPrice * 1000)) + BigInt(500000)) / BigInt(1000000));
+
 export function lineTotals({ qty, unitPrice, discount }: LineInput) {
-  const gross = Math.round((Math.round(qty * 1000) * unitPrice) / 1000);
+  const gross = multiplyRound(qty, unitPrice);
   const off = discountAmount(gross, discount);
   return { gross, discount: off, total: gross - off };
 }
