@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import type { UserCreateInput, UserUpdateInput } from "@/lib/user-schema";
 
-const PUBLIC = { id: true, username: true, name: true, role: true, active: true } satisfies Prisma.UserSelect;
+const PUBLIC = { id: true, username: true, name: true, role: true, isDoctor: true, active: true } satisfies Prisma.UserSelect;
 
 export async function pageUsers(q: string | undefined, skip: number, take: number, orderBy?: Prisma.UserOrderByWithRelationInput | Prisma.UserOrderByWithRelationInput[]) {
   const term = q?.trim();
@@ -23,10 +23,10 @@ export async function createUser(adminId: string, input: UserCreateInput) {
   try {
     return await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
-        data: { username: input.username, name: input.name, role: input.role, passwordHash },
+        data: { username: input.username, name: input.name, role: input.role, isDoctor: input.isDoctor, passwordHash },
         select: PUBLIC,
       });
-      await logAudit(tx, { userId: adminId, action: "user.create", entity: "user", entityId: user.id, after: { username: user.username, name: user.name, role: user.role } });
+      await logAudit(tx, { userId: adminId, action: "user.create", entity: "user", entityId: user.id, after: { username: user.username, name: user.name, role: user.role, isDoctor: user.isDoctor } });
       return { id: user.id };
     });
   } catch (error) {
@@ -48,8 +48,8 @@ export async function updateUser(adminId: string, id: string, input: UserUpdateI
       action: before.active !== after.active ? (after.active ? "user.activate" : "user.deactivate") : "user.update",
       entity: "user",
       entityId: id,
-      before: { name: before.name, role: before.role, active: before.active },
-      after: { name: after.name, role: after.role, active: after.active },
+      before: { name: before.name, role: before.role, isDoctor: before.isDoctor, active: before.active },
+      after: { name: after.name, role: after.role, isDoctor: after.isDoctor, active: after.active },
     });
     return {};
   });

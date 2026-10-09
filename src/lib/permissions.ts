@@ -1,4 +1,4 @@
-export type Role = "ADMIN" | "DOKTER" | "KASIR";
+export type Role = "ADMIN" | "KARYAWAN";
 
 export type Capability =
   | "manage_users_settings"
@@ -21,24 +21,25 @@ export type Capability =
   | "view_revenue_reports"
   | "view_audit_log";
 
+// KARYAWAN = gabungan hak Dokter dan Kasir lama
 const MATRIX: Record<Capability, Role[]> = {
   manage_users_settings: ["ADMIN"],
   manage_service_price: ["ADMIN"],
-  view_service_price: ["ADMIN", "KASIR"],
+  view_service_price: ["ADMIN", "KARYAWAN"],
   manage_product_cost: ["ADMIN"],
-  manage_patients: ["ADMIN", "DOKTER", "KASIR"],
-  create_visit: ["ADMIN", "DOKTER", "KASIR"],
-  edit_medical_record: ["ADMIN", "DOKTER"],
-  view_medical_record: ["ADMIN", "DOKTER"],
-  manage_admission: ["ADMIN", "DOKTER", "KASIR"],
-  monitor_admission: ["ADMIN", "DOKTER"],
+  manage_patients: ["ADMIN", "KARYAWAN"],
+  create_visit: ["ADMIN", "KARYAWAN"],
+  edit_medical_record: ["ADMIN", "KARYAWAN"],
+  view_medical_record: ["ADMIN", "KARYAWAN"],
+  manage_admission: ["ADMIN", "KARYAWAN"],
+  monitor_admission: ["ADMIN", "KARYAWAN"],
   manage_rooms: ["ADMIN"],
-  manage_invoice_payment: ["ADMIN", "KASIR"],
-  apply_discount: ["ADMIN", "KASIR"],
+  manage_invoice_payment: ["ADMIN", "KARYAWAN"],
+  apply_discount: ["ADMIN", "KARYAWAN"],
   void_invoice: ["ADMIN"],
   correct_deposit: ["ADMIN"],
   manage_stock: ["ADMIN"],
-  stock_opname: ["ADMIN", "KASIR"],
+  stock_opname: ["ADMIN", "KARYAWAN"],
   view_revenue_reports: ["ADMIN"],
   view_audit_log: ["ADMIN"],
 };

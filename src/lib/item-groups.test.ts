@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { groupCategories, ITEM_GROUPS } from "./item-groups";
-import { PETSHOP_CATEGORIES, PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "./item-schema";
+import { DRUG_CATEGORIES, PETSHOP_CATEGORIES, PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from "./item-schema";
 
 describe("kelompok produk", () => {
   it("tanpa kelompok atau kelompok asing berarti semua", () => {
@@ -14,7 +14,8 @@ describe("kelompok produk", () => {
   });
 
   it("kategori obat petshop dari sheet masuk kelompok Obat", () => {
-    expect(groupCategories("obat")).toEqual(["obat", "tetes kutu", "vitamin/obat"]);
+    expect(groupCategories("obat")).toEqual(["obat", "tetes kutu", "vitamin/obat", ...DRUG_CATEGORIES]);
+    expect(groupCategories("alkes")).toEqual(["alkes", "test kit"]);
   });
 
   it("setiap kategori item masuk tepat satu kelompok (tidak ada yang hilang dari filter)", () => {

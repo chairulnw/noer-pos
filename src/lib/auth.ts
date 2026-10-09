@@ -54,10 +54,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return token;
       }
       const sid = token.sid as string | undefined;
-      const session = sid ? await prisma.userSession.findUnique({ where: { id: sid }, select: { revokedAt: true, lastSeenAt: true, user: { select: { id: true, active: true, role: true } } } }) : null;
+      const session = sid ? await prisma.userSession.findUnique({ where: { id: sid }, select: { revokedAt: true, lastSeenAt: true, user: { select: { id: true, active: true, role: true, isDoctor: true } } } }) : null;
       if (!session || session.revokedAt || session.user.id !== token.id || !session.user.active) return null;
       if (Date.now() - session.lastSeenAt.getTime() > SEEN_EVERY_MS) await prisma.userSession.update({ where: { id: sid }, data: { lastSeenAt: new Date() } });
       token.role = session.user.role;
+      token.isDoctor = session.user.isDoctor;
       return token;
     },
   },
@@ -86,7 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: { userId: user.id, userAgent: request?.headers.get("user-agent")?.slice(0, 300) ?? null, ip: clientIp(request) },
           select: { id: true },
         });
-        return { id: user.id, name: user.name, role: user.role, sid: session.id };
+        return { id: user.id, name: user.name, role: user.role, isDoctor: user.isDoctor, sid: session.id };
       },
     }),
   ],

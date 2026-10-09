@@ -30,7 +30,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         cashier: payments.at(-1)?.receivedBy.name ?? invoice.createdBy.name,
         customer: (invoice.visit ?? invoice.admission)?.patient.name ?? invoice.customerName ?? "Umum",
         copy: invoice.receiptPrints > 0,
-        lines: invoice.items.map((item) => ({ name: item.nameSnapshot, qty: Number(item.qty), unitPrice: item.unitPriceSnapshot, discount: lineView(item).discount, total: item.lineTotal })),
+        lines: invoice.items.map((item) => ({ name: item.nameSnapshot, qty: Number(item.qty), unitPrice: Number(item.unitPriceSnapshot), discount: lineView(item).discount, total: item.lineTotal })),
         subtotal: invoice.subtotal,
         discountTotal: invoice.discountTotal,
         taxTotal: invoice.taxTotal,

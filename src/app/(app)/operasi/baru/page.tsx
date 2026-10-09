@@ -57,7 +57,7 @@ export default async function NewSurgeryPage({ searchParams }: { searchParams: P
         patientId={patient.id}
         doctors={doctors}
         services={services}
-        defaults={{ procedure: "", anesthesia: "", surgeryDate: todayJakarta().toISOString().slice(0, 10), doctorId: user.role === "DOKTER" ? user.id : doctors.length === 1 ? doctors[0].id : "", serviceItemId: "", preNotes: "" }}
+        defaults={{ procedure: "", anesthesia: "", surgeryDate: todayJakarta().toISOString().slice(0, 10), doctorId: user.isDoctor ? user.id : doctors.length === 1 ? doctors[0].id : "", serviceItemId: "", preNotes: "" }}
         cancelHref="/operasi"
       />
     </div>

@@ -16,13 +16,15 @@ export const userCreateSchema = z.object({
     .trim()
     .toLowerCase()
     .regex(/^[a-z0-9._-]{3,32}$/, "3-32 karakter: huruf kecil, angka, titik, garis bawah, atau strip."),
-  role: z.enum(["ADMIN", "DOKTER", "KASIR"], "Pilih role."),
+  role: z.enum(["ADMIN", "KARYAWAN"], "Pilih role."),
+  isDoctor: z.boolean().default(false),
   password,
 });
 
 export const userUpdateSchema = z.object({
   name: z.string().trim().min(1, "Nama wajib diisi.").max(100),
-  role: z.enum(["ADMIN", "DOKTER", "KASIR"], "Pilih role."),
+  role: z.enum(["ADMIN", "KARYAWAN"], "Pilih role."),
+  isDoctor: z.boolean(),
   active: z.boolean(),
 });
 

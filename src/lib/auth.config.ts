@@ -10,13 +10,15 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.isDoctor = user.isDoctor;
         token.sid = user.sid;
       }
       return token;
     },
     session({ session, token }) {
       session.user.id = token.id as string;
-      session.user.role = token.role as "ADMIN" | "DOKTER" | "KASIR";
+      session.user.role = token.role as "ADMIN" | "KARYAWAN";
+      session.user.isDoctor = Boolean(token.isDoctor);
       session.sid = token.sid as string | undefined;
       return session;
     },

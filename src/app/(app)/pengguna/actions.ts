@@ -19,7 +19,7 @@ const invalid = (error: z.ZodError): UserFormState => ({ message: "Periksa kemba
 
 export async function createUserAction(_prev: UserFormState, formData: FormData): Promise<UserFormState> {
   const admin = await requireCapability("manage_users_settings");
-  const parsed = userCreateFormSchema.safeParse({ name: text(formData, "name"), username: text(formData, "username"), role: text(formData, "role"), password: text(formData, "password"), confirmPassword: text(formData, "confirmPassword") });
+  const parsed = userCreateFormSchema.safeParse({ name: text(formData, "name"), username: text(formData, "username"), role: text(formData, "role"), isDoctor: formData.get("isDoctor") === "on", password: text(formData, "password"), confirmPassword: text(formData, "confirmPassword") });
   if (!parsed.success) return invalid(parsed.error);
 
   const result = await createUser(admin.id, parsed.data);
@@ -31,7 +31,7 @@ export async function createUserAction(_prev: UserFormState, formData: FormData)
 
 export async function updateUserAction(id: string, _prev: UserFormState, formData: FormData): Promise<UserFormState> {
   const admin = await requireCapability("manage_users_settings");
-  const parsed = userUpdateSchema.safeParse({ name: text(formData, "name"), role: text(formData, "role"), active: formData.get("active") === "on" });
+  const parsed = userUpdateSchema.safeParse({ name: text(formData, "name"), role: text(formData, "role"), isDoctor: formData.get("isDoctor") === "on", active: formData.get("active") === "on" });
   if (!parsed.success) return invalid(parsed.error);
 
   const result = await updateUser(admin.id, id, parsed.data);

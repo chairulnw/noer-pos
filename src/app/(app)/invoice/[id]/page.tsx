@@ -121,7 +121,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
                 id: item.id,
                 name: item.nameSnapshot,
                 qty: Number(item.qty),
-                unitPrice: item.unitPriceSnapshot,
+                unitPrice: Number(item.unitPriceSnapshot),
                 discountType: item.discountType,
                 discountValue: item.discountValue,
                 discountAmount: line.discount,

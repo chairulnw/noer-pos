@@ -16,7 +16,7 @@ import { cancelVisitAction } from "./actions";
 
 export default async function VisitsPage() {
   const user = await requireCapability("create_visit");
-  const isDoctor = user.role === "DOKTER";
+  const isDoctor = user.isDoctor;
   const canOpenRecord = can(user.role, "view_medical_record");
   const visits = await listTodayVisits(isDoctor ? user.id : undefined);
 

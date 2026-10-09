@@ -48,7 +48,7 @@ export const listOperationServices = () => prisma.item.findMany({ where: { type:
 async function validate(patientId: string, input: SurgeryInput) {
   const [patient, doctor, service] = await Promise.all([
     prisma.patient.findFirst({ where: { id: patientId, deletedAt: null, owner: { deletedAt: null } }, select: { id: true } }),
-    prisma.user.findFirst({ where: { id: input.doctorId, role: "DOKTER", active: true }, select: { id: true } }),
+    prisma.user.findFirst({ where: { id: input.doctorId, isDoctor: true, active: true }, select: { id: true } }),
     input.serviceItemId ? prisma.item.findFirst({ where: { id: input.serviceItemId, type: "SERVICE", active: true, deletedAt: null }, select: { id: true } }) : null,
   ]);
   if (!patient) return "Pasien tidak ditemukan.";

@@ -41,7 +41,7 @@ describe("itemSchema", () => {
 
   it.each([
     ["kategori tidak cocok dengan jenis", { category: "hotel" }],
-    ["harga jual desimal (BR-1)", { sellPrice: 1999.5 }],
+    ["harga jual lebih dari 3 desimal", { sellPrice: 1999.5555 }],
     ["harga jual negatif", { sellPrice: -1 }],
     ["faktor konversi 0", { conversionFactor: 0 }],
     ["nama kosong", { name: "  " }],
@@ -86,13 +86,29 @@ describe("toItemView (BR-7)", () => {
     expect(toItemView(record, "ADMIN").buyPrice).toBe(1200);
   });
 
-  it.each(["KASIR", "DOKTER"] as const)("%s tidak menerima field buyPrice sama sekali", (role) => {
+  it.each(["KARYAWAN"] as const)("%s tidak menerima field buyPrice sama sekali", (role) => {
     const view = toItemView(record, role);
     expect("buyPrice" in view).toBe(false);
     expect(JSON.stringify(view)).not.toContain("1200");
   });
 
   it("mengubah Decimal jadi number biasa", () => {
-    expect(toItemView(record, "KASIR")).toMatchObject({ conversionFactor: 100, lowStockThreshold: 50, sellPrice: 2000 });
+    expect(toItemView(record, "KARYAWAN")).toMatchObject({ conversionFactor: 100, lowStockThreshold: 50, sellPrice: 2000 });
+  });
+});
+
+describe("harga satuan berpecahan", () => {
+  it("menerima sampai 3 desimal, menolak lebih", () => {
+    expect(itemSchema.safeParse({ ...product, sellPrice: 53.328, buyPrice: 17.776 }).success).toBe(true);
+    expect(itemSchema.safeParse({ ...product, sellPrice: 1545.3 }).success).toBe(true);
+    expect(itemSchema.safeParse({ ...product, sellPrice: 53.3281 }).success).toBe(false);
+    expect(itemSchema.safeParse({ ...product, sellPrice: -1 }).success).toBe(false);
+  });
+
+  it("toItemView mengubah Decimal dari database menjadi number", () => {
+    const record = { ...normalizeItem(product), id: "1", sellPrice: { toString: () => "53.328" }, buyPrice: { toString: () => "17.776" } } as unknown as ItemRecord;
+    expect(toItemView(record, "ADMIN")).toMatchObject({ sellPrice: 53.328, buyPrice: 17.776 });
+    expect(toItemView(record, "KARYAWAN")).toMatchObject({ sellPrice: 53.328 });
+    expect(toItemView(record, "KARYAWAN")).not.toHaveProperty("buyPrice");
   });
 });

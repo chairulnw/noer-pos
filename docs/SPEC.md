@@ -10,7 +10,7 @@
 |---|---|
 | Jenis | Aplikasi gabungan **kasir (POS)** dan **rekam medis (PMS)** untuk klinik hewan |
 | Klien | 1 klinik nyata (single-tenant) |
-| User | 3 akun: Owner/Admin, Dokter, Kasir |
+| User | 2 role: Owner/Admin dan Karyawan (kasir + dokter); dokter pemeriksa ditandai flag `is_doctor` |
 | Volume | ±20 pasien/hari. Performa bukan isu, **integritas data** adalah prioritas |
 | Layanan | Konsultasi, vaksin, operasi/tindakan, rawat inap, grooming, pet hotel, pet shop |
 | Bahasa & mata uang | UI Bahasa Indonesia, IDR |
@@ -58,24 +58,27 @@ Antrean/nomor antrean, booking online oleh pemilik, refund (saldo deposit tidak 
 
 ## 5. Role & Hak Akses
 
-| Fitur | Owner/Admin | Dokter | Kasir |
-|---|:-:|:-:|:-:|
-| Kelola user, pengaturan klinik | ✅ | ❌ | ❌ |
-| Master layanan & harga jual | ✅ | ❌ | 👁 lihat |
-| Master produk, **harga beli**, margin | ✅ | ❌ | ❌ |
-| Daftar owner & pasien | ✅ | ✅ | ✅ |
-| Input kunjungan (walk-in) | ✅ | ✅ | ✅ |
-| Isi & finalisasi rekam medis, resep | ✅ | ✅ | ❌ |
-| Lihat rekam medis | ✅ | ✅ | ❌ (hanya alert alergi/agresif) |
-| Check-in/out rawat inap & hotel | ✅ | ✅ | ✅ |
-| Monitoring harian rawat inap | ✅ | ✅ | ❌ |
-| Master kandang/ruangan | ✅ | ❌ | ❌ |
-| Invoice, pembayaran, DP | ✅ | ❌ | ✅ |
-| Diskon | ✅ | ❌ | ✅ (tercatat audit) |
-| Void invoice | ✅ | ❌ | ❌ |
-| Stok masuk, stok opname | ✅ | ❌ | ❌ |
-| Omzet & laporan total (dashboard/laporan) | ✅ | ❌ | ❌ |
-| Audit log | ✅ | ❌ | ❌ |
+Role **Dokter** dan **Kasir** digabung menjadi **Karyawan** (hak akses = gabungan keduanya). Siapa yang bisa dipilih sebagai dokter pemeriksa ditentukan flag `is_doctor` pada user (bukan role).
+
+| Fitur | Owner/Admin | Karyawan |
+|---|:-:|:-:|
+| Kelola user, pengaturan klinik | ✅ | ❌ |
+| Master layanan & harga jual | ✅ | 👁 lihat |
+| Master produk, **harga beli**, margin | ✅ | ❌ |
+| Daftar owner & pasien | ✅ | ✅ |
+| Input kunjungan (walk-in) | ✅ | ✅ |
+| Isi & finalisasi rekam medis, resep | ✅ | ✅ |
+| Lihat rekam medis | ✅ | ✅ |
+| Check-in/out rawat inap & hotel | ✅ | ✅ |
+| Monitoring harian rawat inap | ✅ | ✅ |
+| Master kandang/ruangan | ✅ | ❌ |
+| Invoice, pembayaran, DP | ✅ | ✅ |
+| Diskon | ✅ | ✅ (tercatat audit) |
+| Void invoice | ✅ | ❌ |
+| Stok masuk | ✅ | ❌ |
+| Stok opname | ✅ | ✅ |
+| Omzet & laporan total (dashboard/laporan) | ✅ | ❌ |
+| Audit log | ✅ | ❌ |
 
 ---
 
@@ -237,7 +240,8 @@ erDiagram
   USER { uuid id PK
     string username UK "huruf kecil"
     string password_hash
-    enum role "ADMIN|DOKTER|KASIR"
+    enum role "ADMIN|KARYAWAN"
+    boolean is_doctor
     bool active }
   OWNER { uuid id PK
     string name
