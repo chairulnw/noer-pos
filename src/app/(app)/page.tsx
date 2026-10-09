@@ -131,8 +131,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     })(),
   ]);
   const alerts = can(user.role, "manage_stock") ? await getStockAlerts() : null;
-  const doctorQueue = user.role === "DOKTER" ? await getDoctorQueue(user.id) : null;
-  const cashierQueue = user.role === "KASIR" ? await getCashierQueue() : null;
+  const doctorQueue = user.isDoctor ? await getDoctorQueue(user.id) : null;
+  const cashierQueue = user.role === "KARYAWAN" ? await getCashierQueue() : null;
   const total = alerts ? alerts.low.length + alerts.expiring.length : 0;
 
   const points = periodSeries(series, from, to, period);

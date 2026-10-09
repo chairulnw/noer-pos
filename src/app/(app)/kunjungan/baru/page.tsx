@@ -30,7 +30,7 @@ export default async function NewVisitPage({ searchParams }: { searchParams: Pro
       <VisitForm
         patientId={patient.id}
         doctors={doctors}
-        defaultDoctorId={user.role === "DOKTER" ? user.id : doctors.length === 1 ? doctors[0].id : undefined}
+        defaultDoctorId={user.isDoctor ? user.id : doctors.length === 1 ? doctors[0].id : undefined}
       />
     </div>
   );

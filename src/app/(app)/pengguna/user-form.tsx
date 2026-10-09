@@ -9,13 +9,12 @@ import { CheckField, Field, Section, selectClass } from "@/components/form-field
 import { keepValuesOnError } from "@/lib/form";
 import { createUserAction, resetPasswordAction, updateUserAction, type UserFormState } from "./actions";
 
-type User = { id: string; username: string; name: string; role: "ADMIN" | "DOKTER" | "KASIR"; active: boolean };
+type User = { id: string; username: string; name: string; role: "ADMIN" | "KARYAWAN"; isDoctor: boolean; active: boolean };
 
 const RoleSelect = ({ defaultValue }: { defaultValue?: string }) => (
-  <select id="role" name="role" defaultValue={defaultValue ?? "KASIR"} className={selectClass}>
+  <select id="role" name="role" defaultValue={defaultValue ?? "KARYAWAN"} className={selectClass}>
     <option value="ADMIN">Owner / Admin</option>
-    <option value="DOKTER">Dokter</option>
-    <option value="KASIR">Kasir</option>
+    <option value="KARYAWAN">Karyawan (kasir + dokter)</option>
   </select>
 );
 
@@ -40,6 +39,7 @@ export function CreateUserForm() {
           <Input id="username" name="username" autoCapitalize="none" required />
         </Field>
         <Field label="Role" name="role" errors={err("role")}><RoleSelect /></Field>
+        <CheckField name="isDoctor" label="Bisa dipilih sebagai dokter pemeriksa" />
         <Field label="Password awal" name="password" errors={err("password")} hint="Minimal 10 karakter, kombinasi huruf dan angka. Hanya Admin yang bisa menggantinya.">
           <PasswordInput id="password" name="password" autoComplete="new-password" required />
         </Field>
@@ -64,6 +64,7 @@ export function EditUserForm({ user, isSelf }: { user: User; isSelf: boolean }) 
           <Field label="Role" name="role" errors={err("role")} hint={isSelf ? "Role akun sendiri tidak bisa diubah." : undefined}>
             <RoleSelect defaultValue={user.role} />
           </Field>
+          <CheckField name="isDoctor" label="Bisa dipilih sebagai dokter pemeriksa" defaultChecked={user.isDoctor} />
           <CheckField name="active" label={isSelf ? "Aktif (akun sendiri tidak bisa dinonaktifkan)" : "Aktif (bisa login)"} defaultChecked={user.active} />
         </Section>
         <Footer pending={pending} state={state} cancel />

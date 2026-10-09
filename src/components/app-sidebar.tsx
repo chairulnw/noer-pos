@@ -10,8 +10,7 @@ import { SidebarSearch } from "@/components/sidebar-search";
 
 const ROLE_LABEL: Record<Role, string> = {
   ADMIN: "Owner / Admin",
-  DOKTER: "Dokter",
-  KASIR: "Kasir",
+  KARYAWAN: "Karyawan",
 };
 
 function initials(name: string) {

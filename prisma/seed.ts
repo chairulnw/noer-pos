@@ -22,7 +22,8 @@ async function main() {
       username: "dokter",
       passwordHash,
       name: "Drh. Contoh",
-      role: "DOKTER",
+      role: "KARYAWAN",
+      isDoctor: true,
     },
   });
 
@@ -33,7 +34,7 @@ async function main() {
       username: "kasir",
       passwordHash,
       name: "Kasir Contoh",
-      role: "KASIR",
+      role: "KARYAWAN",
     },
   });
 

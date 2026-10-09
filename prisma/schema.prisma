@@ -11,8 +11,7 @@ datasource db {
 
 enum Role {
   ADMIN
-  DOKTER
-  KASIR
+  KARYAWAN
 }
 
 enum PatientSex {
@@ -130,6 +129,7 @@ model User {
   name         String
   role         Role
   active       Boolean @default(true)
+  isDoctor     Boolean @default(false) @map("is_doctor")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

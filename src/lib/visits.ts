@@ -11,7 +11,7 @@ export type VisitInput = z.infer<typeof visitSchema>;
 
 export const listDoctors = () =>
   prisma.user.findMany({
-    where: { role: "DOKTER", active: true },
+    where: { isDoctor: true, active: true },
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
@@ -33,7 +33,7 @@ export const listTodayVisits = (doctorId?: string) =>
 export async function createVisit(userId: string, patientId: string, input: VisitInput) {
   const [patient, doctor] = await Promise.all([
     prisma.patient.findFirst({ where: { id: patientId, deletedAt: null, owner: { deletedAt: null } }, select: { id: true } }),
-    prisma.user.findFirst({ where: { id: input.doctorId, role: "DOKTER", active: true }, select: { id: true } }),
+    prisma.user.findFirst({ where: { id: input.doctorId, isDoctor: true, active: true }, select: { id: true } }),
   ]);
   if (!patient) return { error: "Pasien tidak ditemukan." };
   if (!doctor) return { error: "Dokter tidak valid." };

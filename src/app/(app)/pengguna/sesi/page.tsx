@@ -12,7 +12,7 @@ import { describeAgent, isExpired, listSessions } from "@/lib/sessions";
 import { cn } from "@/lib/utils";
 import { revokeSessionAction, revokeUserSessionsAction } from "./actions";
 
-const ROLE = { ADMIN: "Owner / Admin", DOKTER: "Dokter", KASIR: "Kasir" };
+const ROLE = { ADMIN: "Owner / Admin", KARYAWAN: "Karyawan" };
 
 export default async function SessionsPage({ searchParams }: { searchParams: Promise<{ semua?: string }> }) {
   await requireCapability("manage_users_settings");

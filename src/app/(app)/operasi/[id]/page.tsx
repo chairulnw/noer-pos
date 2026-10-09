@@ -5,6 +5,7 @@ import { ClinicalNotes, ClinicalTags } from "@/components/clinical-flags";
 import { StatusChip } from "@/components/status-chip";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatTime } from "@/lib/format";
+import { can } from "@/lib/permissions";
 import { requireCapability } from "@/lib/require-role";
 import { getSurgery } from "@/lib/surgeries";
 import { isEditable, SURGERY_STATUS } from "@/lib/surgery-schema";
@@ -19,7 +20,7 @@ export default async function SurgeryDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const s = z.guid().safeParse(id).success ? await getSurgery(id) : null;
   if (!s) notFound();
-  const canEdit = user.role === "ADMIN" || user.role === "DOKTER";
+  const canEdit = can(user.role, "edit_medical_record");
 
   return (
     <div className="space-y-5">
